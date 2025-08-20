@@ -27,6 +27,23 @@ export function EditItemModal({ item, isOpen, onClose, onSuccess }: EditItemModa
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  // Helper function untuk format rupiah
+  const formatRupiah = (value: string) => {
+    // Hapus semua karakter non-digit
+    const numericValue = value.replace(/\D/g, '')
+    
+    if (numericValue === '') return ''
+    
+    // Format ke rupiah
+    const formatted = new Intl.NumberFormat('id-ID').format(Number(numericValue))
+    return `Rp ${formatted}`
+  }
+
+  // Helper function untuk parse rupiah ke number
+  const parseRupiah = (value: string) => {
+    return value.replace(/\D/g, '')
+  }
+
   useEffect(() => {
     if (item) {
       setFormData({
@@ -87,47 +104,47 @@ export function EditItemModal({ item, isOpen, onClose, onSuccess }: EditItemModa
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="w-[95vw] max-w-4xl mx-auto">
+      <DialogContent className="!w-[90vw] !max-w-5xl mx-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl">Edit Data Customer</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-lg sm:text-xl">Edit Data Customer</DialogTitle>
+          <DialogDescription className="text-sm sm:text-base">
             Edit data customer: <span className="font-semibold text-primary">{item?.customerName}</span>
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Customer Name */}
           <div className="space-y-2">
-            <Label htmlFor="editCustomerName" className="text-base font-medium">Nama Customer *</Label>
+            <Label htmlFor="editCustomerName" className="text-sm sm:text-base font-medium">Nama Customer *</Label>
             <Input
               id="editCustomerName"
               placeholder="Masukkan nama customer"
               value={formData.customerName}
               onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
               required
-              className="h-12 text-base"
+              className="h-10 sm:h-12 text-sm sm:text-base"
             />
           </div>
 
           {/* Item Name */}
           <div className="space-y-2">
-            <Label htmlFor="editItemName" className="text-base font-medium">Nama Barang *</Label>
+            <Label htmlFor="editItemName" className="text-sm sm:text-base font-medium">Nama Barang *</Label>
             <Input
               id="editItemName"
               placeholder="Nama barang"
               value={formData.itemName}
               onChange={(e) => setFormData({ ...formData, itemName: e.target.value })}
               required
-              className="h-12 text-base"
+              className="h-10 sm:h-12 text-sm sm:text-base"
             />
           </div>
 
           {/* Price Fields */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
             <div className="space-y-2">
-              <Label htmlFor="editItemPrice" className="text-base font-medium">
+              <Label htmlFor="editItemPrice" className="text-sm sm:text-base font-medium">
                 <div className="flex items-center gap-2">
-                  <Coins className="w-4 h-4 text-blue-600" />
+                  <Coins className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" />
                   Harga Barang (YEN) *
                 </div>
               </Label>
@@ -139,14 +156,17 @@ export function EditItemModal({ item, isOpen, onClose, onSuccess }: EditItemModa
                 value={formData.itemPrice}
                 onChange={(e) => setFormData({ ...formData, itemPrice: e.target.value })}
                 required
-                className="h-12 text-base"
+                className="h-10 sm:h-12 text-sm sm:text-base"
               />
+              <div className="text-xs text-muted-foreground">
+                Harga barang dalam mata uang YEN (Jepang)
+              </div>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="editExchangeRate" className="text-base font-medium">
+              <Label htmlFor="editExchangeRate" className="text-sm sm:text-base font-medium">
                 <div className="flex items-center gap-2">
-                  <Coins className="w-4 h-4 text-green-600" />
+                  <Coins className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
                   Kurs (YEN → IDR) *
                 </div>
               </Label>
@@ -157,40 +177,50 @@ export function EditItemModal({ item, isOpen, onClose, onSuccess }: EditItemModa
                 value={formData.exchangeRate}
                 onChange={(e) => setFormData({ ...formData, exchangeRate: e.target.value })}
                 required
-                className="h-12 text-base"
+                className="h-10 sm:h-12 text-sm sm:text-base"
               />
+              <div className="text-xs text-muted-foreground">
+                Contoh: 150 (1 YEN = Rp 150)
+              </div>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="editSellingPrice" className="text-base font-medium">
+              <Label htmlFor="editSellingPrice" className="text-sm sm:text-base font-medium">
                 <div className="flex items-center gap-2">
-                  <Coins className="w-4 h-4 text-purple-600" />
+                  <Coins className="w-3 h-3 sm:w-4 sm:h-4 text-purple-600" />
                   Harga Jual (IDR) *
                 </div>
               </Label>
               <Input
                 id="editSellingPrice"
-                type="number"
-                placeholder="0"
-                value={formData.sellingPrice}
-                onChange={(e) => setFormData({ ...formData, sellingPrice: e.target.value })}
+                type="text"
+                placeholder="Contoh: Rp 2.500.000"
+                value={formData.sellingPrice ? formatRupiah(formData.sellingPrice) : ''}
+                onChange={(e) => setFormData({ ...formData, sellingPrice: parseRupiah(e.target.value) })}
+                onBlur={(e) => {
+                  // Pastikan format tetap rapi saat blur
+                  const rawValue = parseRupiah(e.target.value)
+                  if (rawValue) {
+                    e.target.value = formatRupiah(rawValue)
+                  }
+                }}
                 required
-                className="h-12 text-base"
+                className="h-10 sm:h-12 text-sm sm:text-base"
               />
             </div>
           </div>
 
           {/* Preview Calculation */}
           {preview && (
-            <div className="p-4 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg border-2 border-blue-200">
-              <h5 className="font-semibold text-blue-800 mb-3 flex items-center gap-2">
-                <Calculator className="w-4 h-4" />
+            <div className="p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg border-2 border-blue-200">
+              <h5 className="font-semibold text-blue-800 mb-2 sm:mb-3 flex items-center gap-2 text-sm sm:text-base">
+                <Calculator className="w-3 h-3 sm:w-4 sm:h-4" />
                 Preview Perhitungan
               </h5>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                <div className="text-center p-3 bg-white rounded-lg border">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 text-xs sm:text-sm">
+                <div className="text-center p-2 sm:p-3 bg-white rounded-lg border">
                   <div className="text-muted-foreground mb-1">Harga Beli (IDR)</div>
-                  <div className="font-bold text-lg text-blue-600">
+                  <div className="font-bold text-sm sm:text-base text-blue-600">
                     Rp {preview.costInIDR.toLocaleString('id-ID')}
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">
@@ -198,9 +228,9 @@ export function EditItemModal({ item, isOpen, onClose, onSuccess }: EditItemModa
                   </div>
                 </div>
                 
-                <div className="text-center p-3 bg-white rounded-lg border">
+                <div className="text-center p-2 sm:p-3 bg-white rounded-lg border">
                   <div className="text-muted-foreground mb-1">Keuntungan</div>
-                  <div className={`font-bold text-lg ${preview.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <div className={`font-bold text-sm sm:text-base ${preview.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     Rp {preview.profit.toLocaleString('id-ID')}
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">
@@ -208,9 +238,9 @@ export function EditItemModal({ item, isOpen, onClose, onSuccess }: EditItemModa
                   </div>
                 </div>
                 
-                <div className="text-center p-3 bg-white rounded-lg border">
+                <div className="text-center p-2 sm:p-3 bg-white rounded-lg border">
                   <div className="text-muted-foreground mb-1">Margin</div>
-                  <div className={`font-bold text-lg ${preview.margin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <div className={`font-bold text-sm sm:text-base ${preview.margin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {preview.margin.toFixed(1)}%
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">
@@ -222,16 +252,16 @@ export function EditItemModal({ item, isOpen, onClose, onSuccess }: EditItemModa
           )}
 
           {/* Submit Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t">
-            <Button type="submit" className="flex-1 h-12" disabled={isSubmitting}>
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-3 sm:pt-4 border-t">
+            <Button type="submit" className="flex-1 h-10 sm:h-12 text-sm sm:text-base" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 mr-2 animate-spin" />
                   Menyimpan...
                 </>
               ) : (
                 <>
-                  <Save className="w-4 h-4 mr-2" />
+                  <Save className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                   Simpan Perubahan
                 </>
               )}
@@ -240,9 +270,9 @@ export function EditItemModal({ item, isOpen, onClose, onSuccess }: EditItemModa
               type="button" 
               variant="outline" 
               onClick={handleClose}
-              className="flex-1 h-12"
+              className="flex-1 h-10 sm:h-12 text-sm sm:text-base"
             >
-              <X className="w-4 h-4 mr-2" />
+              <X className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
               Batal
             </Button>
           </div>
