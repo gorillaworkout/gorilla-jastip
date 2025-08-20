@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Plus, ShoppingCart, Edit, Trash2, TrendingUp, Package, DollarSign, Percent, User, Coins, RefreshCw } from "lucide-react"
+import { Calendar, Plus, ShoppingCart, Edit, Trash2, TrendingUp, Package, DollarSign, Percent, User, Coins, RefreshCw, ChevronDown, ChevronRight } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { AdminGuard } from "@/components/auth/admin-guard"
 import { Sidebar } from "@/components/layout/sidebar"
@@ -28,6 +28,7 @@ function PeriodsContent() {
   const [editingItem, setEditingItem] = useState<PeriodItem | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editingCustomerName, setEditingCustomerName] = useState<string | null>(null)
+  const [expandedCustomers, setExpandedCustomers] = useState<Set<string>>(new Set())
   
   const [createPeriodData, setCreatePeriodData] = useState<CreatePeriodData>({
     name: "",
@@ -183,6 +184,16 @@ function PeriodsContent() {
     }).format(date)
   }
 
+  const toggleCustomerExpanded = (customerKey: string) => {
+    const newExpanded = new Set(expandedCustomers)
+    if (newExpanded.has(customerKey)) {
+      newExpanded.delete(customerKey)
+    } else {
+      newExpanded.add(customerKey)
+    }
+    setExpandedCustomers(newExpanded)
+  }
+
   if (!mounted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -324,126 +335,155 @@ function PeriodsContent() {
                           return groups
                         }, {} as Record<string, typeof period.items>)
 
-                        return Object.entries(customerGroups).map(([customerName, items]) => (
-                          <div key={customerName} className="border rounded-lg overflow-hidden">
-                            {/* Customer Header */}
-                            <div className="bg-muted/50 p-4 border-b">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                  <User className="w-5 h-5 text-primary" />
-                                  <h4 className="font-semibold text-lg">{customerName}</h4>
-                                  <Badge variant="secondary" className="ml-2">
-                                    {items.length} {items.length === 1 ? 'item' : 'items'}
-                                  </Badge>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                  <div className="text-sm text-muted-foreground">
-                                    Total: {formatCurrency(items.reduce((sum, item) => sum + item.sellingPrice, 0))}
+                        return Object.entries(customerGroups).map(([customerName, items]) => {
+                          const customerKey = `${period.id}-${customerName}`
+                          const isExpanded = expandedCustomers.has(customerKey)
+                          const totalAmount = items.reduce((sum, item) => sum + item.sellingPrice, 0)
+                          const totalProfit = items.reduce((sum, item) => sum + item.profit, 0)
+
+                          return (
+                            <div key={customerKey} className="border rounded-lg overflow-hidden">
+                              {/* Customer Header - Clickable untuk expand/collapse */}
+                              <div 
+                                className="bg-muted/50 p-4 border-b cursor-pointer hover:bg-muted/70 transition-colors"
+                                onClick={() => toggleCustomerExpanded(customerKey)}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-2">
+                                      {isExpanded ? (
+                                        <ChevronDown className="w-5 h-5 text-primary" />
+                                      ) : (
+                                        <ChevronRight className="w-5 h-5 text-primary" />
+                                      )}
+                                      <User className="w-5 h-5 text-primary" />
+                                    </div>
+                                    <h4 className="font-semibold text-lg">{customerName}</h4>
+                                    <Badge variant="secondary" className="ml-2">
+                                      {items.length} {items.length === 1 ? 'item' : 'items'}
+                                    </Badge>
                                   </div>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleEditCustomer(period, customerName, items)}
-                                    className="flex items-center gap-2"
-                                  >
-                                    <Edit className="w-4 h-4" />
-                                    Tambah Barang
-                                  </Button>
+                                  <div className="flex items-center gap-3">
+                                    <div className="text-right">
+                                      <div className="text-sm text-muted-foreground">Total Revenue</div>
+                                      <div className="font-semibold text-green-600">{formatCurrency(totalAmount)}</div>
+                                    </div>
+                                    <div className="text-right">
+                                      <div className="text-sm text-muted-foreground">Total Profit</div>
+                                      <div className={`font-semibold ${totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                        {formatCurrency(totalProfit)}
+                                      </div>
+                                    </div>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleEditCustomer(period, customerName, items)
+                                      }}
+                                      className="flex items-center gap-2"
+                                    >
+                                      <Edit className="w-4 h-4" />
+                                      Tambah Barang
+                                    </Button>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                            
-                            {/* Items List */}
-                            <div className="divide-y">
-                              {items.map((item) => (
-                                <div key={item.id} className="p-4 hover:bg-accent/30 transition-colors">
-                                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                                    {/* Item Info */}
-                                    <div className="flex-1">
-                                      {/* Item Name */}
-                                      {item.itemName && (
-                                        <div className="mb-3">
-                                          <span className="text-sm text-muted-foreground">Barang: </span>
-                                          <span className="font-medium text-primary">{item.itemName}</span>
-                                        </div>
-                                      )}
-                                      
-                                      {/* Price Details */}
-                                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        {/* Harga Beli */}
-                                        <div className="space-y-1">
-                                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <Coins className="w-4 h-4" />
-                                            Harga Beli (YEN)
+                              
+                              {/* Items List - Collapsible */}
+                              {isExpanded && (
+                                <div className="divide-y">
+                                  {items.map((item) => (
+                                    <div key={item.id} className="p-4 hover:bg-accent/30 transition-colors">
+                                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                                        {/* Item Info */}
+                                        <div className="flex-1">
+                                          {/* Item Name */}
+                                          {item.itemName && (
+                                            <div className="mb-3">
+                                              <span className="text-sm text-muted-foreground">Barang: </span>
+                                              <span className="font-medium text-primary">{item.itemName}</span>
+                                            </div>
+                                          )}
+                                          
+                                          {/* Price Details */}
+                                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            {/* Harga Beli */}
+                                            <div className="space-y-1">
+                                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                <Coins className="w-4 h-4" />
+                                                Harga Beli (YEN)
+                                              </div>
+                                              <div className="font-medium">{formatYen(item.itemPrice)}</div>
+                                            </div>
+                                            
+                                            {/* Kurs */}
+                                            <div className="space-y-1">
+                                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                <Coins className="w-4 h-4" />
+                                                Kurs (YEN → IDR)
+                                              </div>
+                                              <div className="font-medium">{item.exchangeRate.toLocaleString('id-ID')}</div>
+                                            </div>
+                                            
+                                            {/* Harga Beli IDR */}
+                                            <div className="space-y-1">
+                                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                <DollarSign className="w-4 h-4" />
+                                                Harga Beli (IDR)
+                                              </div>
+                                              <div className="font-medium text-blue-600">{formatCurrency(item.costInIDR)}</div>
+                                            </div>
                                           </div>
-                                          <div className="font-medium">{formatYen(item.itemPrice)}</div>
+                                          
+                                          {/* Harga Jual & Profit */}
+                                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3 pt-3 border-t">
+                                            <div className="space-y-1">
+                                              <div className="text-sm text-muted-foreground">Harga Jual (IDR)</div>
+                                              <div className="font-semibold text-lg text-green-600">{formatCurrency(item.sellingPrice)}</div>
+                                            </div>
+                                            
+                                            <div className="space-y-1">
+                                              <div className="text-sm text-muted-foreground">Keuntungan</div>
+                                              <div className={`font-semibold text-lg ${item.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                                {formatCurrency(item.profit)}
+                                              </div>
+                                            </div>
+                                            
+                                            <div className="space-y-1">
+                                              <div className="text-sm text-muted-foreground">Margin</div>
+                                              <div className={`font-semibold text-lg ${item.margin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                                {item.margin.toFixed(1)}%
+                                              </div>
+                                            </div>
+                                          </div>
                                         </div>
                                         
-                                        {/* Kurs */}
-                                        <div className="space-y-1">
-                                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <Coins className="w-4 h-4" />
-                                            Kurs (YEN → IDR)
-                                          </div>
-                                          <div className="font-medium">{item.exchangeRate.toLocaleString('id-ID')}</div>
-                                        </div>
-                                        
-                                        {/* Harga Beli IDR */}
-                                        <div className="space-y-1">
-                                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <DollarSign className="w-4 h-4" />
-                                            Harga Beli (IDR)
-                                          </div>
-                                          <div className="font-medium text-blue-600">{formatCurrency(item.costInIDR)}</div>
-                                        </div>
-                                      </div>
-                                      
-                                      {/* Harga Jual & Profit */}
-                                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3 pt-3 border-t">
-                                        <div className="space-y-1">
-                                          <div className="text-sm text-muted-foreground">Harga Jual (IDR)</div>
-                                          <div className="font-semibold text-lg text-green-600">{formatCurrency(item.sellingPrice)}</div>
-                                        </div>
-                                        
-                                        <div className="space-y-1">
-                                          <div className="text-sm text-muted-foreground">Keuntungan</div>
-                                          <div className={`font-semibold text-lg ${item.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                            {formatCurrency(item.profit)}
-                                          </div>
-                                        </div>
-                                        
-                                        <div className="space-y-1">
-                                          <div className="text-sm text-muted-foreground">Margin</div>
-                                          <div className={`font-semibold text-lg ${item.margin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                            {item.margin.toFixed(1)}%
-                                          </div>
+                                        {/* Actions */}
+                                        <div className="flex items-center gap-2">
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => handleEditItem(item)}
+                                          >
+                                            <Edit className="w-4 h-4" />
+                                          </Button>
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => handleDeleteItem(item.id)}
+                                          >
+                                            <Trash2 className="w-4 h-4" />
+                                          </Button>
                                         </div>
                                       </div>
                                     </div>
-                                    
-                                    {/* Actions */}
-                                    <div className="flex items-center gap-2">
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleEditItem(item)}
-                                      >
-                                        <Edit className="w-4 h-4" />
-                                      </Button>
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleDeleteItem(item.id)}
-                                      >
-                                        <Trash2 className="w-4 h-4" />
-                                      </Button>
-                                    </div>
-                                  </div>
+                                  ))}
                                 </div>
-                              ))}
+                              )}
                             </div>
-                          </div>
-                        ))
+                          )
+                        })
                       })()}
                     </div>
                   ) : (
