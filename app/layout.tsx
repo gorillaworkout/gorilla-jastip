@@ -18,8 +18,57 @@ const playfair = Playfair_Display({
 })
 
 export const metadata: Metadata = {
-  title: "JastipdiGW - Admin Panel",
-  description: "Sistem manajemen untuk bisnis jastip",
+  metadataBase: new URL("https://jastipdigw.com"),
+  title: {
+    default: "JastipdiGW – Jasa Titip Jepang & Indonesia",
+    template: "%s | JastipdiGW",
+  },
+  description:
+    "JastipdiGW melayani titip barang Indonesia ⇄ Jepang dan checkout marketplace Jepang. Cepat, aman, transparan.",
+  keywords: [
+    "jastip",
+    "jasa titip",
+    "jastip jepang",
+    "titip barang jepang",
+    "checkout rakuten",
+    "checkout amazon jp",
+    "mercari",
+    "indonesia jepang",
+  ],
+  authors: [{ name: "Bayu Darmawan" }],
+  creator: "Bayu Darmawan",
+  publisher: "JastipdiGW",
+  openGraph: {
+    title: "JastipdiGW – Jasa Titip Jepang & Indonesia",
+    description:
+      "Titip barang Indonesia ⇄ Jepang dan checkout marketplace Jepang. Cepat, aman, transparan.",
+    url: "https://jastipdigw.com",
+    siteName: "JastipdiGW",
+    images: [
+      {
+        url: "/placeholder.jpg",
+        width: 1200,
+        height: 630,
+        alt: "JastipdiGW",
+      },
+    ],
+    locale: "id_ID",
+    type: "website",
+  },
+  alternates: {
+    canonical: "https://jastipdigw.com/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-snippet': -1,
+      'max-image-preview': 'large',
+      'max-video-preview': -1,
+    },
+  },
   generator: "Gorichan",
 }
 
