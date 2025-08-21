@@ -72,62 +72,45 @@ function AnalyticsContent() {
     const load = async () => {
       try {
         setLoading(true)
-        // Ambil semua periode
         const periods: Period[] = await PeriodsService.getPeriods()
-
-        // Tentukan periode mana yang dipakai berdasarkan filter
         let targetPeriodIds: string[] = []
         if (selectedPeriod === "current") {
           const active = periods.find((p) => p.isActive)
           if (active) targetPeriodIds = [active.id]
         } else {
-          // all dan last30: gunakan semua periode
           targetPeriodIds = periods.map((p) => p.id)
         }
-
-        // Ambil items untuk periode terpilih
         const itemsArrays = await Promise.all(
           targetPeriodIds.map((id) => PeriodsService.getPeriodItems(id))
         )
         let items: PeriodItem[] = itemsArrays.flat()
-
-        // Filter last30 jika perlu
         if (selectedPeriod === "last30") {
           const cutoff = new Date()
           cutoff.setDate(cutoff.getDate() - 30)
           items = items.filter((it) => it.createdAt >= cutoff)
         }
-
-        // Hitung metrik agregat
         const totalRevenue = items.reduce((sum, it) => sum + it.sellingPrice, 0)
         const totalProfit = items.reduce((sum, it) => sum + it.profit, 0)
         const totalProducts = items.length
         const averageMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0
-
-        // Growth sederhana: bandingkan 30 hari terakhir vs 30 hari sebelumnya
         const now = new Date()
         const last30Start = new Date(now)
         last30Start.setDate(now.getDate() - 30)
         const prev30Start = new Date(now)
         prev30Start.setDate(now.getDate() - 60)
-
         const last30Items = items.filter((it) => it.createdAt >= last30Start)
         const prev30Items = items.filter((it) => it.createdAt < last30Start && it.createdAt >= prev30Start)
         const last30Revenue = last30Items.reduce((s, it) => s + it.sellingPrice, 0)
         const prev30Revenue = prev30Items.reduce((s, it) => s + it.sellingPrice, 0)
         const last30Profit = last30Items.reduce((s, it) => s + it.profit, 0)
         const prev30Profit = prev30Items.reduce((s, it) => s + it.profit, 0)
-
         const revenueGrowth = prev30Revenue > 0 ? ((last30Revenue - prev30Revenue) / prev30Revenue) * 100 : 0
         const profitGrowth = prev30Profit > 0 ? ((last30Profit - prev30Profit) / prev30Profit) * 100 : 0
-
-        // Monthly trend dari items.createdAt (6 bulan terakhir)
         const monthKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
         const monthLabel = (d: Date) => d.toLocaleString("id-ID", { month: "short" })
         const byMonth = new Map<string, { date: Date; revenue: number; profit: number; products: number }>()
         const sixMonthsAgo = new Date(now)
         sixMonthsAgo.setMonth(now.getMonth() - 5)
-        // Seed 6 bulan agar tidak kosong
         for (let i = 0; i < 6; i++) {
           const d = new Date(sixMonthsAgo)
           d.setMonth(sixMonthsAgo.getMonth() + i)
@@ -145,8 +128,6 @@ function AnalyticsContent() {
         const monthlyData = Array.from(byMonth.values())
           .sort((a, b) => a.date.getTime() - b.date.getTime())
           .map((m) => ({ month: monthLabel(m.date), revenue: m.revenue, profit: m.profit, products: m.products }))
-
-        // Category distribution: gunakan customerName sebagai kategori (berdasarkan revenue share)
         const byCustomer = new Map<string, { revenue: number; profit: number }>()
         for (const it of items) {
           const cur = byCustomer.get(it.customerName) || { revenue: 0, profit: 0 }
@@ -160,7 +141,6 @@ function AnalyticsContent() {
           value: totalRevenueForShare > 0 ? (v.revenue / totalRevenueForShare) * 100 : 0,
           profit: v.profit,
         }))
-        // Ambil top 4, gabungkan sisanya ke "Lainnya"
         categoryData.sort((a, b) => b.value - a.value)
         if (categoryData.length > 5) {
           const top4 = categoryData.slice(0, 4)
@@ -171,8 +151,6 @@ function AnalyticsContent() {
           )
           categoryData = [...top4, othersAgg]
         }
-
-        // Top products: berdasarkan profit
         const topProducts = [...items]
           .sort((a, b) => b.profit - a.profit)
           .slice(0, 5)
@@ -212,10 +190,10 @@ function AnalyticsContent() {
 
   if (!analytics || loading) {
     return (
-      <div className="flex h-screen bg-background">
+      <div className="flex min-h-[100dvh] bg-background">
         <Sidebar />
-        <main className="flex-1 md:ml-64 overflow-auto">
-          <div className="flex items-center justify-center h-full">
+        <main className="flex-1 min-w-0 overflow-auto">
+          <div className="flex items-center justify-center min-h-[60vh] p-6">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
               <p className="text-muted-foreground">Memuat data analytics...</p>
@@ -227,18 +205,18 @@ function AnalyticsContent() {
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex min-h-[100dvh] bg-background">
       <Sidebar />
-      <main className="flex-1 overflow-auto">
-        <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
+      <main className="flex-1 min-w-0 overflow-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6 space-y-6">
           {/* Mobile-first header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold">Analytics Dashboard</h1>
               <p className="text-muted-foreground">Insights bisnis jastip Anda</p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
                 <SelectTrigger className="w-full sm:w-48">
                   <SelectValue />

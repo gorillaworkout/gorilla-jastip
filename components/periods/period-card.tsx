@@ -36,14 +36,14 @@ export function PeriodCard({
       {/* Header */}
       <CardHeader className="bg-blue-50 border-b">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2 bg-blue-500 rounded-lg">
                 <Calendar className="w-5 h-5 text-white" />
               </div>
-              <div>
-                <CardTitle className="text-xl font-bold">{period.name}</CardTitle>
-                <div className="flex items-center gap-2 mt-1">
+              <div className="min-w-0">
+                <CardTitle className="text-xl font-bold truncate">{period.name}</CardTitle>
+                <div className="flex flex-wrap items-center gap-2 mt-1 text-sm text-gray-600">
                   <span className={`px-2 py-1 text-xs rounded-full ${
                     period.isActive 
                       ? 'bg-green-100 text-green-800' 
@@ -51,7 +51,7 @@ export function PeriodCard({
                   }`}>
                     {period.isActive ? "🟢 Aktif" : "⚪ Tidak Aktif"}
                   </span>
-                  <span className="text-sm text-gray-600">
+                  <span className="truncate">
                     {formatDate(period.startDate)} - {formatDate(period.endDate)}
                   </span>
                 </div>
@@ -59,10 +59,10 @@ export function PeriodCard({
             </div>
           </div>
           
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
             <button
               onClick={() => onToggleActive(period.id, !period.isActive)}
-              className={`px-3 py-2 text-sm rounded-lg border ${
+              className={`px-3 py-2 text-sm rounded-lg border w-full sm:w-auto ${
                 period.isActive 
                   ? 'border-orange-300 text-orange-600 hover:bg-orange-50' 
                   : 'bg-green-500 text-white hover:bg-green-600'
@@ -72,14 +72,14 @@ export function PeriodCard({
             </button>
             <button
               onClick={() => onAddCustomer(period)}
-              className="px-3 py-2 text-sm rounded-lg border border-blue-300 text-blue-600 hover:bg-blue-50"
+              className="px-3 py-2 text-sm rounded-lg border border-blue-300 text-blue-600 hover:bg-blue-50 w-full sm:w-auto"
             >
               <Plus className="w-4 h-4 inline mr-1" />
               Tambah Customer
             </button>
             <button
               onClick={() => onDeletePeriod(period.id)}
-              className="px-3 py-2 text-sm rounded-lg bg-red-500 text-white hover:bg-red-600"
+              className="px-3 py-2 text-sm rounded-lg bg-red-500 text-white hover:bg-red-600 w-full sm:w-auto"
             >
               <Trash2 className="w-4 h-4 inline mr-1" />
               Hapus

@@ -13,8 +13,8 @@ export function PageHeader({
   loading
 }: PageHeaderProps) {
   return (
-    <div className="bg-white rounded-lg shadow-md border p-6 mb-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="bg-white rounded-lg shadow-md border p-4 sm:p-6 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-blue-500 rounded-lg">
             <Calendar className="w-6 h-6 text-white" />
@@ -25,12 +25,12 @@ export function PageHeader({
           </div>
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Button 
             variant="outline" 
             onClick={onRefreshStatistics}
             disabled={loading}
-            className="border-orange-300 text-orange-600 hover:bg-orange-50"
+            className="border-orange-300 text-orange-600 hover:bg-orange-50 w-full sm:w-auto"
           >
             <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Refresh Statistics
@@ -38,7 +38,7 @@ export function PageHeader({
           
           <Button 
             onClick={onCreatePeriod}
-            className="bg-blue-500 hover:bg-blue-600"
+            className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto"
           >
             <Plus className="w-4 h-4 mr-2" />
             Buat Periode Baru

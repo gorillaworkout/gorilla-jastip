@@ -102,8 +102,9 @@ export interface CreateCustomerItemData {
 export type ExpenseCategory =
   | "Transport"
   | "Makan"
-  | "Akomodasi"
-  | "Operasional"
+  | "Jajan"
+  | "Belanja"
+  | "Wisata"
   | "Lainnya"
 
 export interface Expense {

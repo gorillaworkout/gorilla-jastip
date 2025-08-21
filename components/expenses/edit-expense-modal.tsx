@@ -16,7 +16,7 @@ interface EditExpenseModalProps {
   loading?: boolean
 }
 
-const CATEGORIES: ExpenseCategory[] = ["Transport", "Makan", "Akomodasi", "Operasional", "Lainnya"]
+const CATEGORIES: ExpenseCategory[] = ["Transport", "Makan", "Jajan", "Belanja", "Wisata", "Lainnya"]
 
 function formatDateISO(d: Date) {
   const yyyy = d.getFullYear()
