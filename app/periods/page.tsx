@@ -223,7 +223,7 @@ function PeriodsContent() {
                   <SheetTitle>Menu</SheetTitle>
                 </SheetHeader>
                 <div className="p-3 pt-0 space-y-1">
-                  <button className="w-full text-left px-3 py-2 rounded-md hover:bg-muted flex items-center gap-3" onClick={() => router.push("/")}> <Home className="h-4 w-4" /> Dashboard</button>
+                  <button className="w-full text-left px-3 py-2 rounded-md hover:bg-muted flex items-center gap-3" onClick={() => router.push("/dashboard")}> <Home className="h-4 w-4" /> Dashboard</button>
                   <button className="w-full text-left px-3 py-2 rounded-md hover:bg-muted flex items-center gap-3" onClick={() => router.push("/pengeluaran")}> <BarChart3 className="h-4 w-4" /> Pengeluaran</button>
                   <button className="w-full text-left px-3 py-2 rounded-md hover:bg-muted flex items-center gap-3" onClick={() => router.push("/periods")}> <Calendar className="h-4 w-4" /> Periode</button>
                   <button className="w-full text-left px-3 py-2 rounded-md hover:bg-muted flex items-center gap-3" onClick={() => router.push("/analytics")}> <BarChart3 className="h-4 w-4" /> Analytics</button>

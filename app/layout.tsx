@@ -18,7 +18,7 @@ const playfair = Playfair_Display({
 })
 
 export const metadata: Metadata = {
-  title: "Gorilla Jastip - Admin Panel",
+  title: "JastipdiGW - Admin Panel",
   description: "Sistem manajemen untuk bisnis jastip",
   generator: "Gorichan",
 }

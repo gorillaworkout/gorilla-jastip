@@ -22,8 +22,8 @@ export function LoginForm() {
   useEffect(() => {
     if (!loading && user) {
       if (user.role === "admin") {
-        // Admin redirect to home page
-        router.push("/")
+        // Admin redirect to dashboard
+        router.push("/dashboard")
       }
       // Non-admin users will stay here and see role error
     }
@@ -74,7 +74,7 @@ export function LoginForm() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Gorilla Jastip</CardTitle>
+          <CardTitle className="text-2xl font-bold">JastipdiGW</CardTitle>
           <CardDescription>
             Login dengan akun Google Anda untuk mengakses dashboard
           </CardDescription>

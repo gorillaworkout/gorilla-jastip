@@ -13,8 +13,8 @@ export function RoleRedirect() {
     if (!loading && user) {
       // Redirect based on role
       if (user.role === "admin") {
-        // Admin goes to home page
-        router.push("/")
+        // Admin goes to dashboard
+        router.push("/dashboard")
       } else {
         // Non-admin users stay on login page and will see role error
         // This is handled by the login form

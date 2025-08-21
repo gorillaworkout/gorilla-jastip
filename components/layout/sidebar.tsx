@@ -47,7 +47,7 @@ export function Sidebar() {
             <span className="text-primary-foreground font-bold text-sm">J</span>
           </div>
           {!isCollapsed && (
-            <span className="font-bold text-lg text-foreground">Gorilla Jastip</span>
+            <span className="font-bold text-lg text-foreground">JastipdiGW</span>
           )}
         </div>
       </div>

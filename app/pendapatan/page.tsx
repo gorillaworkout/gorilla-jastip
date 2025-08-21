@@ -114,7 +114,7 @@ function PendapatanContent() {
                   <SheetTitle>Menu</SheetTitle>
                 </SheetHeader>
                 <div className="p-3 pt-0 space-y-1">
-                  <Button variant="ghost" className="w-full justify-start gap-3" onClick={() => router.push("/")}> <Home className="h-4 w-4" /> Dashboard</Button>
+                  <Button variant="ghost" className="w-full justify-start gap-3" onClick={() => router.push("/dashboard")}> <Home className="h-4 w-4" /> Dashboard</Button>
                   <Button variant="ghost" className="w-full justify-start gap-3" onClick={() => router.push("/pendapatan")}> <HandCoins className="h-4 w-4" /> Pendapatan</Button>
                   <Button variant="ghost" className="w-full justify-start gap-3" onClick={() => router.push("/pengeluaran")}> <BarChart3 className="h-4 w-4" /> Pengeluaran</Button>
                   <Button variant="ghost" className="w-full justify-start gap-3" onClick={() => router.push("/periods")}> <Calendar className="h-4 w-4" /> Periode</Button>
