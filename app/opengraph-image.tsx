@@ -7,9 +7,26 @@ export const size = {
 
 export const contentType = "image/png"
 
+function arrayBufferToBase64(buffer: ArrayBuffer) {
+  let binary = ""
+  const bytes = new Uint8Array(buffer)
+  const len = bytes.byteLength
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i])
+  }
+  // @ts-ignore - btoa exists in edge runtime
+  return btoa(binary)
+}
+
 export default async function OpengraphImage() {
   const base = process.env.NEXT_PUBLIC_BASE_URL || "https://jastipdigw.gorillaworkout.id"
-  const logo = `${base}/jastipdigw.webp`
+  const logoUrl = `${base}/jastipdigw.webp`
+
+  // Fetch logo and inline as data URL to avoid external fetch issues
+  const res = await fetch(logoUrl, { cache: "no-store" })
+  const buf = await res.arrayBuffer()
+  const base64 = arrayBufferToBase64(buf)
+  const dataUrl = `data:image/webp;base64,${base64}`
 
   return new ImageResponse(
     (
@@ -23,9 +40,8 @@ export default async function OpengraphImage() {
           background: "#ffffff",
         }}
       >
-        {/* Logo besar di tengah, tanpa border */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={logo} alt="JastipdiGW" width={520} height={520} />
+        <img src={dataUrl} alt="JastipdiGW" width={520} height={520} />
       </div>
     ),
     {
