@@ -18,9 +18,9 @@ const playfair = Playfair_Display({
 })
 
 export const metadata: Metadata = {
-  title: "Jastip CMS - Admin Panel",
+  title: "Gorilla Jastip - Admin Panel",
   description: "Sistem manajemen untuk bisnis jastip",
-  generator: "v0.app",
+  generator: "Gorichan",
 }
 
 export default function RootLayout({

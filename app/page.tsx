@@ -199,7 +199,7 @@ function DashboardContent() {
                             <p className="font-medium">{formatDate(period.startDate)} - {formatDate(period.endDate)}</p>
                           </div>
                           <div>
-                            <p className="text-muted-foreground">Total Customer</p>
+                            <p className="text-muted-foreground">Total Item</p>
                             <p className="font-medium">{period.totalProducts}</p>
                           </div>
                           <div>
@@ -246,7 +246,7 @@ function DashboardContent() {
                     <span className="font-medium">{periods.filter(p => p.isActive).length}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm">Total Customer</span>
+                    <span className="text-sm">Total Item</span>
                     <span className="font-medium">{periods.reduce((sum, p) => sum + p.totalProducts, 0)}</span>
                   </div>
                   <div className="flex justify-between items-center">

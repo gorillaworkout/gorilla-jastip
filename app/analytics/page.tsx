@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
@@ -21,6 +21,8 @@ import { TrendingUp, DollarSign, Package, Percent, Download } from "lucide-react
 import { useAuth } from "@/contexts/auth-context"
 import { AdminGuard } from "@/components/auth/admin-guard"
 import { Sidebar } from "@/components/layout/sidebar"
+import { PeriodsService } from "@/lib/periods-service"
+import type { Period, PeriodItem } from "@/lib/types"
 
 interface AnalyticsData {
   totalRevenue: number
@@ -52,39 +54,7 @@ function AnalyticsContent() {
   const { user } = useAuth()
   const [selectedPeriod, setSelectedPeriod] = useState("all")
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
-
-  // Demo data
-  useEffect(() => {
-    if (!user) return
-
-    const demoAnalytics: AnalyticsData = {
-      totalRevenue: 83000000,
-      totalProfit: 15300000,
-      totalProducts: 27,
-      averageMargin: 18.4,
-      revenueGrowth: 18.4,
-      profitGrowth: 25.2,
-      monthlyData: [
-        { month: "Jul", revenue: 25000000, profit: 4500000, products: 8 },
-        { month: "Aug", revenue: 38000000, profit: 6800000, products: 12 },
-        { month: "Sep", revenue: 45000000, profit: 8500000, products: 15 },
-      ],
-      categoryData: [
-        { name: "Electronics", value: 45, profit: 8500000 },
-        { name: "Fashion", value: 30, profit: 4200000 },
-        { name: "Beauty", value: 15, profit: 1800000 },
-        { name: "Others", value: 10, profit: 800000 },
-      ],
-      topProducts: [
-        { name: "iPhone 15 Pro", profit: 1515000, margin: 10.1, category: "Electronics" },
-        { name: "MacBook Air M2", profit: 2800000, margin: 15.2, category: "Electronics" },
-        { name: "Nike Air Jordan", profit: 500000, margin: 18.5, category: "Fashion" },
-        { name: "Dyson Hair Dryer", profit: 800000, margin: 22.1, category: "Beauty" },
-        { name: "Apple Watch", profit: 650000, margin: 12.8, category: "Electronics" },
-      ],
-    }
-    setAnalytics(demoAnalytics)
-  }, [user])
+  const [loading, setLoading] = useState(false)
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -96,7 +66,151 @@ function AnalyticsContent() {
 
   const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"]
 
-  if (!analytics) {
+  useEffect(() => {
+    if (!user) return
+
+    const load = async () => {
+      try {
+        setLoading(true)
+        // Ambil semua periode
+        const periods: Period[] = await PeriodsService.getPeriods()
+
+        // Tentukan periode mana yang dipakai berdasarkan filter
+        let targetPeriodIds: string[] = []
+        if (selectedPeriod === "current") {
+          const active = periods.find((p) => p.isActive)
+          if (active) targetPeriodIds = [active.id]
+        } else {
+          // all dan last30: gunakan semua periode
+          targetPeriodIds = periods.map((p) => p.id)
+        }
+
+        // Ambil items untuk periode terpilih
+        const itemsArrays = await Promise.all(
+          targetPeriodIds.map((id) => PeriodsService.getPeriodItems(id))
+        )
+        let items: PeriodItem[] = itemsArrays.flat()
+
+        // Filter last30 jika perlu
+        if (selectedPeriod === "last30") {
+          const cutoff = new Date()
+          cutoff.setDate(cutoff.getDate() - 30)
+          items = items.filter((it) => it.createdAt >= cutoff)
+        }
+
+        // Hitung metrik agregat
+        const totalRevenue = items.reduce((sum, it) => sum + it.sellingPrice, 0)
+        const totalProfit = items.reduce((sum, it) => sum + it.profit, 0)
+        const totalProducts = items.length
+        const averageMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0
+
+        // Growth sederhana: bandingkan 30 hari terakhir vs 30 hari sebelumnya
+        const now = new Date()
+        const last30Start = new Date(now)
+        last30Start.setDate(now.getDate() - 30)
+        const prev30Start = new Date(now)
+        prev30Start.setDate(now.getDate() - 60)
+
+        const last30Items = items.filter((it) => it.createdAt >= last30Start)
+        const prev30Items = items.filter((it) => it.createdAt < last30Start && it.createdAt >= prev30Start)
+        const last30Revenue = last30Items.reduce((s, it) => s + it.sellingPrice, 0)
+        const prev30Revenue = prev30Items.reduce((s, it) => s + it.sellingPrice, 0)
+        const last30Profit = last30Items.reduce((s, it) => s + it.profit, 0)
+        const prev30Profit = prev30Items.reduce((s, it) => s + it.profit, 0)
+
+        const revenueGrowth = prev30Revenue > 0 ? ((last30Revenue - prev30Revenue) / prev30Revenue) * 100 : 0
+        const profitGrowth = prev30Profit > 0 ? ((last30Profit - prev30Profit) / prev30Profit) * 100 : 0
+
+        // Monthly trend dari items.createdAt (6 bulan terakhir)
+        const monthKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
+        const monthLabel = (d: Date) => d.toLocaleString("id-ID", { month: "short" })
+        const byMonth = new Map<string, { date: Date; revenue: number; profit: number; products: number }>()
+        const sixMonthsAgo = new Date(now)
+        sixMonthsAgo.setMonth(now.getMonth() - 5)
+        // Seed 6 bulan agar tidak kosong
+        for (let i = 0; i < 6; i++) {
+          const d = new Date(sixMonthsAgo)
+          d.setMonth(sixMonthsAgo.getMonth() + i)
+          byMonth.set(monthKey(d), { date: d, revenue: 0, profit: 0, products: 0 })
+        }
+        for (const it of items) {
+          const key = monthKey(it.createdAt)
+          const entry = byMonth.get(key)
+          if (entry) {
+            entry.revenue += it.sellingPrice
+            entry.profit += it.profit
+            entry.products += 1
+          }
+        }
+        const monthlyData = Array.from(byMonth.values())
+          .sort((a, b) => a.date.getTime() - b.date.getTime())
+          .map((m) => ({ month: monthLabel(m.date), revenue: m.revenue, profit: m.profit, products: m.products }))
+
+        // Category distribution: gunakan customerName sebagai kategori (berdasarkan revenue share)
+        const byCustomer = new Map<string, { revenue: number; profit: number }>()
+        for (const it of items) {
+          const cur = byCustomer.get(it.customerName) || { revenue: 0, profit: 0 }
+          cur.revenue += it.sellingPrice
+          cur.profit += it.profit
+          byCustomer.set(it.customerName, cur)
+        }
+        const totalRevenueForShare = Array.from(byCustomer.values()).reduce((s, v) => s + v.revenue, 0)
+        let categoryData = Array.from(byCustomer.entries()).map(([name, v]) => ({
+          name,
+          value: totalRevenueForShare > 0 ? (v.revenue / totalRevenueForShare) * 100 : 0,
+          profit: v.profit,
+        }))
+        // Ambil top 4, gabungkan sisanya ke "Lainnya"
+        categoryData.sort((a, b) => b.value - a.value)
+        if (categoryData.length > 5) {
+          const top4 = categoryData.slice(0, 4)
+          const others = categoryData.slice(4)
+          const othersAgg = others.reduce(
+            (acc, cur) => ({ name: "Lainnya", value: acc.value + cur.value, profit: acc.profit + cur.profit }),
+            { name: "Lainnya", value: 0, profit: 0 }
+          )
+          categoryData = [...top4, othersAgg]
+        }
+
+        // Top products: berdasarkan profit
+        const topProducts = [...items]
+          .sort((a, b) => b.profit - a.profit)
+          .slice(0, 5)
+          .map((it) => ({ name: it.itemName || "Item", profit: it.profit, margin: Number(it.margin.toFixed(1)), category: it.customerName }))
+
+        setAnalytics({
+          totalRevenue,
+          totalProfit,
+          totalProducts,
+          averageMargin: Number(averageMargin.toFixed(1)),
+          revenueGrowth: Number(revenueGrowth.toFixed(1)),
+          profitGrowth: Number(profitGrowth.toFixed(1)),
+          monthlyData,
+          categoryData,
+          topProducts,
+        })
+      } catch (err) {
+        console.error("Failed to load analytics:", err)
+        setAnalytics({
+          totalRevenue: 0,
+          totalProfit: 0,
+          totalProducts: 0,
+          averageMargin: 0,
+          revenueGrowth: 0,
+          profitGrowth: 0,
+          monthlyData: [],
+          categoryData: [],
+          topProducts: [],
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    load()
+  }, [user, selectedPeriod])
+
+  if (!analytics || loading) {
     return (
       <div className="flex h-screen bg-background">
         <Sidebar />
@@ -153,7 +267,7 @@ function AnalyticsContent() {
               <CardContent>
                 <div className="text-xl md:text-2xl font-bold">{formatCurrency(analytics.totalRevenue)}</div>
                 <div className="flex items-center text-xs text-green-600 mt-1">
-                  <TrendingUp className="h-3 w-3 mr-1" />+{analytics.revenueGrowth}% dari bulan lalu
+                  <TrendingUp className="h-3 w-3 mr-1" />{analytics.revenueGrowth >= 0 ? "+" : ""}{analytics.revenueGrowth}% dari periode sebelumnya
                 </div>
               </CardContent>
             </Card>
@@ -168,7 +282,7 @@ function AnalyticsContent() {
                   {formatCurrency(analytics.totalProfit)}
                 </div>
                 <div className="flex items-center text-xs text-green-600 mt-1">
-                  <TrendingUp className="h-3 w-3 mr-1" />+{analytics.profitGrowth}% dari bulan lalu
+                  <TrendingUp className="h-3 w-3 mr-1" />{analytics.profitGrowth >= 0 ? "+" : ""}{analytics.profitGrowth}% dari periode sebelumnya
                 </div>
               </CardContent>
             </Card>
@@ -226,8 +340,8 @@ function AnalyticsContent() {
             {/* Category Distribution */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Distribusi Kategori</CardTitle>
-                <CardDescription>Berdasarkan profit</CardDescription>
+                <CardTitle className="text-lg">Distribusi Customer</CardTitle>
+                <CardDescription>Berdasarkan share revenue</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-64 w-full">
@@ -240,13 +354,13 @@ function AnalyticsContent() {
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="value"
-                        label={({ name, value }) => `${name} ${value}%`}
+                        label={({ name, value }) => `${name} ${value?.toFixed(1)}%`}
                       >
                         {analytics.categoryData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
-                      <Tooltip formatter={(value: number) => [`${value}%`, "Persentase"]} />
+                      <Tooltip formatter={(value: number) => [`${(value as number).toFixed(1)}%`, "Persentase"]} />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
@@ -263,7 +377,7 @@ function AnalyticsContent() {
             <CardContent>
               <div className="space-y-4">
                 {analytics.topProducts.map((product, index) => (
-                  <div key={product.name} className="flex items-center justify-between p-3 rounded-lg border">
+                  <div key={product.name + index} className="flex items-center justify-between p-3 rounded-lg border">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <div className="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
                         <span className="text-sm font-medium text-primary">#{index + 1}</span>

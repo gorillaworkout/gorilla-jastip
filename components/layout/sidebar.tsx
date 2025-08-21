@@ -20,9 +20,9 @@ import {
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: Home },
-  { name: "Analytics", href: "/analytics", icon: BarChart3 },
-  { name: "Revenue", href: "/revenue", icon: TrendingUp },
+  { name: "Pengeluaran", href: "/pengeluaran", icon: TrendingUp },
   { name: "Periode", href: "/periods", icon: Calendar },
+  { name: "Analytics", href: "/analytics", icon: BarChart3 },
   { name: "Pengaturan", href: "/settings", icon: Settings },
 ]
 
@@ -46,7 +46,7 @@ export function Sidebar() {
             <span className="text-primary-foreground font-bold text-sm">J</span>
           </div>
           {!isCollapsed && (
-            <span className="font-bold text-lg text-foreground">Jastip CMS</span>
+            <span className="font-bold text-lg text-foreground">Gorilla Jastip</span>
           )}
         </div>
       </div>

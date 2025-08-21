@@ -98,6 +98,40 @@ export interface CreateCustomerItemData {
   notes?: string
 }
 
+// Tambahan tipe untuk fitur Pengeluaran
+export type ExpenseCategory =
+  | "Transport"
+  | "Makan"
+  | "Akomodasi"
+  | "Operasional"
+  | "Lainnya"
+
+export interface Expense {
+  id: string
+  periodId: string
+  date: Date
+  itemName: string
+  expensePrice: number // Pengeluaran dalam YEN
+  exchangeRate: number // Kurs YEN → IDR
+  totalInIDR: number // expensePrice * exchangeRate
+  category: ExpenseCategory
+  notes?: string
+  createdBy?: string
+  createdByName?: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface CreateExpenseData {
+  periodId: string
+  date: string // yyyy-MM-dd
+  itemName: string
+  expensePrice: string // YEN
+  exchangeRate: string // kurs
+  category: ExpenseCategory
+  notes?: string
+}
+
 export interface UpdatePeriodData {
   name?: string
   startDate?: string
@@ -126,6 +160,15 @@ export interface UpdateCustomerItemData {
   itemPrice?: string // Harga dalam YEN
   exchangeRate?: string // Kurs YEN ke IDR
   sellingPrice?: string // Harga jual dalam IDR
+  notes?: string
+}
+
+export interface UpdateExpenseData {
+  date?: string
+  itemName?: string
+  expensePrice?: string
+  exchangeRate?: string
+  category?: ExpenseCategory
   notes?: string
 }
 
