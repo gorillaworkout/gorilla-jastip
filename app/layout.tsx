@@ -41,32 +41,28 @@ export const metadata: Metadata = {
 	creator: "Bayu Darmawan",
 	publisher: "JastipdiGW",
 	openGraph: {
-		title: "JastipdiGW – Jasa Titip Jepang & Indonesia",
-		description:
-			"Titip barang Indonesia ⇄ Jepang dan checkout marketplace Jepang. Cepat, aman, transparan.",
+		type: "website",
+		locale: "id_ID",
 		url: BASE,
 		siteName: "JastipdiGW",
+		title: "JastipdiGW - Jasa Titip Barang dari Jepang ke Indonesia",
+		description: "Jasa titip barang dari Jepang ke Indonesia dan sebaliknya. Aman, terpercaya, dan transparan. Titip barang sekarang!",
 		images: [
 			{
-				url: `${BASE}/jastipdigw.webp`,
-				secureUrl: `${BASE}/jastipdigw.webp`,
+				url: "/jastipdigw.webp",
 				width: 1200,
 				height: 630,
-				alt: "JastipdiGW",
+				alt: "JastipdiGW Logo",
 				type: "image/webp",
 			},
 		],
-		locale: "id_ID",
-		type: "website",
 	},
 	twitter: {
 		card: "summary_large_image",
-		title: "JastipdiGW – Jasa Titip Jepang & Indonesia",
-		description:
-			"Titip barang Indonesia ⇄ Jepang dan checkout marketplace Jepang. Cepat, aman, transparan.",
-		images: [`${BASE}/jastipdigw.webp`],
+		title: "JastipdiGW - Jasa Titip Barang dari Jepang ke Indonesia",
+		description: "Jasa titip barang dari Jepang ke Indonesia dan sebaliknya. Aman, terpercaya, dan transparan. Titip barang sekarang!",
+		images: ["/jastipdigw.webp"],
 		creator: "@jastipdigw",
-		site: "@jastipdigw",
 	},
 	alternates: {
 		canonical: `${BASE}/`,
