@@ -53,15 +53,7 @@ export const metadata: Metadata = {
 				width: 1200,
 				height: 630,
 				alt: "JastipdiGW",
-				type: "image/png",
-			},
-			{
-				url: `${BASE}/placeholder-logo.png`,
-				secureUrl: `${BASE}/placeholder-logo.png`,
-				width: 1200,
-				height: 630,
-				alt: "JastipdiGW",
-				type: "image/png",
+				type: "image/webp",
 			},
 		],
 		locale: "id_ID",
@@ -72,10 +64,7 @@ export const metadata: Metadata = {
 		title: "JastipdiGW – Jasa Titip Jepang & Indonesia",
 		description:
 			"Titip barang Indonesia ⇄ Jepang dan checkout marketplace Jepang. Cepat, aman, transparan.",
-		images: [
-			`${BASE}/jastipdigw.webp`,
-			`${BASE}/placeholder-logo.png`,
-		],
+		images: [`${BASE}/jastipdigw.webp`],
 		creator: "@jastipdigw",
 		site: "@jastipdigw",
 	},

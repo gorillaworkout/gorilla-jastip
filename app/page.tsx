@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
 import { Button } from "@/components/ui/button"
-import { ShieldCheck, Clock, Sparkles, ArrowRight } from "lucide-react"
+import { ShieldCheck, Clock, Sparkles, ArrowRight, LogIn } from "lucide-react"
 import Image from "next/image"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel"
  
@@ -77,28 +77,48 @@ export default function HomePage() {
               href="https://www.facebook.com/bayu.darmawan02/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-slate-300 hover:text-white text-sm"
+              aria-label="Facebook"
+              className="group inline-flex items-center"
             >
-              Facebook
+              <img
+                src="https://cdn.simpleicons.org/facebook/CBD5E1"
+                alt="Facebook"
+                className="h-5 w-5 opacity-80 group-hover:opacity-100 transition"
+              />
             </a>
             <a
               href="https://wa.me/6287700600208"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-slate-300 hover:text-white text-sm"
+              aria-label="WhatsApp"
+              className="group inline-flex items-center"
             >
-              WhatsApp
+              <img
+                src="https://cdn.simpleicons.org/whatsapp/CBD5E1"
+                alt="WhatsApp"
+                className="h-5 w-5 opacity-80 group-hover:opacity-100 transition"
+              />
             </a>
             <a
               href="https://www.instagram.com/jastipdigw/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-slate-300 hover:text-white text-sm"
+              aria-label="Instagram"
+              className="group inline-flex items-center"
             >
-              Instagram
+              <img
+                src="https://cdn.simpleicons.org/instagram/CBD5E1"
+                alt="Instagram"
+                className="h-5 w-5 opacity-80 group-hover:opacity-100 transition"
+              />
             </a>
-            <Button size="sm" className="bg-white text-black hover:bg-white/90" onClick={() => router.push("/login")}>
-              Login
+            <Button
+              size="icon"
+              className="bg-white text-black hover:bg-white/90"
+              aria-label="Login"
+              onClick={() => router.push("/login")}
+            >
+              <LogIn className="h-5 w-5" />
             </Button>
           </div>
         </div>
