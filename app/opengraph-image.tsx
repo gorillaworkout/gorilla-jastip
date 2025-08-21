@@ -20,36 +20,12 @@ export default async function OpengraphImage() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#0b1220",
+          background: "#ffffff",
         }}
       >
-        <div
-          style={{
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 80,
-          }}
-        >
-          <div
-            style={{
-              width: 480,
-              height: 480,
-              background: "#ffffff",
-              borderRadius: 24,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 10px 40px rgba(0,0,0,0.35)",
-            }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={logo} alt="JastipdiGW" width={360} height={360} />
-          </div>
-        </div>
+        {/* Logo besar di tengah, tanpa border */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={logo} alt="JastipdiGW" width={520} height={520} />
       </div>
     ),
     {
