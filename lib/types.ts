@@ -173,6 +173,35 @@ export interface UpdateExpenseData {
   notes?: string
 }
 
+// Pendapatan (Income)
+export interface Income {
+  id: string
+  periodId: string
+  date: Date
+  customerName: string
+  incomeAmount: number // IDR
+  notes?: string
+  createdBy?: string
+  createdByName?: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface CreateIncomeData {
+  periodId: string
+  date: string // yyyy-MM-dd
+  customerName: string
+  incomeAmount: string // IDR (string untuk input), akan diparse ke number
+  notes?: string
+}
+
+export interface UpdateIncomeData {
+  date?: string
+  customerName?: string
+  incomeAmount?: string
+  notes?: string
+}
+
 export interface User {
   id: string
   email: string

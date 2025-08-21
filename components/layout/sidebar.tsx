@@ -21,6 +21,7 @@ import {
 const navigation = [
   { name: "Dashboard", href: "/", icon: Home },
   { name: "Pengeluaran", href: "/pengeluaran", icon: TrendingUp },
+  { name: "Pendapatan", href: "/pendapatan", icon: BarChart3 },
   { name: "Periode", href: "/periods", icon: Calendar },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
   { name: "Pengaturan", href: "/settings", icon: Settings },

@@ -9,10 +9,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // Suppress hydration warnings in development
-  experimental: {
-    suppressHydrationWarning: true,
-  },
+  // Next.js 15: suppressHydrationWarning tidak lagi valid di experimental
+  // Jika ingin mengabaikan mismatch tertentu, gunakan suppressHydrationWarning per-elemen React
 }
 
 export default nextConfig
