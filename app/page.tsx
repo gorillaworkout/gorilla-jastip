@@ -69,7 +69,7 @@ export default function HomePage() {
       <header className="sticky top-0 z-30 bg-slate-950/60 backdrop-blur border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3 font-bold tracking-tight">
-            <Image src="/jastipdigw.webp" alt="JastipdiGW" width={64} height={64} className="rounded-sm" />
+            <Image src="/jastipdigw.png" alt="JastipdiGW" width={64} height={64} className="rounded-sm" />
             <span className="text-xl md:text-2xl">JastipdiGW</span>
           </div>
           <div className="flex items-center gap-4">
@@ -136,8 +136,8 @@ export default function HomePage() {
             description:
               'Jasa titip Indonesia ⇄ Jepang dan checkout marketplace Jepang. Cepat, aman, transparan.',
             areaServed: ['Indonesia', 'Japan'],
-            logo: 'https://jastipdigw.com/jastipdigw.webp',
-            image: 'https://jastipdigw.com/jastipdigw.webp',
+            logo: 'https://jastipdigw.com/jastipdigw.png',
+            image: 'https://jastipdigw.com/jastipdigw.png',
             sameAs: [
               'https://www.instagram.com/jastipdigw/',
               'https://wa.me/6287700600208',
