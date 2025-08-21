@@ -291,8 +291,8 @@ export default function HomePage() {
               </ul>
               <div className="mt-6">
                 <Button className="bg-blue-600 hover:bg-blue-700 text-white" asChild>
-                  <a href="https://chat.whatsapp.com/your-group-invite-link" target="_blank" rel="noopener noreferrer">
-                    Masuk Grup WhatsApp <ArrowRight className="ml-2 h-4 w-4" />
+                  <a href="https://chat.whatsapp.com/EgdUCttb8r68vylNdW5OX1?mode=ems_copy_c" target="_blank" rel="noopener noreferrer">
+                    Masuk Group WhatsApp <ArrowRight className="ml-2 h-4 w-4" />
                   </a>
                 </Button>
               </div>
