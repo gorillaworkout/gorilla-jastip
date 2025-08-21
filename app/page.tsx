@@ -14,6 +14,8 @@ export default function HomePage() {
   const router = useRouter()
   const [carouselApi, setCarouselApi] = useState<CarouselApi | null>(null)
   const autoTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const [brandsApi, setBrandsApi] = useState<CarouselApi | null>(null)
+  const brandsTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // Simple autoplay for gallery
   useEffect(() => {
@@ -26,6 +28,18 @@ export default function HomePage() {
       if (autoTimerRef.current) clearInterval(autoTimerRef.current)
     }
   }, [carouselApi])
+
+  // Autoplay for brands carousel
+  useEffect(() => {
+    if (!brandsApi) return
+    brandsTimerRef.current && clearInterval(brandsTimerRef.current)
+    brandsTimerRef.current = setInterval(() => {
+      brandsApi.scrollNext()
+    }, 2500)
+    return () => {
+      if (brandsTimerRef.current) clearInterval(brandsTimerRef.current)
+    }
+  }, [brandsApi])
 
   useEffect(() => {
     if (!loading && user?.role === "admin") {
@@ -41,12 +55,23 @@ export default function HomePage() {
     )
   }
 
+  const galleryImages = [
+    "/1.webp",
+    "/3.webp",
+    "/2.webp",
+    "/4.jpeg",
+    "/5.jpeg",
+  ]
+
   return (
     <main className="min-h-[100dvh] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
       {/* Header */}
       <header className="sticky top-0 z-30 bg-slate-950/60 backdrop-blur border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-          <div className="font-bold tracking-tight">JastipdiGW</div>
+          <div className="flex items-center gap-3 font-bold tracking-tight">
+            <Image src="/jastipdigw.webp" alt="JastipdiGW" width={64} height={64} className="rounded-sm" />
+            <span className="text-xl md:text-2xl">JastipdiGW</span>
+          </div>
           <div className="flex items-center gap-4">
             <a
               href="https://www.facebook.com/bayu.darmawan02/"
@@ -91,6 +116,8 @@ export default function HomePage() {
             description:
               'Jasa titip Indonesia ⇄ Jepang dan checkout marketplace Jepang. Cepat, aman, transparan.',
             areaServed: ['Indonesia', 'Japan'],
+            logo: 'https://jastipdigw.com/jastipdigw.webp',
+            image: 'https://jastipdigw.com/jastipdigw.webp',
             sameAs: [
               'https://www.instagram.com/jastipdigw/',
               'https://wa.me/6287700600208',
@@ -141,6 +168,68 @@ export default function HomePage() {
         </div>
       </section>
 
+          {/* Brands we can buy */}
+      <section className="max-w-7xl mx-auto px-6 pb-16">
+        <h2 className="text-2xl font-bold mb-4">Brand yang bisa kami belikan</h2>
+        <div
+          className="relative rounded-2xl border border-slate-800 bg-slate-900/40 p-4"
+          onMouseEnter={() => {
+            if (brandsTimerRef.current) clearInterval(brandsTimerRef.current)
+          }}
+          onMouseLeave={() => {
+            if (brandsApi) {
+              brandsTimerRef.current = setInterval(() => brandsApi.scrollNext(), 2500)
+            }
+          }}
+        >
+          <Carousel setApi={setBrandsApi} className="px-8" opts={{ loop: true, dragFree: true, align: "start" }}>
+            <CarouselContent className="items-center">
+              {[
+                { name: "Nike", logo: "https://cdn.simpleicons.org/nike/111111" },
+                { name: "Adidas", logo: "https://cdn.simpleicons.org/adidas/111111" },
+                { name: "Coach", logo: "/coach.jpg" },
+                { name: "Uniqlo", logo: "/uniqlo.jpg" },
+                { name: "GU", logo: "/gu.jpg" },
+                { name: "MUJI", logo: "https://upload.wikimedia.org/wikipedia/commons/6/6a/Muji_logo.svg" },
+                { name: "ZARA", logo: "https://cdn.simpleicons.org/zara/111111" },
+                { name: "Onitsuka Tiger", logo: "/onitsuka.jpg" },
+                { name: "New Balance", logo: "https://cdn.simpleicons.org/newbalance/BE0027" },
+                { name: "Converse Japan", logo: "/converse.jpg" },
+                { name: "Porter Yoshida", logo: "/porter.jpg" },
+                { name: "Sanrio", logo: "/sanrio.jpeg" },
+                { name: "Shiseido", logo: "/shiseido.jpg" },
+                { name: "Senka", logo: "/senka.jpg" },
+                { name: "Hada Labo", logo: "/hadalabo.jpg" },
+              
+                { name: "Pokémon Center", logo: "/pokemon.jpg" },
+                { name: "Nintendo", logo: "https://upload.wikimedia.org/wikipedia/commons/0/0d/Nintendo.svg" },
+              ].map((b) => (
+                <CarouselItem key={b.name} className="basis-1/2 sm:basis-1/3 md:basis-1/5 lg:basis-1/6">
+                  <div className="h-16 md:h-20 flex items-center justify-center rounded-xl border border-slate-800 bg-white px-3">
+                    <img
+                      src={b.logo}
+                      alt={b.name}
+                      className="max-h-10 md:max-h-12 object-contain"
+                      crossOrigin="anonymous"
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        const target = e.currentTarget as HTMLImageElement
+                        target.style.display = 'none'
+                        const sibling = target.nextElementSibling as HTMLElement | null
+                        if (sibling) sibling.classList.remove('hidden')
+                      }}
+                    />
+                    <span className="hidden text-black text-sm font-semibold">{b.name}</span>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="hidden sm:flex bg-slate-900/70 border-slate-700 hover:bg-slate-900" />
+            <CarouselNext className="hidden sm:flex bg-slate-900/70 border-slate-700 hover:bg-slate-900" />
+          </Carousel>
+        </div>
+      </section>
+      
       {/* How it works */}
       <section className="max-w-7xl mx-auto px-6 pb-16">
         <h2 className="text-2xl font-bold">Cara Kerja</h2>
@@ -163,9 +252,11 @@ export default function HomePage() {
         </div>
       </section>
 
+    
+
       {/* Proof Gallery */}
       <section className="max-w-7xl mx-auto px-6 pb-16">
-   
+      
         <div
           className="relative rounded-2xl border border-slate-800 bg-slate-900/40 p-4"
           onMouseEnter={() => {
@@ -179,12 +270,8 @@ export default function HomePage() {
         >
           <Carousel setApi={setCarouselApi} className="px-8" opts={{ align: "center" }}>
             <CarouselContent>
-              {[
-                "/1.webp",
-                "/3.webp",
-                "/2.webp",
-              ].map((src, idx) => (
-                <CarouselItem key={idx} className="basis-full sm:basis-1/2 md:basis-1/3">
+              {galleryImages.map((src, idx) => (
+                <CarouselItem key={`${src}-${idx}`} className="basis-full sm:basis-1/2 md:basis-1/3">
                   <div className="relative aspect-[3/4] w-full max-w-sm mx-auto overflow-hidden rounded-xl border border-slate-800 bg-slate-950">
                     <Image src={src} alt={`Bukti pengiriman ${idx + 1}`} fill className="object-cover" priority={idx === 0} />
                   </div>
