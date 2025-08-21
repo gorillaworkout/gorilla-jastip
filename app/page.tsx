@@ -165,10 +165,7 @@ export default function HomePage() {
 
       {/* Proof Gallery */}
       <section className="max-w-7xl mx-auto px-6 pb-16">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold">Galeri Bukti Pengiriman</h2>
-          <p className="text-slate-300 text-sm">Sebagian dokumentasi pengiriman kami</p>
-        </div>
+   
         <div
           className="relative rounded-2xl border border-slate-800 bg-slate-900/40 p-4"
           onMouseEnter={() => {
@@ -180,17 +177,15 @@ export default function HomePage() {
             }
           }}
         >
-          <Carousel setApi={setCarouselApi} className="px-8">
+          <Carousel setApi={setCarouselApi} className="px-8" opts={{ align: "center" }}>
             <CarouselContent>
               {[
-                "/placeholder.jpg",
-                "/placeholder-user.jpg",
-                "/placeholder.jpg",
-                "/placeholder-user.jpg",
-                "/placeholder.jpg",
+                "/1.webp",
+                "/3.webp",
+                "/2.webp",
               ].map((src, idx) => (
-                <CarouselItem key={idx}>
-                  <div className="relative h-64 sm:h-80 md:h-[28rem] overflow-hidden rounded-xl border border-slate-800 bg-slate-950">
+                <CarouselItem key={idx} className="basis-full sm:basis-1/2 md:basis-1/3">
+                  <div className="relative aspect-[3/4] w-full max-w-sm mx-auto overflow-hidden rounded-xl border border-slate-800 bg-slate-950">
                     <Image src={src} alt={`Bukti pengiriman ${idx + 1}`} fill className="object-cover" priority={idx === 0} />
                   </div>
                 </CarouselItem>
