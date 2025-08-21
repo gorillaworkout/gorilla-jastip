@@ -17,8 +17,10 @@ const playfair = Playfair_Display({
 	variable: "--font-playfair",
 })
 
+const BASE = "https://jastipdigw.gorillaworkout.id"
+
 export const metadata: Metadata = {
-	metadataBase: new URL("https://jastipdigw.gorillaworkout.id"),
+	metadataBase: new URL(BASE),
 	title: {
 		default: "JastipdiGW – Jasa Titip Jepang & Indonesia",
 		template: "%s | JastipdiGW",
@@ -42,20 +44,20 @@ export const metadata: Metadata = {
 		title: "JastipdiGW – Jasa Titip Jepang & Indonesia",
 		description:
 			"Titip barang Indonesia ⇄ Jepang dan checkout marketplace Jepang. Cepat, aman, transparan.",
-		url: "https://jastipdigw.gorillaworkout.id",
+		url: BASE,
 		siteName: "JastipdiGW",
 		images: [
 			{
-				url: "/jastipdigw.webp",
-				secureUrl: "https://jastipdigw.gorillaworkout.id/jastipdigw.webp",
+				url: `${BASE}/jastipdigw.webp`,
+				secureUrl: `${BASE}/jastipdigw.webp`,
 				width: 1200,
 				height: 630,
 				alt: "JastipdiGW",
-				type: "image/webp",
+				type: "image/png",
 			},
 			{
-				url: "/placeholder-logo.png",
-				secureUrl: "https://jastipdigw.gorillaworkout.id/placeholder-logo.png",
+				url: `${BASE}/placeholder-logo.png`,
+				secureUrl: `${BASE}/placeholder-logo.png`,
 				width: 1200,
 				height: 630,
 				alt: "JastipdiGW",
@@ -71,14 +73,14 @@ export const metadata: Metadata = {
 		description:
 			"Titip barang Indonesia ⇄ Jepang dan checkout marketplace Jepang. Cepat, aman, transparan.",
 		images: [
-			"https://jastipdigw.gorillaworkout.id/placeholder-logo.png",
-			"https://jastipdigw.gorillaworkout.id/jastipdigw.webp",
+			`${BASE}/jastipdigw.webp`,
+			`${BASE}/placeholder-logo.png`,
 		],
 		creator: "@jastipdigw",
 		site: "@jastipdigw",
 	},
 	alternates: {
-		canonical: "https://jastipdigw.gorillaworkout.id/",
+		canonical: `${BASE}/`,
 	},
 	robots: {
 		index: true,
