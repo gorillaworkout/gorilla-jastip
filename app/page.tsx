@@ -136,8 +136,8 @@ export default function HomePage() {
             description:
               'Jasa titip Indonesia ⇄ Jepang dan checkout marketplace Jepang. Cepat, aman, transparan.',
             areaServed: ['Indonesia', 'Japan'],
-            logo: 'https://jastipdigw.com/jastipdigw.png',
-            image: 'https://jastipdigw.com/jastipdigw.png',
+            logo: 'https://jastipdigw.gorillaworkout.id/jastipdigw.png',
+            image: 'https://jastipdigw.gorillaworkout.id/jastipdigw.png',
             sameAs: [
               'https://www.instagram.com/jastipdigw/',
               'https://wa.me/6287700600208',
