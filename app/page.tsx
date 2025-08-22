@@ -288,7 +288,7 @@ export default function HomePage() {
             }
           }}
         >
-          <Carousel setApi={setCarouselApi} className="px-8" opts={{ align: "center" }}>
+          <Carousel setApi={setCarouselApi} className="px-8" opts={{ loop: true, align: "center" }}>
             <CarouselContent>
               {galleryImages.map((src, idx) => (
                 <CarouselItem key={`${src}-${idx}`} className="basis-full sm:basis-1/2 md:basis-1/3">
