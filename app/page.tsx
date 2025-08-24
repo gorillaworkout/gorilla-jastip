@@ -73,48 +73,9 @@ export default function HomePage() {
             <span className="text-xl md:text-2xl">JastipdiGW</span>
           </div>
           <div className="flex items-center gap-4">
-            <a
-              href="https://www.facebook.com/bayu.darmawan02/"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Facebook"
-              className="group inline-flex items-center"
-            >
-              <img
-                src="https://cdn.simpleicons.org/facebook/CBD5E1"
-                alt="Facebook"
-                className="h-5 w-5 opacity-80 group-hover:opacity-100 transition"
-              />
-            </a>
-            <a
-              href="https://wa.me/6287700600208"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="WhatsApp"
-              className="group inline-flex items-center"
-            >
-              <img
-                src="https://cdn.simpleicons.org/whatsapp/CBD5E1"
-                alt="WhatsApp"
-                className="h-5 w-5 opacity-80 group-hover:opacity-100 transition"
-              />
-            </a>
-            <a
-              href="https://www.instagram.com/jastipdigw/"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Instagram"
-              className="group inline-flex items-center"
-            >
-              <img
-                src="https://cdn.simpleicons.org/instagram/CBD5E1"
-                alt="Instagram"
-                className="h-5 w-5 opacity-80 group-hover:opacity-100 transition"
-              />
-            </a>
             <Button
               size="icon"
-              className="bg-white text-black hover:bg-white/90"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300"
               aria-label="Login"
               onClick={() => router.push("/login")}
             >
@@ -440,8 +401,180 @@ export default function HomePage() {
         </div>
       </section>
 
-      <footer className="border-t border-slate-800 py-6 text-center text-slate-400 text-sm">
-        © {new Date().getFullYear()} Jastip Jepang. All rights reserved.
+      {/* Footer */}
+      <footer className="border-t border-slate-800 bg-slate-950/50 backdrop-blur">
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          {/* Main Footer Content */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            {/* Company Info */}
+            <div className="md:col-span-2">
+              <div className="flex items-center gap-3 mb-4">
+                <Image src="/jastipdigw.png" alt="JastipdiGW" width={48} height={48} className="rounded-lg" />
+                <span className="text-xl font-bold">JastipdiGW</span>
+              </div>
+              <p className="text-slate-300 text-sm mb-4">
+                Jasa titip barang dari Jepang ke Indonesia dan sebaliknya. 
+                Aman, terpercaya, dan transparan dengan pengalaman bertahun-tahun.
+              </p>
+              <div className="flex items-center gap-4">
+                <a
+                  href="https://www.facebook.com/bayu.darmawan02/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook"
+                  className="group inline-flex items-center justify-center w-10 h-10 rounded-full bg-slate-800 hover:bg-blue-600 transition-all duration-300 hover:scale-110"
+                >
+                  <img
+                    src="https://cdn.simpleicons.org/facebook/ffffff"
+                    alt="Facebook"
+                    className="h-5 w-5 opacity-80 group-hover:opacity-100 transition"
+                  />
+                </a>
+                <a
+                  href="https://wa.me/6287700600208"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="WhatsApp"
+                  className="group inline-flex items-center justify-center w-10 h-10 rounded-full bg-slate-800 hover:bg-green-600 transition-all duration-300 hover:scale-110"
+                >
+                  <img
+                    src="https://cdn.simpleicons.org/whatsapp/ffffff"
+                    alt="WhatsApp"
+                    className="h-5 w-5 opacity-80 group-hover:opacity-100 transition"
+                  />
+                </a>
+                <a
+                  href="https://www.instagram.com/jastipdigw/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                  className="group inline-flex items-center justify-center w-10 h-10 rounded-full bg-slate-800 hover:bg-pink-600 transition-all duration-300 hover:scale-110"
+                >
+                  <img
+                    src="https://cdn.simpleicons.org/instagram/ffffff"
+                    alt="Instagram"
+                    className="h-5 w-5 opacity-80 group-hover:opacity-100 transition"
+                  />
+                </a>
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h3 className="font-semibold text-white mb-4">Layanan</h3>
+              <ul className="space-y-2 text-sm text-slate-300">
+                <li>
+                  <a 
+                    href="https://wa.me/6287700600208?text=Halo%20saya%20ingin%20tanya%20tentang%20layanan%20Jastip%20Jepang" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="hover:text-blue-400 transition-colors flex items-center gap-2 group"
+                  >
+                    <span>Jastip Jepang</span>
+                    <svg className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="https://wa.me/6287700600208?text=Halo%20saya%20ingin%20tanya%20tentang%20layanan%20Checkout%20Marketplace%20Jepang" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="hover:text-blue-400 transition-colors flex items-center gap-2 group"
+                  >
+                    <span>Checkout Marketplace</span>
+                    <svg className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="https://wa.me/6287700600208?text=Halo%20saya%20ingin%20tanya%20tentang%20layanan%20Pengiriman%20Indonesia%20%E2%87%84%20Jepang" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="hover:text-blue-400 transition-colors flex items-center gap-2 group"
+                  >
+                    <span>Pengiriman ID ⇄ JP</span>
+                    <svg className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="https://wa.me/6287700600208?text=Halo%20saya%20ingin%20tanya%20tentang%20layanan%20Live%20Shopping" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="hover:text-blue-400 transition-colors flex items-center gap-2 group"
+                  >
+                    <span>Live Shopping</span>
+                    <svg className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Contact Info */}
+            <div>
+              <h3 className="font-semibold text-white mb-4">Kontak</h3>
+              <ul className="space-y-2 text-sm text-slate-300">
+                <li className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
+                  <a href="https://wa.me/6287700600208" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors">
+                    +62 877-0060-0208
+                  </a>
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
+                  <span>Bayu Darmawan</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
+                  <span>Admin JastipdiGW</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom Footer */}
+          <div className="pt-8 border-t border-slate-800">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="text-slate-400 text-sm">
+                © {new Date().getFullYear()} JastipdiGW. All rights reserved.
+              </div>
+              <div className="flex items-center gap-6 text-sm text-slate-400">
+                <a 
+                  href="https://wa.me/6287700600208?text=Halo%20saya%20ingin%20tanya%20tentang%20Privacy%20Policy" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="hover:text-blue-400 transition-colors"
+                >
+                  Privacy Policy
+                </a>
+                <a 
+                  href="https://wa.me/6287700600208?text=Halo%20saya%20ingin%20tanya%20tentang%20Terms%20of%20Service" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="hover:text-blue-400 transition-colors"
+                >
+                  Terms of Service
+                </a>
+                <a 
+                  href="https://wa.me/6287700600208?text=Halo%20saya%20ingin%20tanya%20tentang%20FAQ" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="hover:text-blue-400 transition-colors"
+                >
+                  FAQ
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
       </footer>
     </main>
   )

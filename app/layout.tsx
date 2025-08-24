@@ -99,7 +99,7 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="id" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
-			<body className="font-sans antialiased">
+			<body className="font-sans antialiased" suppressHydrationWarning>
 				<ReduxProvider>
 					<AuthProvider>{children}</AuthProvider>
 				</ReduxProvider>

@@ -439,20 +439,34 @@ export class PeriodsService {
   // Update period statistics (totalProducts, totalRevenue, totalProfit, averageMargin)
   static async updatePeriodStatistics(periodId: string): Promise<void> {
     try {
-      const items = await this.getPeriodItems(periodId)
+      if (!db) {
+        throw new Error("Firestore database not initialized")
+      }
       
-      const totalProducts = items.length
-      const totalRevenue = items.reduce((sum, item) => sum + item.sellingPrice, 0)
-      const totalProfit = items.reduce((sum, item) => sum + item.profit, 0)
-      const averageMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0
+      const currentUser = this.checkAuth()
+      
+      // Get all items for this period
+      const q = query(
+        collection(db, ITEMS_COLLECTION),
+        where("periodId", "==", periodId)
+      )
+      const querySnapshot = await getDocs(q)
 
-      console.log(`Updating period ${periodId} statistics:`, {
-        totalProducts,
-        totalRevenue,
-        totalProfit,
-        averageMargin,
-        itemsCount: items.length
+      // Calculate statistics
+      let totalProducts = 0
+      let totalRevenue = 0
+      let totalProfit = 0
+      let totalCost = 0
+
+      querySnapshot.forEach((doc) => {
+        const data = doc.data()
+        totalProducts++
+        totalRevenue += Number(data.sellingPrice) || 0
+        totalCost += Number(data.costInIDR) || 0
+        totalProfit += Number(data.profit) || 0
       })
+
+      const averageMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0
 
       // Update period with new statistics
       const docRef = doc(db, PERIODS_COLLECTION, periodId)

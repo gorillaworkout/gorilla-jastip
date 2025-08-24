@@ -29,19 +29,33 @@ export default function LoginPage() {
           <div className="w-full max-w-sm">
             {/* Logo section */}
             <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-28 h-28 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-3xl shadow-2xl mb-6 p-4 ring-4 ring-blue-400/20">
-                <Image 
-                  src="/jastipdigw.png" 
-                  alt="JastipdiGW Logo" 
-                  width={80} 
-                  height={80}
-                  className="object-contain"
-                />
+              <div className="relative mb-6">
+                {/* Animated background circles */}
+                <div className="absolute inset-0 w-32 h-32 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-full blur-xl animate-pulse"></div>
+                <div className="absolute inset-0 w-32 h-32 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full blur-xl animate-pulse" style={{animationDelay: '1s'}}></div>
+                
+                {/* Main logo container */}
+                <div className="relative inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 rounded-3xl shadow-2xl p-6 ring-4 ring-blue-400/30 hover:ring-blue-300/50 transition-all duration-500 hover:scale-105 hover:shadow-blue-500/25">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-3xl"></div>
+                  <Image 
+                    src="/jastipdigw.png" 
+                    alt="JastipdiGW Logo" 
+                    width={80} 
+                    height={80}
+                    className="relative z-10 object-contain drop-shadow-lg"
+                  />
+                  
+                  {/* Floating elements */}
+                  <div className="absolute -top-2 -right-2 w-4 h-4 bg-yellow-400 rounded-full animate-bounce"></div>
+                  <div className="absolute -bottom-2 -left-2 w-3 h-3 bg-pink-400 rounded-full animate-bounce" style={{animationDelay: '0.5s'}}></div>
+                </div>
               </div>
-              <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">
+              
+              <h1 className="text-5xl font-bold text-white mb-3 tracking-tight bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
                 JastipdiGW
               </h1>
-              <p className="text-blue-200 text-base font-medium">Admin Dashboard</p>
+              <p className="text-blue-200 text-lg font-medium mb-2">Admin Dashboard</p>
+              <p className="text-blue-300/70 text-sm">Masuk ke panel administrasi</p>
             </div>
 
             {/* Login form - integrated design */}

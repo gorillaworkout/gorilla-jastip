@@ -1,6 +1,6 @@
-import { initializeApp } from "firebase/app"
-import { getFirestore } from "firebase/firestore"
-import { getAuth } from "firebase/auth"
+import { initializeApp, FirebaseApp } from "firebase/app"
+import { getFirestore, Firestore } from "firebase/firestore"
+import { getAuth, Auth } from "firebase/auth"
 
 const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true"
 
@@ -14,9 +14,9 @@ const isFirebaseConfigured =
   process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID &&
   process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 
-let app: any = null
-let db: any = null
-let auth: any = null
+let app: FirebaseApp | null = null
+let db: Firestore | null = null
+let auth: Auth | null = null
 
 if (isFirebaseConfigured) {
   const firebaseConfig = {
@@ -42,8 +42,17 @@ if (isFirebaseConfigured) {
     console.log("📁 Firestore database:", db ? "Initialized" : "Failed")
     console.log("🔐 Auth service:", auth ? "Initialized" : "Failed")
     console.log("🏗️ Project ID:", process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID)
+    
+    // Verify that db is properly initialized
+    if (!db) {
+      throw new Error("Firestore database failed to initialize")
+    }
   } catch (error) {
     console.error("Firebase initialization error:", error)
+    // Reset variables on error
+    app = null
+    db = null
+    auth = null
   }
 } else {
   const reason = isDemoMode
@@ -59,5 +68,6 @@ if (isFirebaseConfigured) {
   console.log("NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id")
 }
 
+// Export with proper type checking
 export { db, auth, isFirebaseConfigured, isDemoMode }
 export default app

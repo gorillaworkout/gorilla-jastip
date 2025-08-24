@@ -46,6 +46,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
+          // Check if Firestore is available
+          if (!db) {
+            throw new Error("Firestore database not available")
+          }
+          
           // Check if user exists in Firestore
           const userDoc = await getDoc(doc(db, "users", firebaseUser.uid))
           
