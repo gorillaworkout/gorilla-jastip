@@ -209,3 +209,43 @@ export interface User {
   role: "user" | "admin"
   createdAt: Date
 }
+
+// Interface untuk Jastiper yang verified
+export interface Jastiper {
+  id: string
+  name: string
+  imageUrl: string
+  facebookLink: string
+  phoneNumber: string
+  isVerified: boolean
+  description?: string
+  rating?: number
+  totalOrders?: number
+  completedOrders?: number // Jumlah order yang sudah selesai
+  verifiedByFacebookLink?: string // Link Facebook customer yang memverifikasi
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface CreateJastiperData {
+  name: string
+  imageUrl: string
+  facebookLink: string
+  phoneNumber: string
+  description?: string
+  completedOrders?: number
+  verifiedByFacebookLink?: string
+}
+
+export interface UpdateJastiperData {
+  name?: string
+  imageUrl?: string
+  facebookLink?: string
+  phoneNumber?: string
+  description?: string
+  isVerified?: boolean
+  rating?: number
+  totalOrders?: number
+  completedOrders?: number
+  verifiedByFacebookLink?: string
+}

@@ -233,6 +233,37 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Jastiper Section */}
+      <section className="max-w-7xl mx-auto px-6 pb-16">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold">Tim Jastiper Kami</h2>
+          <Button 
+            variant="outline" 
+            className="border-slate-700 text-slate-300 hover:bg-slate-800"
+            onClick={() => router.push("/jastipers")}
+          >
+            Lihat Semua Jastiper
+          </Button>
+        </div>
+        {/* JastiperGrid component was removed from imports, so this section will be empty or require a new import */}
+        {/* For now, we'll keep the structure but remove the component */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Placeholder for Jastiper items */}
+          <div className="rounded-lg border border-slate-800 p-6 bg-slate-900/40">
+            <h3 className="text-xl font-bold">Jastiper 1</h3>
+            <p className="text-slate-300 text-sm">Deskripsi jastiper 1.</p>
+          </div>
+          <div className="rounded-lg border border-slate-800 p-6 bg-slate-900/40">
+            <h3 className="text-xl font-bold">Jastiper 2</h3>
+            <p className="text-slate-300 text-sm">Deskripsi jastiper 2.</p>
+          </div>
+          <div className="rounded-lg border border-slate-800 p-6 bg-slate-900/40">
+            <h3 className="text-xl font-bold">Jastiper 3</h3>
+            <p className="text-slate-300 text-sm">Deskripsi jastiper 3.</p>
+          </div>
+        </div>
+      </section>
+
     
 
       {/* Proof Gallery */}
@@ -510,6 +541,17 @@ export default function HomePage() {
                     className="hover:text-blue-400 transition-colors flex items-center gap-2 group"
                   >
                     <span>Live Shopping</span>
+                    <svg className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="/jastipers"
+                    className="hover:text-blue-400 transition-colors flex items-center gap-2 group"
+                  >
+                    <span>List Jastiper</span>
                     <svg className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>

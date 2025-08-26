@@ -3,23 +3,44 @@
 import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
 import { AdminGuard } from "@/components/auth/admin-guard"
 import { Sidebar } from "@/components/layout/sidebar"
-import { Plus, TrendingUp, Package, DollarSign, Percent, AlertCircle, Calendar } from "lucide-react"
+import { Plus, TrendingUp, Package, DollarSign, Percent, AlertCircle, Calendar, Users, Shield, ShieldOff, Edit, Trash2, X } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { PeriodsService } from "@/lib/periods-service"
 import { IncomesService } from "@/lib/incomes-service"
 import { ExpensesService } from "@/lib/expenses-service"
-import { Period, Income, Expense } from "@/lib/types"
+import { JastiperService } from "@/lib/jastiper-service"
+import { Period, Income, Expense, Jastiper, CreateJastiperData, UpdateJastiperData } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 
 function DashboardContent() {
   const { isConfigured } = useAuth()
   const [periods, setPeriods] = useState<Period[]>([])
   const [loading, setLoading] = useState(true)
+  const [jastipers, setJastipers] = useState<Jastiper[]>([])
   const [incomesByPeriod, setIncomesByPeriod] = useState<Record<string, Income[]>>({})
   const [expensesByPeriod, setExpensesByPeriod] = useState<Record<string, Expense[]>>({})
+  
+  // Jastiper management states
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [editingJastiper, setEditingJastiper] = useState<Jastiper | null>(null)
+  const [formData, setFormData] = useState<CreateJastiperData>({
+    name: "",
+    imageUrl: "",
+    facebookLink: "",
+    phoneNumber: "",
+    description: "",
+    completedOrders: 0,
+    verifiedByFacebookLink: "",
+  })
+  const [jastiperError, setJastiperError] = useState<string | null>(null)
 
   useEffect(() => {
     loadPeriods()
@@ -36,6 +57,11 @@ function DashboardContent() {
         })
       )
       setPeriods(periodsWithItems)
+      
+      // Load jastipers
+      const jastipersData = await JastiperService.getAllJastipers()
+      setJastipers(jastipersData)
+      
       // Fetch incomes & expenses per period
       const incomeEntries = await Promise.all(
         periodsData.map(async (p) => [p.id, await IncomesService.getIncomesByPeriod(p.id)] as const)
@@ -54,6 +80,104 @@ function DashboardContent() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Jastiper management functions
+  const handleCreateJastiper = async () => {
+    try {
+      setJastiperError(null)
+      await JastiperService.createJastiper(formData)
+      setIsCreateModalOpen(false)
+      setFormData({
+        name: "",
+        imageUrl: "",
+        facebookLink: "",
+        phoneNumber: "",
+        description: "",
+        completedOrders: 0,
+        verifiedByFacebookLink: "",
+      })
+      await loadPeriods() // Reload to get updated jastipers
+    } catch (err) {
+      console.error("Error creating jastiper:", err)
+      setJastiperError("Gagal membuat jastiper")
+    }
+  }
+
+  const handleEditJastiper = async () => {
+    if (!editingJastiper) return
+
+    try {
+      setJastiperError(null)
+      const updateData: UpdateJastiperData = {
+        name: formData.name,
+        imageUrl: formData.imageUrl,
+        facebookLink: formData.facebookLink,
+        phoneNumber: formData.phoneNumber,
+        description: formData.description,
+        completedOrders: formData.completedOrders,
+        verifiedByFacebookLink: formData.verifiedByFacebookLink,
+      }
+      
+      await JastiperService.updateJastiper(editingJastiper.id, updateData)
+      setIsEditModalOpen(false)
+      setEditingJastiper(null)
+      setFormData({
+        name: "",
+        imageUrl: "",
+        facebookLink: "",
+        phoneNumber: "",
+        description: "",
+        completedOrders: 0,
+        verifiedByFacebookLink: "",
+      })
+      await loadPeriods() // Reload to get updated jastipers
+    } catch (err) {
+      console.error("Error updating jastiper:", err)
+      setJastiperError("Gagal mengupdate jastiper")
+    }
+  }
+
+  const handleVerifyToggle = async (jastiperId: string, currentStatus: boolean) => {
+    try {
+      if (currentStatus) {
+        await JastiperService.unverifyJastiper(jastiperId)
+      } else {
+        await JastiperService.verifyJastiper(jastiperId)
+      }
+      await loadPeriods() // Reload to get updated jastipers
+    } catch (err) {
+      console.error("Error toggling verification:", err)
+      setJastiperError("Gagal mengubah status verifikasi")
+    }
+  }
+
+  const handleDeleteJastiper = async (jastiperId: string) => {
+    if (!confirm("Apakah Anda yakin ingin menghapus jastiper ini?")) {
+      return
+    }
+
+    try {
+      await JastiperService.deleteJastiper(jastiperId)
+      await loadPeriods() // Reload to get updated jastipers
+    } catch (err) {
+      console.error("Error deleting jastiper:", err)
+      setJastiperError("Gagal menghapus jastiper")
+    }
+  }
+
+  const openEditModal = (jastiper: Jastiper) => {
+    setEditingJastiper(jastiper)
+    setFormData({
+      name: jastiper.name,
+      imageUrl: jastiper.imageUrl || "",
+      facebookLink: jastiper.facebookLink || "",
+      phoneNumber: jastiper.phoneNumber || "",
+      description: jastiper.description || "",
+      completedOrders: jastiper.completedOrders || 0,
+      verifiedByFacebookLink: jastiper.verifiedByFacebookLink || "",
+    })
+    setIsEditModalOpen(true)
   }
 
   // Calculate totals & aggregations
@@ -76,6 +200,11 @@ function DashboardContent() {
 
     const averageProfit = activePeriods > 0 ? totalProfit / activePeriods : 0
     const profitMargin = activePeriods > 0 ? totalMargin / activePeriods : 0
+
+    // Jastiper stats
+    const totalJastipers = jastipers.length
+    const verifiedJastipers = jastipers.filter(j => j.isVerified).length
+    const unverifiedJastipers = totalJastipers - verifiedJastipers
 
     // Income/Expense totals across all periods
     const allIncomes = Object.values(incomesByPeriod).flat()
@@ -102,8 +231,11 @@ function DashboardContent() {
       totalExpenseAll,
       netAll,
       topCustomers,
+      totalJastipers,
+      verifiedJastipers,
+      unverifiedJastipers,
     }
-  }, [periods, incomesByPeriod, expensesByPeriod])
+  }, [periods, incomesByPeriod, expensesByPeriod, jastipers])
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -157,7 +289,7 @@ function DashboardContent() {
               <h1 className="text-3xl font-bold text-foreground font-serif">Dashboard</h1>
               <p className="text-muted-foreground">Ringkasan bisnis jastip Anda</p>
             </div>
-            <Button className="w-fit" onClick={() => window.location.href = '/periods'}>
+            <Button onClick={() => window.location.href = '/periods'}>
               <Plus className="w-4 h-4 mr-2" />
               Tambah Produk
             </Button>
@@ -192,12 +324,14 @@ function DashboardContent() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Rata-rata Profit</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium">Total Jastiper</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-primary">{formatCurrency(stats.averageProfit)}</div>
-                <p className="text-xs text-muted-foreground">Per periode aktif</p>
+                <div className="text-2xl font-bold text-primary">{stats.totalJastipers}</div>
+                <p className="text-xs text-muted-foreground">
+                  {stats.verifiedJastipers} terverifikasi, {stats.unverifiedJastipers} belum
+                </p>
               </CardContent>
             </Card>
 
@@ -246,6 +380,265 @@ function DashboardContent() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Jastiper Management Section */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Kelola Jastiper</CardTitle>
+                  <CardDescription>Statistik dan manajemen jastiper</CardDescription>
+                </div>
+                <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+                  <DialogTrigger asChild>
+                    <Button>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Tambah Jastiper
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                      <DialogTitle>Tambah Jastiper Baru</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="name">Nama Jastiper *</Label>
+                        <Input
+                          id="name"
+                          value={formData.name}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          placeholder="Masukkan nama jastiper"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="imageUrl">URL Gambar</Label>
+                        <Input
+                          id="imageUrl"
+                          value={formData.imageUrl}
+                          onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                          placeholder="https://example.com/image.jpg"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="facebookLink">Link Facebook</Label>
+                        <Input
+                          id="facebookLink"
+                          value={formData.facebookLink}
+                          onChange={(e) => setFormData({ ...formData, facebookLink: e.target.value })}
+                          placeholder="https://facebook.com/username"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="phoneNumber">Nomor Telepon</Label>
+                        <Input
+                          id="phoneNumber"
+                          value={formData.phoneNumber}
+                          onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                          placeholder="+6281234567890"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="description">Deskripsi</Label>
+                        <Textarea
+                          id="description"
+                          value={formData.description}
+                          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                          placeholder="Deskripsi singkat tentang jastiper"
+                          rows={3}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="completedOrders">Jumlah Order Selesai</Label>
+                        <Input
+                          id="completedOrders"
+                          type="number"
+                          min="0"
+                          value={formData.completedOrders}
+                          onChange={(e) => setFormData({ ...formData, completedOrders: parseInt(e.target.value) || 0 })}
+                          placeholder="0"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="verifiedByFacebookLink">Link Facebook Customer Verifier</Label>
+                        <Input
+                          id="verifiedByFacebookLink"
+                          value={formData.verifiedByFacebookLink}
+                          onChange={(e) => setFormData({ ...formData, verifiedByFacebookLink: e.target.value })}
+                          placeholder="https://facebook.com/customer-verifier"
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Link Facebook customer yang memverifikasi jastiper ini
+                        </p>
+                      </div>
+                      {jastiperError && (
+                        <div className="text-red-600 text-sm">{jastiperError}</div>
+                      )}
+                      <div className="flex gap-2 pt-4">
+                        <Button onClick={handleCreateJastiper} className="flex-1">
+                          Tambah Jastiper
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          onClick={() => setIsCreateModalOpen(false)}
+                          className="flex-1"
+                        >
+                          Batal
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div className="text-center p-4 rounded-lg border bg-muted/30">
+                  <div className="text-2xl font-bold text-primary">{stats.totalJastipers}</div>
+                  <div className="text-sm text-muted-foreground">Total Jastiper</div>
+                </div>
+                <div className="text-center p-4 rounded-lg border bg-green-50">
+                  <div className="text-2xl font-bold text-green-600">{stats.verifiedJastipers}</div>
+                  <div className="text-sm text-muted-foreground">Terverifikasi</div>
+                </div>
+                <div className="text-center p-4 rounded-lg border bg-yellow-50">
+                  <div className="text-2xl font-bold text-yellow-600">{stats.unverifiedJastipers}</div>
+                  <div className="text-sm text-muted-foreground">Belum Terverifikasi</div>
+                </div>
+              </div>
+              
+              {jastiperError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-4">
+                  {jastiperError}
+                </div>
+              )}
+              
+              {jastipers.length > 0 ? (
+                <div className="space-y-3">
+                  <h4 className="font-medium">Daftar Jastiper</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {jastipers.map((jastiper) => (
+                      <div key={jastiper.id} className="p-3 rounded-lg border hover:shadow-md transition-shadow">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                            {jastiper.imageUrl ? (
+                              <img 
+                                src={jastiper.imageUrl} 
+                                alt={jastiper.name}
+                                className="w-12 h-12 rounded-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-lg font-medium">
+                                {jastiper.name.charAt(0).toUpperCase()}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium truncate">{jastiper.name}</div>
+                            <div className="flex items-center gap-2">
+                              <Badge 
+                                variant={jastiper.isVerified ? "default" : "secondary"}
+                                className={jastiper.isVerified ? "bg-green-100 text-green-800" : ""}
+                              >
+                                {jastiper.isVerified ? (
+                                  <>
+                                    <Shield className="w-3 h-3 mr-1" />
+                                    Terverifikasi
+                                  </>
+                                ) : (
+                                  <>
+                                    <ShieldOff className="w-3 h-3 mr-1" />
+                                    Belum Terverifikasi
+                                  </>
+                                )}
+                              </Badge>
+                              {jastiper.rating && (
+                                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                  <span>⭐</span>
+                                  <span>{jastiper.rating}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {jastiper.description && (
+                          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                            {jastiper.description}
+                          </p>
+                        )}
+                        
+                        <div className="flex items-center gap-2 mb-3 text-sm text-muted-foreground">
+                          <Package className="h-4 w-4" />
+                          <span>{jastiper.totalOrders || 0} order selesai</span>
+                        </div>
+
+                        {/* New Fields Display */}
+                        <div className="space-y-2 mb-3">
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <span className="font-medium">Order Selesai:</span>
+                            <span>{jastiper.completedOrders || 0}</span>
+                          </div>
+                          {jastiper.verifiedByFacebookLink && (
+                            <div className="text-sm">
+                              <span className="font-medium text-muted-foreground">Verified by:</span>
+                              <a 
+                                href={jastiper.verifiedByFacebookLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline ml-1"
+                              >
+                                Customer Facebook
+                              </a>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Admin Actions */}
+                        <div className="flex gap-2 pt-3 border-t">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openEditModal(jastiper)}
+                            className="flex-1"
+                          >
+                            <Edit className="h-4 w-4 mr-1" />
+                            Edit
+                          </Button>
+                          <Button
+                            variant={jastiper.isVerified ? "outline" : "secondary"}
+                            size="sm"
+                            onClick={() => handleVerifyToggle(jastiper.id, jastiper.isVerified)}
+                            className={jastiper.isVerified 
+                              ? "border-yellow-600 text-yellow-400 hover:bg-yellow-600/20" 
+                              : "bg-green-600 hover:bg-green-700"
+                            }
+                          >
+                            {jastiper.isVerified ? <ShieldOff className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteJastiper(jastiper.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground mb-4">Belum ada jastiper terdaftar</p>
+                  <Button onClick={() => setIsCreateModalOpen(true)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Tambah Jastiper Pertama
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
@@ -357,6 +750,101 @@ function DashboardContent() {
           </Card>
         </div>
       </main>
+
+      {/* Edit Jastiper Modal */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Edit Jastiper</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="edit-name">Nama Jastiper *</Label>
+              <Input
+                id="edit-name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="Masukkan nama jastiper"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-imageUrl">URL Gambar</Label>
+              <Input
+                id="edit-imageUrl"
+                value={formData.imageUrl}
+                onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                placeholder="https://example.com/image.jpg"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-facebookLink">Link Facebook</Label>
+              <Input
+                id="edit-facebookLink"
+                value={formData.facebookLink}
+                onChange={(e) => setFormData({ ...formData, facebookLink: e.target.value })}
+                placeholder="https://facebook.com/username"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-phoneNumber">Nomor Telepon</Label>
+              <Input
+                id="edit-phoneNumber"
+                value={formData.phoneNumber}
+                onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                placeholder="+6281234567890"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-description">Deskripsi</Label>
+              <Textarea
+                id="edit-description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Deskripsi singkat tentang jastiper"
+                rows={3}
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-completedOrders">Jumlah Order Selesai</Label>
+              <Input
+                id="edit-completedOrders"
+                type="number"
+                min="0"
+                value={formData.completedOrders}
+                onChange={(e) => setFormData({ ...formData, completedOrders: parseInt(e.target.value) || 0 })}
+                placeholder="0"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-verifiedByFacebookLink">Link Facebook Customer Verifier</Label>
+              <Input
+                id="edit-verifiedByFacebookLink"
+                value={formData.verifiedByFacebookLink}
+                onChange={(e) => setFormData({ ...formData, verifiedByFacebookLink: e.target.value })}
+                placeholder="https://facebook.com/customer-verifier"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Link Facebook customer yang memverifikasi jastiper ini
+              </p>
+            </div>
+            {jastiperError && (
+              <div className="text-red-600 text-sm">{jastiperError}</div>
+            )}
+            <div className="flex gap-2 pt-4">
+              <Button onClick={handleEditJastiper} className="flex-1">
+                Update Jastiper
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setIsEditModalOpen(false)}
+                className="flex-1"
+              >
+                Batal
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

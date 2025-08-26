@@ -19,6 +19,7 @@ import {
   ChevronDown,
   DollarSign,
   PieChart,
+  Users,
 } from "lucide-react"
 
 const navigation = [
@@ -33,6 +34,7 @@ const navigation = [
       { name: "Analytics", href: "/analytics", icon: PieChart },
     ]
   },
+  { name: "Jastiper", href: "/jastipers", icon: Users },
   { name: "Pengeluaran Bulanan", href: "/monthly-expenses", icon: TrendingUp },
   { name: "Pengaturan", href: "/settings", icon: Settings },
 ]
