@@ -20,6 +20,7 @@ import {
   DollarSign,
   PieChart,
   Users,
+  Plane,
 } from "lucide-react"
 
 const navigation = [
@@ -35,6 +36,7 @@ const navigation = [
     ]
   },
   { name: "Jastiper", href: "/jastipers", icon: Users },
+  { name: "Keberangkatan", href: "/departures", icon: Plane },
   { name: "Pengeluaran Bulanan", href: "/monthly-expenses", icon: TrendingUp },
   { name: "Pengaturan", href: "/settings", icon: Settings },
 ]
@@ -85,6 +87,18 @@ export function Sidebar() {
             <span className="font-bold text-lg text-foreground">JastipdiGW</span>
           )}
         </div>
+      </div>
+
+      {/* Collapse Toggle - Hidden on mobile */}
+      <div className="hidden md:block border-t p-3">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-center"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+        >
+          <ChevronLeft className={cn("h-4 w-4 transition-transform", isCollapsed && "rotate-180")} />
+        </Button>
       </div>
 
       {/* Navigation */}
@@ -178,18 +192,6 @@ export function Sidebar() {
           {!isCollapsed && <span>Logout</span>}
         </Button>
       </div>
-
-      {/* Collapse Toggle */}
-      <div className="border-t p-3">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-center"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-        >
-          <ChevronLeft className={cn("h-4 w-4 transition-transform", isCollapsed && "rotate-180")} />
-        </Button>
-      </div>
     </div>
   )
 
@@ -210,13 +212,18 @@ export function Sidebar() {
       {/* Mobile Sidebar */}
       <Sheet>
         <SheetTrigger asChild>
-          <Button variant="ghost" size="sm" className="md:hidden">
+          <Button variant="ghost" size="sm" className="md:hidden fixed top-3 left-3 z-50 bg-background/90 backdrop-blur border shadow-lg hover:bg-background/95">
             <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-64 p-0">
-          <SheetHeader className="px-3 pt-3 pb-2">
-            <SheetTitle>Menu</SheetTitle>
+        <SheetContent side="left" className="w-80 p-0 border-r">
+          <SheetHeader className="px-3 pt-3 pb-2 border-b">
+            <SheetTitle className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <span className="text-primary-foreground font-bold text-sm">J</span>
+              </div>
+              <span>JastipdiGW</span>
+            </SheetTitle>
           </SheetHeader>
           <SidebarContent />
         </SheetContent>

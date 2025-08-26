@@ -1,32 +1,92 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow authenticated users to read and write to periods collection
+    // Periode
     match /periods/{document} {
       allow read, write: if request.auth != null;
     }
-    
-    // Allow authenticated users to read and write to periodItems collection
+
+    // Item di periode
     match /periodItems/{document} {
       allow read, write: if request.auth != null;
     }
-    
-    // Allow authenticated users to read and write to users collection
+
+    // Users (batasi ke user-nya sendiri)
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Allow authenticated users to read and write to expenses collection
+    // Pengeluaran
     match /expenses/{document} {
       allow read, write: if request.auth != null;
     }
-    
-    // Allow authenticated users to read and write to incomes collection
+
+    // Pendapatan
     match /incomes/{document} {
       allow read, write: if request.auth != null;
     }
-    
-    // Default rule - deny all other access
+
+    // Monthly Expenses Collection Rules
+    match /monthly-expenses/{document} {
+      // Allow read if user is authenticated
+      allow read: if request.auth != null;
+      
+      // Allow create if user is authenticated and data is valid
+      allow create: if request.auth != null 
+        && request.resource.data.name is string 
+        && request.resource.data.name.size() > 0 
+        && request.resource.data.name.size() <= 100
+        && request.resource.data.amount is number 
+        && request.resource.data.amount > 0 
+        && request.resource.data.amount <= 1000000000
+        && request.resource.data.category is string 
+        && request.resource.data.category in ['kos', 'jajan', 'coffeeshop', 'utang','makan', 'transport', 'shopping', 'entertainment', 'health', 'education', 'other']
+        && request.resource.data.date is timestamp
+        && request.resource.data.description == null || (request.resource.data.description is string && request.resource.data.description.size() <= 500)
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp;
+      
+      // Allow update if user is authenticated and data is valid
+      allow update: if request.auth != null 
+        && request.resource.data.name is string 
+        && request.resource.data.name.size() > 0 
+        && request.resource.data.name.size() <= 100
+        && request.resource.data.amount is number 
+        && request.resource.data.amount > 0 
+        && request.resource.data.amount <= 1000000000
+        && request.resource.data.category is string 
+        && request.resource.data.category in ['kos', 'jajan', 'coffeeshop', 'utang','makan', 'transport', 'shopping', 'entertainment', 'health', 'education', 'other']
+        && request.resource.data.date is timestamp
+        && request.resource.data.description == null || (request.resource.data.description is string && request.resource.data.description.size() <= 500)
+        && request.resource.data.updatedAt is timestamp;
+      
+      // Allow delete if user is authenticated
+      allow delete: if request.auth != null;
+    }
+
+    // Jastipers Collection Rules - PUBLIC READ ACCESS
+    match /jastipers/{document} {
+      // Allow public read access for all jastipers (untuk homepage)
+      allow read: if true;
+      
+      // Allow create, update, delete only for admin users
+      allow create, update, delete: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
+    }
+
+    // Departure Trips Collection Rules - FIXED VERSION
+    match /departure_trips/{document} {
+      // Allow public read access for home page display (customer bisa lihat)
+      allow read: if true;
+      
+      // Allow create, update, delete only for admin users
+      allow create, update, delete: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
+    }
+
+    // Default: deny
     match /{document=**} {
       allow read, write: if false;
     }

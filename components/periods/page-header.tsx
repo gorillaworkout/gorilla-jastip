@@ -15,7 +15,7 @@ export function PageHeader({
   return (
     <div className="bg-white rounded-lg shadow-md border p-4 sm:p-6 mb-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="flex items-center gap-3">
+        <div className="hidden sm:flex items-center gap-3">
           <div className="p-2 bg-blue-500 rounded-lg">
             <Calendar className="w-6 h-6 text-white" />
           </div>

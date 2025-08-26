@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useAuth } from "@/contexts/auth-context"
 import { AdminGuard } from "@/components/auth/admin-guard"
 import { Sidebar } from "@/components/layout/sidebar"
+import { MobileHeader } from "@/components/layout/mobile-header"
 import { PeriodsService } from "@/lib/periods-service"
 import { Period, CreatePeriodData, PeriodItem } from "@/lib/types"
 import { auth } from "@/lib/firebase"
@@ -16,12 +17,9 @@ import {
   CreatePeriodModal,
   LoadingSpinner
 } from "@/components/periods"
-import { useRouter } from "next/navigation"
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { Menu, Home, BarChart3, Calendar, Settings } from "lucide-react"
+
 
 function PeriodsContent() {
-  const router = useRouter()
   const { user } = useAuth()
   const [periods, setPeriods] = useState<Period[]>([])
   const [loading, setLoading] = useState(true)
@@ -199,7 +197,7 @@ function PeriodsContent() {
   if (loading) {
     return (
       <div className="flex min-h-[100dvh] bg-gray-50">
-        <div className="hidden md:flex"><Sidebar /></div>
+        <Sidebar />
         <main className="flex-1 min-w-0 overflow-auto">
           <LoadingSpinner message="Memuat data periode..." size="lg" />
         </main>
@@ -209,32 +207,10 @@ function PeriodsContent() {
 
   return (
     <div className="flex min-h-[100dvh] bg-gray-50">
-      <div className="hidden md:flex"><Sidebar /></div>
+      <Sidebar />
       <main className="flex-1 min-w-0 overflow-auto">
         {/* Mobile header menu */}
-        <div className="md:hidden sticky top-0 z-20 bg-gray-50/80 backdrop-blur supports-[backdrop-filter]:bg-gray-50/60 border-b">
-          <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-            <Sheet>
-              <SheetTrigger asChild>
-                <button className="p-2 rounded-md hover:bg-muted"><Menu className="h-5 w-5" /></button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-64 p-0">
-                <SheetHeader className="px-3 pt-3 pb-2">
-                  <SheetTitle>Menu</SheetTitle>
-                </SheetHeader>
-                <div className="p-3 pt-0 space-y-1">
-                  <button className="w-full text-left px-3 py-2 rounded-md hover:bg-muted flex items-center gap-3" onClick={() => router.push("/dashboard")}> <Home className="h-4 w-4" /> Dashboard</button>
-                  <button className="w-full text-left px-3 py-2 rounded-md hover:bg-muted flex items-center gap-3" onClick={() => router.push("/pengeluaran")}> <BarChart3 className="h-4 w-4" /> Pengeluaran</button>
-                  <button className="w-full text-left px-3 py-2 rounded-md hover:bg-muted flex items-center gap-3" onClick={() => router.push("/periods")}> <Calendar className="h-4 w-4" /> Periode</button>
-                  <button className="w-full text-left px-3 py-2 rounded-md hover:bg-muted flex items-center gap-3" onClick={() => router.push("/analytics")}> <BarChart3 className="h-4 w-4" /> Analytics</button>
-                  <button className="w-full text-left px-3 py-2 rounded-md hover:bg-muted flex items-center gap-3" onClick={() => router.push("/settings")}> <Settings className="h-4 w-4" /> Pengaturan</button>
-                </div>
-              </SheetContent>
-            </Sheet>
-            <div className="font-semibold">Periode</div>
-            <div className="w-5" />
-          </div>
-        </div>
+        <MobileHeader />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6 space-y-8">
           {/* Header */}

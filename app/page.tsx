@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { ShieldCheck, Clock, Sparkles, ArrowRight, LogIn } from "lucide-react"
 import Image from "next/image"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel"
+import { TripsService, type DepartureTrip } from "@/lib/trips-service"
  
 
 export default function HomePage() {
@@ -16,6 +17,8 @@ export default function HomePage() {
   const autoTimerRef = useRef<NodeJS.Timeout | null>(null)
   const [brandsApi, setBrandsApi] = useState<CarouselApi | null>(null)
   const brandsTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const [trips, setTrips] = useState<DepartureTrip[]>([])
+  const [tripsLoading, setTripsLoading] = useState(true)
 
   // Simple autoplay for gallery
   useEffect(() => {
@@ -46,6 +49,24 @@ export default function HomePage() {
       router.replace("/dashboard")
     }
   }, [user, loading, router])
+
+  // Load trips for home page
+  useEffect(() => {
+    const loadTrips = async () => {
+      try {
+        setTripsLoading(true)
+        const tripsData = await TripsService.getHomePageTrips()
+        setTrips(tripsData)
+      } catch (error) {
+        console.error("Error loading trips:", error)
+        // Don't show error on home page, just use empty array
+      } finally {
+        setTripsLoading(false)
+      }
+    }
+    
+    loadTrips()
+  }, [])
 
   if (loading) {
     return (
@@ -233,38 +254,209 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Jastiper Section */}
+      {/* List Keberangkatanku */}
       <section className="max-w-7xl mx-auto px-6 pb-16">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">Tim Jastiper Kami</h2>
-          <Button 
+          <h2 className="text-2xl font-bold">List Keberangkatan</h2>
+          {/* <Button 
             variant="outline" 
-            className="border-slate-700 text-slate-300 hover:bg-slate-800"
-            onClick={() => router.push("/jastipers")}
+            className="border-blue-600 text-blue-400 hover:bg-blue-600 hover:text-white"
+            asChild
           >
-            Lihat Semua Jastiper
+            <a href="https://wa.me/6287700600208?text=Halo%20saya%20ingin%20tanya%20tentang%20jadwal%20keberangkatan" target="_blank" rel="noopener noreferrer">
+              Tanya Jadwal
+            </a>
+          </Button> */}
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {tripsLoading ? (
+            // Loading skeleton
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="rounded-xl border border-slate-700 bg-slate-900/50 p-6 animate-pulse">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-slate-600 rounded-full" />
+                    <div className="h-4 w-20 bg-slate-600 rounded" />
+                  </div>
+                  <div className="h-4 w-24 bg-slate-600 rounded" />
+                </div>
+                
+                <div className="mb-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 bg-slate-600 rounded-full" />
+                    <div className="space-y-2">
+                      <div className="h-5 w-32 bg-slate-600 rounded" />
+                      <div className="h-4 w-24 bg-slate-600 rounded" />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="h-4 w-20 bg-slate-600 rounded" />
+                      <div className="h-4 w-24 bg-slate-600 rounded" />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="h-4 w-16 bg-slate-600 rounded" />
+                      <div className="h-4 w-24 bg-slate-600 rounded" />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="h-4 w-16 bg-slate-600 rounded" />
+                      <div className="h-4 w-16 bg-slate-600 rounded" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : trips.length > 0 ? (
+            trips.map((trip) => {
+              const getStatusInfo = (status: string) => {
+                switch (status) {
+                  case 'upcoming':
+                    return { label: 'Upcoming', color: 'text-green-400', bgColor: 'bg-green-400', pulse: true };
+                  case 'planning':
+                    return { label: 'Planning', color: 'text-yellow-400', bgColor: 'bg-yellow-400', pulse: false };
+                  case 'completed':
+                    return { label: 'Completed', color: 'text-slate-400', bgColor: 'bg-slate-400', pulse: false };
+                  default:
+                    return { label: status, color: 'text-slate-400', bgColor: 'bg-slate-400', pulse: false };
+                }
+              };
+
+              const calculateDuration = (departureDate: string, returnDate: string) => {
+                const start = new Date(departureDate);
+                const end = new Date(returnDate);
+                const diffTime = Math.abs(end.getTime() - start.getTime());
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return diffDays;
+              };
+
+              const formatDate = (dateString: string) => {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('id-ID', { 
+                  day: 'numeric', 
+                  month: 'long', 
+                  year: 'numeric' 
+                });
+              };
+
+              const statusInfo = getStatusInfo(trip.status);
+              const duration = calculateDuration(trip.departureDate, trip.returnDate);
+              const isUpcoming = trip.status === 'upcoming';
+              const isCompleted = trip.status === 'completed';
+
+              return (
+                <div 
+                  key={trip.id}
+                  className={`rounded-xl border p-6 relative overflow-hidden ${
+                    isUpcoming 
+                      ? 'border-blue-600/30 bg-gradient-to-br from-blue-600/10 to-indigo-600/10' 
+                      : isCompleted 
+                        ? 'border-slate-700 bg-slate-900/50'
+                        : 'border-slate-700 bg-slate-900/50'
+                  }`}
+                >
+                  {isUpcoming && (
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/20 rounded-full -translate-y-16 translate-x-16 blur-2xl" />
+                  )}
+                  
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-3 h-3 ${statusInfo.bgColor} rounded-full ${statusInfo.pulse ? 'animate-pulse' : ''}`} />
+                        <span className={`text-sm font-medium ${statusInfo.color}`}>{statusInfo.label}</span>
+                      </div>
+                      <div className={`text-xs px-2 py-1 rounded-full ${
+                        isUpcoming 
+                          ? 'text-blue-400 bg-blue-600/20' 
+                          : 'text-slate-400 bg-slate-700'
+                      }`}>
+                        {new Date(trip.departureDate).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
+                      </div>
+                    </div>
+                    
+                    <div className="mb-4">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                          isUpcoming ? 'bg-blue-600/20' : 'bg-slate-700'
+                        }`}>
+                          <svg className={`w-5 h-5 ${
+                            isUpcoming ? 'text-blue-400' : 'text-slate-400'
+                          }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-white">{trip.title}</h3>
+                          <p className="text-sm text-slate-300">{trip.route}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400">Berangkat:</span>
+                          <span className="text-white font-medium">{formatDate(trip.departureDate)}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400">Pulang:</span>
+                          <span className="text-white font-medium">{formatDate(trip.returnDate)}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400">Durasi:</span>
+                          <span className={`font-medium ${isUpcoming ? 'text-blue-400' : 'text-slate-400'}`}>
+                            {duration} hari
+                          </span>
+                        </div>
+                        {trip.orderDeadline && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-slate-400">Deadline Order:</span>
+                            <span className="text-white font-medium">{formatDate(trip.orderDeadline)}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {trip.description && (
+                      <div className="mb-3 text-sm text-slate-300">
+                        {trip.description}
+                      </div>
+                    )}
+                    
+                    {trip.notes && (
+                      <div className="text-xs text-slate-400">
+                        <span className="text-blue-400">📝</span> {trip.notes}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="col-span-full text-center py-12">
+              <div className="w-16 h-16 mx-auto mb-4 bg-slate-700 rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">Belum Ada Trip</h3>
+              <p className="text-slate-400 text-sm">
+                Saat ini belum ada jadwal keberangkatan yang tersedia.
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-8 text-center">
+          <p className="text-slate-400 text-sm mb-4">
+            Ingin tahu jadwal keberangkatan terbaru atau ada pertanyaan tentang trip tertentu?
+          </p>
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white" asChild>
+            <a href="https://wa.me/6287700600208?text=Halo%20saya%20ingin%20tanya%20tentang%20jadwal%20keberangkatan%20dan%20order%20jastip" target="_blank" rel="noopener noreferrer">
+              Tanya Jadwal & Order Sekarang
+            </a>
           </Button>
         </div>
-        {/* JastiperGrid component was removed from imports, so this section will be empty or require a new import */}
-        {/* For now, we'll keep the structure but remove the component */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Placeholder for Jastiper items */}
-          <div className="rounded-lg border border-slate-800 p-6 bg-slate-900/40">
-            <h3 className="text-xl font-bold">Jastiper 1</h3>
-            <p className="text-slate-300 text-sm">Deskripsi jastiper 1.</p>
-          </div>
-          <div className="rounded-lg border border-slate-800 p-6 bg-slate-900/40">
-            <h3 className="text-xl font-bold">Jastiper 2</h3>
-            <p className="text-slate-300 text-sm">Deskripsi jastiper 2.</p>
-          </div>
-          <div className="rounded-lg border border-slate-800 p-6 bg-slate-900/40">
-            <h3 className="text-xl font-bold">Jastiper 3</h3>
-            <p className="text-slate-300 text-sm">Deskripsi jastiper 3.</p>
-          </div>
-        </div>
       </section>
-
-    
 
       {/* Proof Gallery */}
       <section className="max-w-7xl mx-auto px-6 pb-16">

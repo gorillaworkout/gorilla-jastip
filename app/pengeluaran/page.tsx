@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { AdminGuard } from "@/components/auth/admin-guard"
 import { Sidebar } from "@/components/layout/sidebar"
+import { MobileHeader } from "@/components/layout/mobile-header"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -11,18 +12,16 @@ import { EditExpenseModal } from "@/components/expenses/edit-expense-modal"
 import { PeriodsService } from "@/lib/periods-service"
 import { ExpensesService } from "@/lib/expenses-service"
 import type { Expense, Period } from "@/lib/types"
-import { Menu, Plus, Wallet, Home, BarChart3, Calendar, Settings } from "lucide-react"
+import { Plus, Wallet } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { useRouter } from "next/navigation"
+
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(amount)
 }
 
 function PengeluaranContent() {
-  const router = useRouter()
   const { user } = useAuth()
   const [periods, setPeriods] = useState<Period[]>([])
   const [expensesByPeriod, setExpensesByPeriod] = useState<Record<string, Expense[]>>({})
@@ -94,7 +93,7 @@ function PengeluaranContent() {
   if (loading) {
     return (
       <div className="flex min-h-[100dvh] bg-background">
-        <div className="hidden md:flex"><Sidebar /></div>
+        <Sidebar />
         <main className="flex-1 min-w-0 overflow-auto">
           <div className="flex items-center justify-center min-h-[60vh] p-6">
             <div className="text-center">
@@ -109,34 +108,10 @@ function PengeluaranContent() {
 
   return (
     <div className="flex min-h-[100dvh] bg-background">
-      <div className="hidden md:flex"><Sidebar /></div>
+      <Sidebar />
       <main className="flex-1 min-w-0 overflow-auto">
         {/* Mobile header menu */}
-        <div className="md:hidden sticky top-0 z-20 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-          <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-64 p-0">
-                <SheetHeader className="px-3 pt-3 pb-2">
-                  <SheetTitle>Menu</SheetTitle>
-                </SheetHeader>
-                <div className="p-3 pt-0 space-y-1">
-                  <Button variant="ghost" className="w-full justify-start gap-3" onClick={() => router.push("/dashboard")}> <Home className="h-4 w-4" /> Dashboard</Button>
-                  <Button variant="ghost" className="w-full justify-start gap-3" onClick={() => router.push("/pengeluaran")}> <BarChart3 className="h-4 w-4" /> Pengeluaran</Button>
-                  <Button variant="ghost" className="w-full justify-start gap-3" onClick={() => router.push("/periods")}> <Calendar className="h-4 w-4" /> Periode</Button>
-                  <Button variant="ghost" className="w-full justify-start gap-3" onClick={() => router.push("/analytics")}> <BarChart3 className="h-4 w-4" /> Analytics</Button>
-                  <Button variant="ghost" className="w-full justify-start gap-3" onClick={() => router.push("/settings")}> <Settings className="h-4 w-4" /> Pengaturan</Button>
-                </div>
-              </SheetContent>
-            </Sheet>
-            <div className="font-semibold">Pengeluaran</div>
-            <div className="w-9" />
-          </div>
-        </div>
+        <MobileHeader title="Pengeluaran" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">

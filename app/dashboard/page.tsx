@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { AdminGuard } from "@/components/auth/admin-guard"
 import { Sidebar } from "@/components/layout/sidebar"
+import { MobileHeader } from "@/components/layout/mobile-header"
 import { Plus, TrendingUp, Package, DollarSign, Percent, AlertCircle, Calendar, Users, Shield, ShieldOff, Edit, Trash2, X } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -273,7 +274,10 @@ function DashboardContent() {
     <div className="flex min-h-[100dvh] bg-background">
       <Sidebar />
       <main className="flex-1 min-w-0 overflow-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6 space-y-6">
+        {/* Mobile Header Spacing */}
+        <MobileHeader />
+        
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6 space-y-4 sm:space-y-6">
           {!isConfigured && (
             <Alert>
               <AlertCircle className="h-4 w-4" />
@@ -284,25 +288,25 @@ function DashboardContent() {
             </Alert>
           )}
 
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-foreground font-serif">Dashboard</h1>
-              <p className="text-muted-foreground">Ringkasan bisnis jastip Anda</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground font-serif">Dashboard</h1>
+              <p className="text-muted-foreground text-sm sm:text-base">Ringkasan bisnis jastip Anda</p>
             </div>
-            <Button onClick={() => window.location.href = '/periods'}>
+            <Button onClick={() => window.location.href = '/periods'} className="w-full sm:w-auto">
               <Plus className="w-4 h-4 mr-2" />
               Tambah Produk
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Revenue (Produk)</CardTitle>
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-primary">{formatCurrency(stats.totalRevenue)}</div>
+                <div className="text-xl sm:text-2xl font-bold text-primary">{formatCurrency(stats.totalRevenue)}</div>
                 <p className="text-xs text-muted-foreground">
                   {periods.filter(p => p.isActive).length > 0 ? 'Dari periode aktif' : 'Belum ada data'}
                 </p>
@@ -315,7 +319,7 @@ function DashboardContent() {
                 <Package className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-primary">{stats.totalItems}</div>
+                <div className="text-xl sm:text-2xl font-bold text-primary">{stats.totalItems}</div>
                 <p className="text-xs text-muted-foreground">
                   {periods.filter(p => p.isActive).length > 0 ? 'Produk terjual' : 'Belum ada data'}
                 </p>
@@ -328,7 +332,7 @@ function DashboardContent() {
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-primary">{stats.totalJastipers}</div>
+                <div className="text-xl sm:text-2xl font-bold text-primary">{stats.totalJastipers}</div>
                 <p className="text-xs text-muted-foreground">
                   {stats.verifiedJastipers} terverifikasi, {stats.unverifiedJastipers} belum
                 </p>
@@ -341,21 +345,21 @@ function DashboardContent() {
                 <Percent className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-primary">{stats.profitMargin.toFixed(1)}%</div>
+                <div className="text-xl sm:text-2xl font-bold text-primary">{stats.profitMargin.toFixed(1)}%</div>
                 <p className="text-xs text-muted-foreground">Rata-rata margin</p>
               </CardContent>
             </Card>
           </div>
 
           {/* Income/Expense summary */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Pendapatan (Incomes)</CardTitle>
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-primary">{formatCurrency(stats.totalIncomeAll)}</div>
+                <div className="text-xl sm:text-2xl font-bold text-primary">{formatCurrency(stats.totalIncomeAll)}</div>
                 <p className="text-xs text-muted-foreground">Akumulasi semua periode</p>
               </CardContent>
             </Card>
@@ -365,17 +369,17 @@ function DashboardContent() {
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-primary">{formatCurrency(stats.totalExpenseAll)}</div>
+                <div className="text-xl sm:text-2xl font-bold text-primary">{formatCurrency(stats.totalExpenseAll)}</div>
                 <p className="text-xs text-muted-foreground">Akumulasi semua periode</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="sm:col-span-2 lg:col-span-1">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Net (Pendapatan - Pengeluaran)</CardTitle>
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-primary">{formatCurrency(stats.netAll)}</div>
+                <div className="text-xl sm:text-2xl font-bold text-primary">{formatCurrency(stats.netAll)}</div>
                 <p className="text-xs text-muted-foreground">Akumulasi semua periode</p>
               </CardContent>
             </Card>
@@ -384,19 +388,19 @@ function DashboardContent() {
           {/* Jastiper Management Section */}
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
                   <CardTitle>Kelola Jastiper</CardTitle>
                   <CardDescription>Statistik dan manajemen jastiper</CardDescription>
                 </div>
                 <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
                   <DialogTrigger asChild>
-                    <Button>
+                    <Button className="w-full sm:w-auto">
                       <Plus className="w-4 h-4 mr-2" />
                       Tambah Jastiper
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-[500px]">
+                  <DialogContent className="sm:max-w-[500px] w-[95vw] max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>Tambah Jastiper Baru</DialogTitle>
                     </DialogHeader>
@@ -473,7 +477,7 @@ function DashboardContent() {
                       {jastiperError && (
                         <div className="text-red-600 text-sm">{jastiperError}</div>
                       )}
-                      <div className="flex gap-2 pt-4">
+                      <div className="flex flex-col sm:flex-row gap-2 pt-4">
                         <Button onClick={handleCreateJastiper} className="flex-1">
                           Tambah Jastiper
                         </Button>
@@ -491,17 +495,17 @@ function DashboardContent() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div className="text-center p-4 rounded-lg border bg-muted/30">
-                  <div className="text-2xl font-bold text-primary">{stats.totalJastipers}</div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6">
+                <div className="text-center p-3 sm:p-4 rounded-lg border bg-muted/30">
+                  <div className="text-xl sm:text-2xl font-bold text-primary">{stats.totalJastipers}</div>
                   <div className="text-sm text-muted-foreground">Total Jastiper</div>
                 </div>
-                <div className="text-center p-4 rounded-lg border bg-green-50">
-                  <div className="text-2xl font-bold text-green-600">{stats.verifiedJastipers}</div>
+                <div className="text-center p-3 sm:p-4 rounded-lg border bg-green-50">
+                  <div className="text-xl sm:text-2xl font-bold text-green-600">{stats.verifiedJastipers}</div>
                   <div className="text-sm text-muted-foreground">Terverifikasi</div>
                 </div>
-                <div className="text-center p-4 rounded-lg border bg-yellow-50">
-                  <div className="text-2xl font-bold text-yellow-600">{stats.unverifiedJastipers}</div>
+                <div className="text-center p-3 sm:p-4 rounded-lg border bg-yellow-50">
+                  <div className="text-xl sm:text-2xl font-bold text-yellow-600">{stats.unverifiedJastipers}</div>
                   <div className="text-sm text-muted-foreground">Belum Terverifikasi</div>
                 </div>
               </div>
@@ -515,29 +519,29 @@ function DashboardContent() {
               {jastipers.length > 0 ? (
                 <div className="space-y-3">
                   <h4 className="font-medium">Daftar Jastiper</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {jastipers.map((jastiper) => (
                       <div key={jastiper.id} className="p-3 rounded-lg border hover:shadow-md transition-shadow">
                         <div className="flex items-center gap-3 mb-3">
-                          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
                             {jastiper.imageUrl ? (
                               <img 
                                 src={jastiper.imageUrl} 
                                 alt={jastiper.name}
-                                className="w-12 h-12 rounded-full object-cover"
+                                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
                               />
                             ) : (
-                              <span className="text-lg font-medium">
+                              <span className="text-base sm:text-lg font-medium">
                                 {jastiper.name.charAt(0).toUpperCase()}
                               </span>
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium truncate">{jastiper.name}</div>
+                            <div className="font-medium truncate text-sm sm:text-base">{jastiper.name}</div>
                             <div className="flex items-center gap-2">
                               <Badge 
                                 variant={jastiper.isVerified ? "default" : "secondary"}
-                                className={jastiper.isVerified ? "bg-green-100 text-green-800" : ""}
+                                className={jastiper.isVerified ? "bg-green-100 text-green-800 text-xs" : "text-xs"}
                               >
                                 {jastiper.isVerified ? (
                                   <>
@@ -552,7 +556,7 @@ function DashboardContent() {
                                 )}
                               </Badge>
                               {jastiper.rating && (
-                                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                   <span>⭐</span>
                                   <span>{jastiper.rating}</span>
                                 </div>
@@ -594,7 +598,7 @@ function DashboardContent() {
                         </div>
 
                         {/* Admin Actions */}
-                        <div className="flex gap-2 pt-3 border-t">
+                        <div className="flex flex-col sm:flex-row gap-2 pt-3 border-t">
                           <Button
                             variant="outline"
                             size="sm"
@@ -640,7 +644,7 @@ function DashboardContent() {
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             <Card>
               <CardHeader>
                 <CardTitle>Periode Aktif</CardTitle>
@@ -650,12 +654,12 @@ function DashboardContent() {
                 {periods.filter(p => p.isActive).length > 0 ? (
                   <div className="space-y-4">
                     {periods.filter(p => p.isActive).map((period) => (
-                      <div key={period.id} className="p-4 rounded-lg border bg-muted/30">
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="font-semibold">{period.name}</h3>
-                          <Badge variant="default">Aktif</Badge>
+                      <div key={period.id} className="p-3 sm:p-4 rounded-lg border bg-muted/30">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+                          <h3 className="font-semibold text-sm sm:text-base">{period.name}</h3>
+                          <Badge variant="default" className="w-fit">Aktif</Badge>
                         </div>
-                        <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
                           <div>
                             <p className="text-muted-foreground">Periode</p>
                             <p className="font-medium">{formatDate(period.startDate)} - {formatDate(period.endDate)}</p>
@@ -706,18 +710,18 @@ function DashboardContent() {
                     const totalExpense = expenses.reduce((s, e) => s + e.totalInIDR, 0)
                     const net = totalIncome - totalExpense
                     return (
-                      <div key={p.id} className="flex items-center justify-between p-3 rounded-lg border">
+                      <div key={p.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 rounded-lg border">
                         <div className="min-w-0">
-                          <div className="font-medium truncate">{p.name}</div>
+                          <div className="font-medium truncate text-sm sm:text-base">{p.name}</div>
                           <div className="text-xs text-muted-foreground">{p.startDate.toLocaleDateString('id-ID')} - {p.endDate.toLocaleDateString('id-ID')}</div>
                         </div>
-                        <div className="text-right">
+                        <div className="text-left sm:text-right">
                           <div className="text-xs text-muted-foreground">Pendapatan</div>
-                          <div className="font-semibold">{formatCurrency(totalIncome)}</div>
+                          <div className="font-semibold text-sm sm:text-base">{formatCurrency(totalIncome)}</div>
                           <div className="text-xs text-muted-foreground mt-1">Pengeluaran</div>
-                          <div className="font-semibold">{formatCurrency(totalExpense)}</div>
+                          <div className="font-semibold text-sm sm:text-base">{formatCurrency(totalExpense)}</div>
                           <div className="text-xs text-muted-foreground mt-1">Net</div>
-                          <div className="font-semibold">{formatCurrency(net)}</div>
+                          <div className="font-semibold text-sm sm:text-base">{formatCurrency(net)}</div>
                         </div>
                       </div>
                     )
@@ -739,9 +743,9 @@ function DashboardContent() {
               ) : (
                 <div className="space-y-3">
                   {stats.topCustomers.map(([name, amount]) => (
-                    <div key={name} className="flex items-center justify-between p-3 rounded-lg border">
-                      <div className="font-medium truncate">{name}</div>
-                      <div className="font-semibold text-primary">{formatCurrency(amount)}</div>
+                    <div key={name} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 rounded-lg border">
+                      <div className="font-medium truncate text-sm sm:text-base">{name}</div>
+                      <div className="font-semibold text-primary text-sm sm:text-base">{formatCurrency(amount)}</div>
                     </div>
                   ))}
                 </div>
@@ -753,7 +757,7 @@ function DashboardContent() {
 
       {/* Edit Jastiper Modal */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] w-[95vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Jastiper</DialogTitle>
           </DialogHeader>
@@ -830,7 +834,7 @@ function DashboardContent() {
             {jastiperError && (
               <div className="text-red-600 text-sm">{jastiperError}</div>
             )}
-            <div className="flex gap-2 pt-4">
+            <div className="flex flex-col sm:flex-row gap-2 pt-4">
               <Button onClick={handleEditJastiper} className="flex-1">
                 Update Jastiper
               </Button>

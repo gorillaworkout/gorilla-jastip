@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
+import { MobileHeader } from "@/components/layout/mobile-header"
 import {
     Plus,
     TrendingUp,
@@ -505,16 +506,19 @@ function MonthlyExpensesPageContent() {
 
 
     return (
-        <div className="p-6 space-y-6">
+        <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
+            {/* Mobile Header Spacing */}
+            <MobileHeader />
+            
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold">Pengeluaran Bulanan</h1>
-                    <p className="text-muted-foreground">
+                    <h1 className="text-2xl sm:text-3xl font-bold">Pengeluaran Bulanan</h1>
+                    <p className="text-muted-foreground text-sm sm:text-base">
                         Kelola dan monitor pengeluaran bulanan Anda
                     </p>
                 </div>
-                <Button onClick={() => setShowForm(true)} className="gap-2">
+                <Button onClick={() => setShowForm(true)} className="gap-2 w-full sm:w-auto">
                     <Plus className="h-4 w-4" />
                     Tambah Pengeluaran
                 </Button>
@@ -524,14 +528,14 @@ function MonthlyExpensesPageContent() {
             {isInitialized && (
                 <Card>
                     <CardHeader>
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                             <div className="flex items-center gap-2">
                                 <Filter className="h-4 w-4" />
                                 <CardTitle className="text-lg">Filter & Pencarian</CardTitle>
                             </div>
                             {/* Show filter status */}
                             {isFilterActive() && (
-                                <Badge variant="secondary" className="text-xs">
+                                <Badge variant="secondary" className="text-xs w-fit">
                                     Filter Aktif
                                 </Badge>
                             )}
@@ -541,7 +545,7 @@ function MonthlyExpensesPageContent() {
                     <CardContent>
                         <div className="space-y-4">
                                 {/* Month and Date Range Filter */}
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="month">Bulan</Label>
                                         <Input
@@ -581,7 +585,7 @@ function MonthlyExpensesPageContent() {
                                 </div>
 
                                 {/* Category and Search Filter */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="filterCategory">Kategori</Label>
                                         <Select
@@ -628,7 +632,7 @@ function MonthlyExpensesPageContent() {
                                 </div>
 
                                 {/* Filter Actions */}
-                                <div className="flex gap-2 pt-2">
+                                <div className="flex flex-col sm:flex-row gap-2 pt-2">
                                     <Button onClick={loadExpenses} className="gap-2">
                                         <Filter className="h-4 w-4" />
                                         Terapkan Filter
@@ -642,14 +646,14 @@ function MonthlyExpensesPageContent() {
                 </Card>
             )}
             {/* Statistics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Total Periode</CardTitle>
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{formatCurrency(totalExpenses)}</div>
+                        <div className="text-xl sm:text-2xl font-bold">{formatCurrency(totalExpenses)}</div>
                         <p className="text-xs text-muted-foreground">
                             {filterData.startDate && filterData.endDate ? (
                                 `${format(new Date(filterData.startDate), "dd MMM", { locale: id })} - ${format(new Date(filterData.endDate), "dd MMM yyyy", { locale: id })}`
@@ -666,7 +670,7 @@ function MonthlyExpensesPageContent() {
                         <TrendingUp className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{filteredExpenses.length}</div>
+                        <div className="text-xl sm:text-2xl font-bold">{filteredExpenses.length}</div>
                         <p className="text-xs text-muted-foreground">
                             {filteredExpenses.length === expenses.length ?
                                 "Semua transaksi" :
@@ -676,13 +680,13 @@ function MonthlyExpensesPageContent() {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="sm:col-span-2 lg:col-span-1">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Rata-rata per Transaksi</CardTitle>
                         <PieChart className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">
+                        <div className="text-xl sm:text-2xl font-bold">
                             {filteredExpenses.length > 0 ? formatCurrency(totalExpenses / filteredExpenses.length) : formatCurrency(0)}
                         </div>
                         <p className="text-xs text-muted-foreground">
@@ -701,16 +705,16 @@ function MonthlyExpensesPageContent() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
                         {EXPENSE_CATEGORIES.map((category) => {
                             const amount = categoryStats[category.id] || 0
                             const percentage = totalExpenses > 0 ? (amount / totalExpenses) * 100 : 0
 
                             return (
-                                <div key={category.id} className="text-center p-4 rounded-lg border">
-                                    <div className="text-2xl mb-2">{category.icon}</div>
-                                    <div className="font-medium text-sm">{category.name}</div>
-                                    <div className="text-lg font-bold text-blue-600">
+                                <div key={category.id} className="text-center p-3 sm:p-4 rounded-lg border">
+                                    <div className="text-xl sm:text-2xl mb-2">{category.icon}</div>
+                                    <div className="font-medium text-xs sm:text-sm">{category.name}</div>
+                                    <div className="text-base sm:text-lg font-bold text-blue-600">
                                         {formatCurrency(amount)}
                                     </div>
                                     <div className="text-xs text-muted-foreground">
@@ -725,7 +729,7 @@ function MonthlyExpensesPageContent() {
 
             {/* Add/Edit Form Modal */}
             {showForm && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-3 sm:p-4">
                     <Card ref={modalRef} className="w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
                         <CardHeader>
                             <CardTitle>
@@ -737,7 +741,7 @@ function MonthlyExpensesPageContent() {
                         </CardHeader>
                         <CardContent>
                             <form onSubmit={handleSubmit} className="space-y-4">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="name">Nama Pengeluaran</Label>
                                         <Input
@@ -774,7 +778,7 @@ function MonthlyExpensesPageContent() {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="category">Kategori</Label>
                                         <Select
@@ -828,7 +832,7 @@ function MonthlyExpensesPageContent() {
                                     />
                                 </div>
 
-                                <div className="flex gap-2 pt-4">
+                                <div className="flex flex-col sm:flex-row gap-2 pt-4">
                                     <Button type="submit" className="flex-1">
                                         {editingExpense ? "Update Pengeluaran" : "Tambah Pengeluaran"}
                                     </Button>
@@ -844,7 +848,7 @@ function MonthlyExpensesPageContent() {
 
             {/* Delete Confirmation Modal */}
             {deletingExpense && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
                     <Card className="w-full max-w-md">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
@@ -867,7 +871,7 @@ function MonthlyExpensesPageContent() {
                                     </div>
                                 </div>
 
-                                <div className="flex gap-2 pt-2">
+                                <div className="flex flex-col sm:flex-row gap-2 pt-2">
                                     <Button
                                         variant="destructive"
                                         onClick={() => handleDelete(deletingExpense.id!)}
@@ -955,25 +959,25 @@ function MonthlyExpensesPageContent() {
                                 return (
                                     <div
                                         key={expense.id}
-                                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                                     >
-                                        <div className="flex items-center gap-4">
-                                            <div className="text-2xl">{category?.icon}</div>
-                                            <div>
-                                                <div className="font-medium">{expense.name}</div>
-                                                <div className="text-sm text-muted-foreground">
+                                        <div className="flex items-center gap-3 sm:gap-4">
+                                            <div className="text-xl sm:text-2xl">{category?.icon}</div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="font-medium text-sm sm:text-base">{expense.name}</div>
+                                                <div className="text-xs sm:text-sm text-muted-foreground">
                                                     {format(expense.date, "dd MMMM yyyy", { locale: id })}
                                                     {expense.description && ` • ${expense.description}`}
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center gap-2">
-                                            <Badge variant="secondary" className="text-sm">
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                                            <Badge variant="secondary" className="text-xs sm:text-sm w-fit">
                                                 {category?.name}
                                             </Badge>
-                                            <div className="text-right">
-                                                <div className="font-bold text-lg">
+                                            <div className="text-left sm:text-right">
+                                                <div className="font-bold text-base sm:text-lg">
                                                     {formatCurrency(expense.amount)}
                                                 </div>
                                             </div>
