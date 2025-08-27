@@ -507,7 +507,7 @@ export default function HomePage() {
             </div>
             <div className="flex w-full md:items-end md:justify-end">
               <Button className="bg-blue-600 hover:bg-blue-700 text-white w-full md:w-auto" asChild>
-                <a href="https://wa.me/6287700600208?text=Halo%20saya%20ingin%20gabung%20jadi%20jastiper" target="_blank" rel="noopener noreferrer">
+                <a href="https://wa.me/6287700600208" target="_blank" rel="noopener noreferrer">
                   Gabung Jadi Jastiper <ArrowRight className="ml-2 h-4 w-4" />
                 </a>
               </Button>
