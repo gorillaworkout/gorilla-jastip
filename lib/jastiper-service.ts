@@ -38,6 +38,7 @@ export class JastiperService {
           name: data.name || "",
           imageUrl: data.imageUrl || "",
           facebookLink: data.facebookLink || "",
+          instagramLink: data.instagramLink || "",
           phoneNumber: data.phoneNumber || "",
           isVerified: Boolean(data.isVerified),
           description: data.description || "",
@@ -77,6 +78,7 @@ export class JastiperService {
           name: data.name || "",
           imageUrl: data.imageUrl || "",
           facebookLink: data.facebookLink || "",
+          instagramLink: data.instagramLink || "",
           phoneNumber: data.phoneNumber || "",
           isVerified: Boolean(data.isVerified),
           description: data.description || "",
@@ -111,6 +113,7 @@ export class JastiperService {
           name: data.name || "",
           imageUrl: data.imageUrl || "",
           facebookLink: data.facebookLink || "",
+          instagramLink: data.instagramLink || "",
           phoneNumber: data.phoneNumber || "",
           isVerified: Boolean(data.isVerified),
           description: data.description || "",
@@ -248,6 +251,7 @@ export class JastiperService {
           name: data.name || "",
           imageUrl: data.imageUrl || "",
           facebookLink: data.facebookLink || "",
+          instagramLink: data.instagramLink || "",
           phoneNumber: data.phoneNumber || "",
           isVerified: Boolean(data.isVerified),
           description: data.description || "",
@@ -268,8 +272,9 @@ export class JastiperService {
           const descriptionMatch = j.description?.toLowerCase().includes(searchLower) || false
           const phoneMatch = j.phoneNumber?.toLowerCase().includes(searchLower) || false
           const facebookMatch = j.facebookLink?.toLowerCase().includes(searchLower) || false
+          const instagramMatch = j.instagramLink?.toLowerCase().includes(searchLower) || false
           
-          return nameMatch || descriptionMatch || phoneMatch || facebookMatch
+          return nameMatch || descriptionMatch || phoneMatch || facebookMatch || instagramMatch
         })
       }
       

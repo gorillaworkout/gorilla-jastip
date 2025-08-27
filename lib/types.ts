@@ -216,6 +216,7 @@ export interface Jastiper {
   name: string
   imageUrl: string
   facebookLink: string
+  instagramLink: string
   phoneNumber: string
   isVerified: boolean
   description?: string
@@ -231,6 +232,7 @@ export interface CreateJastiperData {
   name: string
   imageUrl: string
   facebookLink: string
+  instagramLink: string
   phoneNumber: string
   description?: string
   completedOrders?: number
@@ -241,6 +243,7 @@ export interface UpdateJastiperData {
   name?: string
   imageUrl?: string
   facebookLink?: string
+  instagramLink?: string
   phoneNumber?: string
   description?: string
   isVerified?: boolean

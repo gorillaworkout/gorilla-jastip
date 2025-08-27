@@ -37,6 +37,7 @@ export default function JastipersPage() {
           description: String(jastiper.description || "").trim(),
           phoneNumber: String(jastiper.phoneNumber || "").trim(),
           facebookLink: String(jastiper.facebookLink || "").trim(),
+          instagramLink: String(jastiper.instagramLink || "").trim(),
           isVerified: Boolean(jastiper.isVerified),
           rating: Number(jastiper.rating) || 0,
           totalOrders: Number(jastiper.totalOrders) || 0,
@@ -86,13 +87,15 @@ export default function JastipersPage() {
         const description = String(j.description || "").toLowerCase()
         const phone = String(j.phoneNumber || "").toLowerCase()
         const facebook = String(j.facebookLink || "").toLowerCase()
+        const instagram = String(j.instagramLink || "").toLowerCase()
         
         const nameMatch = name.includes(searchLower)
         const descriptionMatch = description.includes(searchLower)
         const phoneMatch = phone.includes(searchLower)
         const facebookMatch = facebook.includes(searchLower)
+        const instagramMatch = instagram.includes(searchLower)
         
-        return nameMatch || descriptionMatch || phoneMatch || facebookMatch
+        return nameMatch || descriptionMatch || phoneMatch || facebookMatch || instagramMatch
       })
     }
 
@@ -201,7 +204,7 @@ export default function JastipersPage() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input
-                placeholder="Cari jastiper berdasarkan nama, deskripsi, nomor telepon, atau Facebook..."
+                placeholder="Cari jastiper berdasarkan nama, deskripsi, nomor telepon, Facebook, atau Instagram..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 pr-10 bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-400"
@@ -368,19 +371,6 @@ export default function JastipersPage() {
                     </div>
                   </div>
 
-                  {/* {jastiper.rating && jastiper.rating > 0 && (
-                    <div className="flex items-center gap-3 p-3 bg-slate-800/40 rounded-lg border border-slate-700/50">
-                      <div className="flex items-center gap-1">
-                        {[...Array(5)].map((_, i) => (
-                          <span key={i} className={`text-lg ${i < jastiper.rating! ? 'text-yellow-400' : 'text-slate-600'}`}>
-                            ★
-                          </span>
-                        ))}
-                      </div>
-                      <span className="text-slate-300 text-sm">({jastiper.rating}/5)</span>
-                    </div>
-                  )} */}
-
                   {jastiper.verifiedByFacebookLink && (
                     <div className="text-sm text-slate-400 bg-slate-800/30 p-3 rounded-lg border border-slate-700/30">
                       <span className="font-medium text-slate-300">Verified by: </span>
@@ -395,29 +385,44 @@ export default function JastipersPage() {
                     </div>
                   )}
 
-                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
+                  {/* Social Media Links - Single Section */}
+                  <div className="flex flex-col gap-2 pt-2">
+                    {/* WhatsApp */}
                     {jastiper.phoneNumber && (
                       <a
                         href={`https://wa.me/${jastiper.phoneNumber.replace(/\D/g, '')}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white text-sm font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-green-600/25"
+                        className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white text-sm font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-3 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-green-600/25"
                       >
                         <Phone className="h-4 w-4" />
-                        <span className="hidden sm:inline">WhatsApp</span>
-                        <span className="sm:hidden">WA</span>
+                        <span>WhatsApp</span>
                       </a>
                     )}
+                    
+                    {/* Facebook */}
                     {jastiper.facebookLink && (
                       <a
                         href={jastiper.facebookLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-blue-600/25"
+                        className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-3 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-blue-600/25"
                       >
                         <Facebook className="h-4 w-4" />
-                        <span className="hidden sm:inline">Facebook</span>
-                        <span className="sm:hidden">FB</span>
+                        <span>Facebook</span>
+                      </a>
+                    )}
+                    
+                    {/* Instagram */}
+                    {jastiper.instagramLink && (
+                      <a
+                        href={jastiper.instagramLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full bg-gradient-to-r from-pink-600 to-pink-700 hover:from-pink-700 hover:to-pink-800 text-white text-sm font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-3 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-pink-600/25"
+                      >
+                        <span className="text-lg">📷</span>
+                        <span>Instagram</span>
                       </a>
                     )}
                   </div>

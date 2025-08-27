@@ -36,6 +36,7 @@ function DashboardContent() {
     name: "",
     imageUrl: "",
     facebookLink: "",
+    instagramLink: "",
     phoneNumber: "",
     description: "",
     completedOrders: 0,
@@ -93,6 +94,7 @@ function DashboardContent() {
         name: "",
         imageUrl: "",
         facebookLink: "",
+        instagramLink: "",
         phoneNumber: "",
         description: "",
         completedOrders: 0,
@@ -114,6 +116,7 @@ function DashboardContent() {
         name: formData.name,
         imageUrl: formData.imageUrl,
         facebookLink: formData.facebookLink,
+        instagramLink: formData.instagramLink,
         phoneNumber: formData.phoneNumber,
         description: formData.description,
         completedOrders: formData.completedOrders,
@@ -127,6 +130,7 @@ function DashboardContent() {
         name: "",
         imageUrl: "",
         facebookLink: "",
+        instagramLink: "",
         phoneNumber: "",
         description: "",
         completedOrders: 0,
@@ -173,6 +177,7 @@ function DashboardContent() {
       name: jastiper.name,
       imageUrl: jastiper.imageUrl || "",
       facebookLink: jastiper.facebookLink || "",
+      instagramLink: jastiper.instagramLink || "",
       phoneNumber: jastiper.phoneNumber || "",
       description: jastiper.description || "",
       completedOrders: jastiper.completedOrders || 0,
@@ -433,6 +438,15 @@ function DashboardContent() {
                         />
                       </div>
                       <div>
+                        <Label htmlFor="instagramLink">Link Instagram</Label>
+                        <Input
+                          id="instagramLink"
+                          value={formData.instagramLink}
+                          onChange={(e) => setFormData({ ...formData, instagramLink: e.target.value })}
+                          placeholder="https://instagram.com/username"
+                        />
+                      </div>
+                      <div>
                         <Label htmlFor="phoneNumber">Nomor Telepon</Label>
                         <Input
                           id="phoneNumber"
@@ -593,6 +607,39 @@ function DashboardContent() {
                               >
                                 Customer Facebook
                               </a>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Social Media Links */}
+                        <div className="space-y-2 mb-3">
+                          {(jastiper.facebookLink || jastiper.instagramLink) && (
+                            <div className="text-sm">
+                              <span className="font-medium text-muted-foreground">Social Media:</span>
+                              <div className="flex flex-wrap gap-2 mt-1">
+                                {jastiper.facebookLink && (
+                                  <a 
+                                    href={jastiper.facebookLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-xs hover:bg-blue-200 transition-colors"
+                                  >
+                                    <span>📘</span>
+                                    Facebook
+                                  </a>
+                                )}
+                                {jastiper.instagramLink && (
+                                  <a 
+                                    href={jastiper.instagramLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 px-2 py-1 bg-pink-100 text-pink-700 rounded-md text-xs hover:bg-pink-200 transition-colors"
+                                  >
+                                    <span>📷</span>
+                                    Instagram
+                                  </a>
+                                )}
+                              </div>
                             </div>
                           )}
                         </div>
@@ -787,6 +834,15 @@ function DashboardContent() {
                 value={formData.facebookLink}
                 onChange={(e) => setFormData({ ...formData, facebookLink: e.target.value })}
                 placeholder="https://facebook.com/username"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-instagramLink">Link Instagram</Label>
+              <Input
+                id="edit-instagramLink"
+                value={formData.instagramLink}
+                onChange={(e) => setFormData({ ...formData, instagramLink: e.target.value })}
+                placeholder="https://instagram.com/username"
               />
             </div>
             <div>
