@@ -371,19 +371,24 @@ export default function JastipersPage() {
                     </div>
                   </div>
 
-                  {jastiper.verifiedByFacebookLink && (
-                    <div className="text-sm text-slate-400 bg-slate-800/30 p-3 rounded-lg border border-slate-700/30">
-                      <span className="font-medium text-slate-300">Verified by: </span>
-                      <a 
-                        href={jastiper.verifiedByFacebookLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-400 hover:text-blue-300 hover:underline ml-1 transition-colors"
-                      >
-                        Customer Facebook
-                      </a>
-                    </div>
-                  )}
+                  {/* Verification Status */}
+                  <div className="text-sm bg-slate-800/30 p-3 rounded-lg border border-slate-700/30">
+                    {jastiper.verifiedByFacebookLink ? (
+                      <>
+                        <span className="font-medium text-slate-300">Verified by: </span>
+                        <a 
+                          href={jastiper.verifiedByFacebookLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-400 hover:text-blue-300 hover:underline ml-1 transition-colors"
+                        >
+                          Customer Facebook
+                        </a>
+                      </>
+                    ) : (
+                      <span className="text-amber-400 font-medium">Belum terverifikasi oleh customer</span>
+                    )}
+                  </div>
 
                   {/* Social Media Links - Single Section */}
                   <div className="flex flex-col gap-2 pt-2">
