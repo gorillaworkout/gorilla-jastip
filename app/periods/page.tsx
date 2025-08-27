@@ -9,6 +9,10 @@ import { PeriodsService } from "@/lib/periods-service"
 import { Period, CreatePeriodData, PeriodItem } from "@/lib/types"
 import { auth } from "@/lib/firebase"
 import { EditItemModal } from "@/components/periods/edit-item-modal"
+import { EditPeriodModal } from "@/components/periods/edit-period-modal"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Calendar, Pencil } from "lucide-react"
+import { PeriodBody } from "@/components/periods/period-body"
 import { AddCustomerModal } from "@/components/periods/add-customer-modal"
 import {
   PeriodCard,
@@ -29,8 +33,10 @@ function PeriodsContent() {
   const [selectedPeriod, setSelectedPeriod] = useState<Period | null>(null)
   const [editingItem, setEditingItem] = useState<PeriodItem | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isEditPeriodOpen, setIsEditPeriodOpen] = useState(false)
   const [editingCustomerName, setEditingCustomerName] = useState<string | null>(null)
   const [expandedCustomers, setExpandedCustomers] = useState<Set<string>>(new Set())
+  const [accordionValue, setAccordionValue] = useState<string | undefined>(undefined)
   
   const [createPeriodData, setCreatePeriodData] = useState<CreatePeriodData>({
     name: "",
@@ -53,12 +59,20 @@ function PeriodsContent() {
       setLoading(true)
       // Ensure statistics (including totalUnpaid/totalProfit) are up-to-date
       const periodsData = await PeriodsService.getPeriodsWithRefreshedStats()
-      const periodsWithItems = await Promise.all(
+      let periodsWithItems = await Promise.all(
         periodsData.map(async (period) => {
           const items = await PeriodsService.getPeriodItems(period.id)
           return { ...period, items }
         })
       )
+      // Sort periods primarily by startDate ascending (earliest first).
+      // Tie-breakers: active periods first, then endDate ascending.
+      periodsWithItems = periodsWithItems.sort((a, b) => {
+        const startDiff = a.startDate.getTime() - b.startDate.getTime()
+        if (startDiff !== 0) return startDiff
+        if (a.isActive !== b.isActive) return a.isActive ? -1 : 1
+        return a.endDate.getTime() - b.endDate.getTime()
+      })
       setPeriods(periodsWithItems)
     } catch (error) {
       console.error("Error loading periods:", error)
@@ -157,6 +171,11 @@ function PeriodsContent() {
     loadPeriods()
   }
 
+  const handleOpenEditPeriod = (period: Period) => {
+    setSelectedPeriod(period)
+    setIsEditPeriodOpen(true)
+  }
+
   const handleAddCustomer = (period: Period) => {
     setSelectedPeriod(period)
     setIsAddCustomerOpen(true)
@@ -232,36 +251,72 @@ function PeriodsContent() {
             loading={loading}
           />
 
-          {/* Periods List */}
-          <div className="space-y-8">
-            {periods.map((period) => (
-              <PeriodCard
-                key={period.id}
-                period={period}
-                expandedCustomers={expandedCustomers}
-                onToggleActive={handleToggleActive}
-                onAddCustomer={handleAddCustomer}
-                onDeletePeriod={handleDeletePeriod}
-                onEditCustomer={handleEditCustomer}
-                onEditItem={handleEditItem}
-                onDeleteItem={handleDeleteItem}
-                onToggleCustomerExpanded={toggleCustomerExpanded}
-                formatCurrency={formatCurrency}
-                formatDate={formatDate}
-                onRefreshPeriods={loadPeriods}
-                onOptimisticCustomerPayment={optimisticCustomerPayment}
-              />
-            ))}
-
-            {periods.length === 0 && (
-              <EmptyState
-                title="Belum ada periode"
-                description="Buat periode pertama untuk mulai tracking bisnis jastip Anda"
-                buttonText="Buat Periode Pertama"
-                onAction={() => setIsCreatePeriodOpen(true)}
-              />
-            )}
-          </div>
+          {/* Periods List as Accordion */}
+          {periods.length > 0 ? (
+            <Accordion type="single" collapsible value={accordionValue} onValueChange={setAccordionValue}>
+              {periods.map((period) => (
+                <AccordionItem key={period.id} value={period.id} className="bg-white rounded-md border mb-4">
+                  <AccordionTrigger className="px-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-blue-500 rounded-lg">
+                        <Calendar className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-semibold">{period.name}</span>
+                        <span className="text-xs text-gray-600">{formatDate(period.startDate)} - {formatDate(period.endDate)}</span>
+                      </div>
+                      <span className={`ml-2 px-2 py-0.5 text-[10px] rounded-full ${period.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>{period.isActive ? 'Aktif' : 'Tidak Aktif'}</span>
+                    </div>
+                    <div className="ml-auto flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); handleToggleActive(period.id, !period.isActive) }}
+                        className={`px-3 py-1.5 text-xs rounded border ${period.isActive ? 'border-orange-300 text-orange-600 hover:bg-orange-50' : 'bg-green-500 text-white hover:bg-green-600'}`}
+                      >
+                        {period.isActive ? 'Nonaktifkan' : 'Aktifkan'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); handleOpenEditPeriod(period) }}
+                        className="px-3 py-1.5 text-xs rounded border border-blue-300 text-blue-600 hover:bg-blue-50 flex items-center gap-1"
+                        title="Ganti Periode"
+                      >
+                        <Pencil className="w-3 h-3" /> Ganti Periode
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); handleDeletePeriod(period.id) }}
+                        className="px-3 py-1.5 text-xs rounded bg-red-500 text-white hover:bg-red-600"
+                      >
+                        Hapus
+                      </button>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <PeriodBody
+                      period={period}
+                      expandedCustomers={expandedCustomers}
+                      onAddCustomer={handleAddCustomer}
+                      onEditCustomer={handleEditCustomer}
+                      onEditItem={handleEditItem}
+                      onDeleteItem={handleDeleteItem}
+                      onToggleCustomerExpanded={toggleCustomerExpanded}
+                      formatCurrency={formatCurrency}
+                      onRefreshPeriods={loadPeriods}
+                      onOptimisticCustomerPayment={optimisticCustomerPayment}
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          ) : (
+            <EmptyState
+              title="Belum ada periode"
+              description="Buat periode pertama untuk mulai tracking bisnis jastip Anda"
+              buttonText="Buat Periode Pertama"
+              onAction={() => setIsCreatePeriodOpen(true)}
+            />
+          )}
 
           {/* Create Period Modal */}
           <CreatePeriodModal
@@ -296,6 +351,17 @@ function PeriodsContent() {
               setEditingItem(null)
             }}
             onSuccess={handleEditSuccess}
+          />
+
+          {/* Edit Period Modal */}
+          <EditPeriodModal
+            period={selectedPeriod}
+            isOpen={isEditPeriodOpen}
+            onClose={() => {
+              setIsEditPeriodOpen(false)
+              setSelectedPeriod(null)
+            }}
+            onSuccess={loadPeriods}
           />
         </div>
       </main>
