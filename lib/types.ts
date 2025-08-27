@@ -22,7 +22,8 @@ export interface Period {
   totalProducts: number
   totalRevenue: number
   totalProfit: number
-  averageMargin: number
+  averageMargin: number // kept for backward compat but not used for display
+  totalUnpaid: number // total revenue of unpaid items
   items: PeriodItem[]
   createdAt: Date
   updatedAt: Date
@@ -38,6 +39,7 @@ export interface PeriodItem {
   profit: number // Keuntungan (harga jual - harga beli)
   margin: number // Margin keuntungan
   costInIDR: number // Harga beli dalam IDR (itemPrice * exchangeRate)
+  isPaymentReceived: boolean // Status pembayaran sudah diterima atau belum
   createdAt: Date
   updatedAt: Date
 }
@@ -82,6 +84,7 @@ export interface CreateItemData {
   itemPrice: string // Harga dalam YEN
   exchangeRate: string // Kurs YEN ke IDR
   sellingPrice: string // Harga jual dalam IDR
+  isPaymentReceived?: boolean // Status pembayaran sudah diterima atau belum
 }
 
 // New interface for creating customer with multiple items
@@ -96,6 +99,7 @@ export interface CreateCustomerItemData {
   exchangeRate: string // Kurs YEN ke IDR
   sellingPrice: string // Harga jual dalam IDR
   notes?: string
+  isPaymentReceived?: boolean // Status pembayaran sudah diterima atau belum
 }
 
 // Tambahan tipe untuk fitur Pengeluaran

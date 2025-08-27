@@ -51,7 +51,8 @@ function PeriodsContent() {
   const loadPeriods = async () => {
     try {
       setLoading(true)
-      const periodsData = await PeriodsService.getPeriods()
+      // Ensure statistics (including totalUnpaid/totalProfit) are up-to-date
+      const periodsData = await PeriodsService.getPeriodsWithRefreshedStats()
       const periodsWithItems = await Promise.all(
         periodsData.map(async (period) => {
           const items = await PeriodsService.getPeriodItems(period.id)
@@ -64,6 +65,17 @@ function PeriodsContent() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Optimistic local update to avoid full reloads when toggling payments
+  const optimisticCustomerPayment = (periodId: string, customerName: string, isPaid: boolean) => {
+    setPeriods(prev => prev.map(p => {
+      if (p.id !== periodId) return p
+      const updatedItems = p.items.map(it => it.customerName === customerName ? { ...it, isPaymentReceived: isPaid } : it)
+      const totalUnpaid = updatedItems.reduce((sum, it) => sum + (!it.isPaymentReceived ? it.sellingPrice : 0), 0)
+      const totalProfit = updatedItems.reduce((sum, it) => sum + (it.isPaymentReceived ? it.profit : 0), 0)
+      return { ...p, items: updatedItems, totalUnpaid, totalProfit }
+    }))
   }
 
   const refreshStatistics = async () => {
@@ -236,6 +248,8 @@ function PeriodsContent() {
                 onToggleCustomerExpanded={toggleCustomerExpanded}
                 formatCurrency={formatCurrency}
                 formatDate={formatDate}
+                onRefreshPeriods={loadPeriods}
+                onOptimisticCustomerPayment={optimisticCustomerPayment}
               />
             ))}
 

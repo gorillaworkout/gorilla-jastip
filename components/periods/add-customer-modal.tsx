@@ -28,10 +28,12 @@ export function AddCustomerModal({ periodId, periodName, isOpen, onClose, onSucc
         itemPrice: "",
         exchangeRate: "",
         sellingPrice: "",
-        notes: ""
+        notes: "",
+        isPaymentReceived: false
       }
     ]
   })
+  const [allPaid, setAllPaid] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Helper function untuk format rupiah
@@ -71,7 +73,8 @@ export function AddCustomerModal({ periodId, periodName, isOpen, onClose, onSucc
           itemPrice: "",
           exchangeRate: "",
           sellingPrice: "",
-          notes: ""
+          notes: "",
+          isPaymentReceived: allPaid
         }
       ]
     }))
@@ -86,12 +89,20 @@ export function AddCustomerModal({ periodId, periodName, isOpen, onClose, onSucc
     }
   }
 
-  const updateItemField = (index: number, field: keyof CreateCustomerItemData, value: string) => {
+  const updateItemField = (index: number, field: keyof CreateCustomerItemData, value: any) => {
     setFormData(prev => ({
       ...prev,
       items: prev.items.map((item, i) => 
-        i === index ? { ...item, [field]: value } : item
+        i === index ? { ...item, [field]: field === 'isPaymentReceived' ? Boolean(value) : value } : item
       )
+    }))
+  }
+
+  const setAllItemsPaid = (paid: boolean) => {
+    setAllPaid(paid)
+    setFormData(prev => ({
+      ...prev,
+      items: prev.items.map(item => ({ ...item, isPaymentReceived: paid }))
     }))
   }
 
@@ -141,7 +152,8 @@ export function AddCustomerModal({ periodId, periodName, isOpen, onClose, onSucc
           itemPrice: "",
           exchangeRate: "",
           sellingPrice: "",
-          notes: ""
+          notes: "",
+          isPaymentReceived: false
         }
       ]
     })
@@ -201,6 +213,20 @@ export function AddCustomerModal({ periodId, periodName, isOpen, onClose, onSucc
 
           {/* Items Section */}
           <div className="space-y-3 sm:space-y-4">
+            {/* Master payment toggle */}
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="all-paid-toggle"
+                checked={allPaid}
+                onChange={(e) => setAllItemsPaid(e.target.checked)}
+                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+              />
+              <Label htmlFor="all-paid-toggle" className="text-sm sm:text-base font-medium text-gray-700">
+                Tandai semua item sudah dibayar
+              </Label>
+            </div>
+
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <h3 className="text-lg sm:text-xl font-semibold flex items-center gap-2">
                 <Package className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
@@ -270,6 +296,25 @@ export function AddCustomerModal({ periodId, periodName, isOpen, onClose, onSucc
                         rows={2}
                         className="text-sm sm:text-base resize-none"
                       />
+                    </div>
+                    
+                    {/* Payment Status */}
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id={`paymentStatus-${index}`}
+                          checked={Boolean(item.isPaymentReceived)}
+                          onChange={(e) => updateItemField(index, 'isPaymentReceived', e.target.checked)}
+                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                        />
+                        <Label htmlFor={`paymentStatus-${index}`} className="text-sm sm:text-base font-medium text-gray-700">
+                          Pembayaran sudah diterima
+                        </Label>
+                      </div>
+                      <div className="text-xs text-muted-foreground ml-6">
+                        Centang jika customer sudah membayar item ini
+                      </div>
                     </div>
                   </div>
 

@@ -56,4 +56,16 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Hide scrollbars (Webkit) */
+  ::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: transparent;
+  }
+  /* Hide scrollbar (Firefox) */
+  * {
+    scrollbar-width: none;
+  }
 }

@@ -16,6 +16,8 @@ interface PeriodCardProps {
   onToggleCustomerExpanded: (customerKey: string) => void
   formatCurrency: (amount: number) => string
   formatDate: (date: Date) => string
+  onRefreshPeriods: () => void
+  onOptimisticCustomerPayment: (periodId: string, customerName: string, isPaid: boolean) => void
 }
 
 export function PeriodCard({
@@ -29,7 +31,9 @@ export function PeriodCard({
   onDeleteItem,
   onToggleCustomerExpanded,
   formatCurrency,
-  formatDate
+  formatDate,
+  onRefreshPeriods,
+  onOptimisticCustomerPayment
 }: PeriodCardProps) {
   return (
     <Card className="mb-6 shadow-md">
@@ -104,8 +108,8 @@ export function PeriodCard({
             <div className="text-sm text-gray-600">Total Profit</div>
           </div>
           <div className="text-center p-3 bg-white rounded-lg border">
-            <div className="text-2xl font-bold text-purple-600">{period.averageMargin.toFixed(1)}%</div>
-            <div className="text-sm text-gray-600">Rata-rata Margin</div>
+            <div className="text-2xl font-bold text-amber-600">{formatCurrency(period.totalUnpaid || 0)}</div>
+            <div className="text-sm text-gray-600">Total Belum Dibayar</div>
           </div>
         </div>
       </div>
@@ -148,6 +152,8 @@ export function PeriodCard({
                     onEditItem={onEditItem}
                     onDeleteItem={onDeleteItem}
                     formatCurrency={formatCurrency}
+                    onRefresh={onRefreshPeriods}
+                    onOptimisticPayment={(customerName, paid) => onOptimisticCustomerPayment(period.id, customerName, paid)}
                   />
                 )
               })

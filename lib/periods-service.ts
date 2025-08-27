@@ -27,6 +27,37 @@ export class PeriodsService {
     return auth.currentUser
   }
 
+  // Bulk set a customer's items payment status in a period
+  static async setCustomerPaymentStatus(periodId: string, customerName: string, isPaid: boolean): Promise<void> {
+    try {
+      const currentUser = this.checkAuth()
+      if (!db) throw new Error("Firestore database not initialized")
+
+      // Fetch all items for this period
+      const q = query(collection(db, ITEMS_COLLECTION), where("periodId", "==", periodId))
+      const querySnapshot = await getDocs(q)
+
+      const updates: Promise<any>[] = []
+      querySnapshot.forEach((docSnap) => {
+        const data = docSnap.data()
+        if (data.customerName === customerName) {
+          const docRef = doc(db, ITEMS_COLLECTION, docSnap.id)
+          updates.push(updateDoc(docRef, {
+            isPaymentReceived: isPaid,
+            updatedAt: serverTimestamp(),
+            updatedBy: currentUser.uid,
+          }))
+        }
+      })
+
+      await Promise.all(updates)
+      await this.updatePeriodStatistics(periodId)
+    } catch (error) {
+      console.error("Error setting customer payment status:", error)
+      throw error
+    }
+  }
+
   // Create new period
   static async createPeriod(data: CreatePeriodData): Promise<string> {
     try {
@@ -88,6 +119,7 @@ export class PeriodsService {
           totalRevenue: data.totalRevenue || 0,
           totalProfit: data.totalProfit || 0,
           averageMargin: data.averageMargin || 0,
+          totalUnpaid: data.totalUnpaid || 0,
           items: data.items || [],
           createdAt: data.createdAt?.toDate() || new Date(),
           updatedAt: data.updatedAt?.toDate() || new Date(),
@@ -126,6 +158,7 @@ export class PeriodsService {
           totalRevenue: data.totalRevenue || 0,
           totalProfit: data.totalProfit || 0,
           averageMargin: data.averageMargin || 0,
+          totalUnpaid: data.totalUnpaid || 0,
           items: data.items || [],
           createdAt: data.createdAt?.toDate() || new Date(),
           updatedAt: data.updatedAt?.toDate() || new Date(),
@@ -257,6 +290,7 @@ export class PeriodsService {
         profit,
         margin,
         costInIDR,
+        isPaymentReceived: Boolean(data.isPaymentReceived) || false,
         periodId,
         createdBy: currentUser.uid,
         createdAt: serverTimestamp(),
@@ -303,6 +337,8 @@ export class PeriodsService {
       if (data.itemPrice !== undefined) updateData.itemPrice = Number.parseFloat(data.itemPrice)
       if (data.exchangeRate !== undefined) updateData.exchangeRate = Number.parseFloat(data.exchangeRate)
       if (data.sellingPrice !== undefined) updateData.sellingPrice = Number.parseFloat(data.sellingPrice)
+      // allow toggling payment status
+      if ((data as any).isPaymentReceived !== undefined) updateData.isPaymentReceived = Boolean((data as any).isPaymentReceived)
 
       // Recalculate profit and margin if price data changed
       if (data.itemPrice !== undefined || data.exchangeRate !== undefined || data.sellingPrice !== undefined) {
@@ -417,6 +453,7 @@ export class PeriodsService {
             profit: data.profit,
             margin: data.margin,
             costInIDR: data.costInIDR || (data.itemPrice * data.exchangeRate),
+            isPaymentReceived: Boolean(data.isPaymentReceived) || false,
             createdAt: data.createdAt?.toDate() || new Date(),
             updatedAt: data.updatedAt?.toDate() || new Date(),
           })
@@ -457,13 +494,19 @@ export class PeriodsService {
       let totalRevenue = 0
       let totalProfit = 0
       let totalCost = 0
+      let totalUnpaid = 0
 
       querySnapshot.forEach((doc) => {
         const data = doc.data()
         totalProducts++
         totalRevenue += Number(data.sellingPrice) || 0
         totalCost += Number(data.costInIDR) || 0
-        totalProfit += Number(data.profit) || 0
+        // Only count profit for paid items
+        if (data.isPaymentReceived) {
+          totalProfit += Number(data.profit) || 0
+        } else {
+          totalUnpaid += Number(data.sellingPrice) || 0
+        }
       })
 
       const averageMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0
@@ -475,6 +518,7 @@ export class PeriodsService {
         totalRevenue,
         totalProfit,
         averageMargin,
+        totalUnpaid,
         updatedAt: serverTimestamp(),
       })
 
@@ -517,6 +561,7 @@ export class PeriodsService {
           profit,
           margin,
           costInIDR,
+          isPaymentReceived: Boolean(item.isPaymentReceived) || false,
           periodId,
           notes: item.notes || "",
           createdBy: currentUser.uid,

@@ -1,9 +1,10 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChevronDown, ChevronRight, User, Edit, Trash2 } from "lucide-react"
+import { ChevronDown, ChevronRight, User, Edit, Trash2, CheckCircle, XCircle } from "lucide-react"
 import type { Period, PeriodItem } from "@/lib/types"
 // TODO: Pastikan file ItemRow ada dan path sudah benar
 import { ItemRow } from "@/components/periods/item-row"
+import { PeriodsService } from "@/lib/periods-service"
 
 interface CustomerGroupProps {
   customerKey: string
@@ -16,6 +17,8 @@ interface CustomerGroupProps {
   onEditItem: (item: PeriodItem) => void
   onDeleteItem: (itemId: string) => void
   formatCurrency: (amount: number) => string
+  onRefresh: () => void
+  onOptimisticPayment: (customerName: string, paid: boolean) => void
 }
 
 export function CustomerGroup({
@@ -28,11 +31,45 @@ export function CustomerGroup({
   onEditCustomer,
   onEditItem,
   onDeleteItem,
-  formatCurrency
+  formatCurrency,
+  onRefresh,
+  onOptimisticPayment
 }: CustomerGroupProps) {
+  // Calculate totals including payment status
   const totalRevenue = items.reduce((sum, item) => sum + item.sellingPrice, 0)
-  const totalProfit = items.reduce((sum, item) => sum + item.profit, 0)
+  const totalProfit = items.reduce((sum, item) => sum + (item.isPaymentReceived ? item.profit : 0), 0)
   const totalItems = items.length
+  
+  // Payment status summary
+  const paidItems = items.filter(item => item.isPaymentReceived)
+  const unpaidItems = items.filter(item => !item.isPaymentReceived)
+  const paidRevenue = paidItems.reduce((sum, item) => sum + item.sellingPrice, 0)
+  const unpaidRevenue = unpaidItems.reduce((sum, item) => sum + item.sellingPrice, 0)
+  const computedAllPaid = unpaidItems.length === 0 && items.length > 0
+
+  const [allPaidState, setAllPaidState] = useState<boolean>(computedAllPaid)
+
+  // Keep local checkbox in sync when items prop changes
+  useEffect(() => {
+    setAllPaidState(computedAllPaid)
+  }, [computedAllPaid])
+
+  const toggleAllPaid = async (paid: boolean) => {
+    try {
+      // optimistic: update local checkbox immediately
+      setAllPaidState(paid)
+      // optimistic: update in parent lists and totals without reload
+      onOptimisticPayment(customerName, paid)
+      await PeriodsService.setCustomerPaymentStatus(period.id, customerName, paid)
+      // refresh persisted stats in background (fast path remains optimistic)
+      onRefresh()
+    } catch (e) {
+      console.error("Gagal mengubah status pembayaran customer:", e)
+      alert("Gagal mengubah status pembayaran customer")
+      // revert local checkbox on error
+      setAllPaidState(!paid)
+    }
+  }
 
   return (
     <Card className="border border-gray-200 overflow-hidden">
@@ -52,10 +89,38 @@ export function CustomerGroup({
                 <span className="truncate">Revenue: {formatCurrency(totalRevenue)}</span>
                 <span className="truncate">Profit: {formatCurrency(totalProfit)}</span>
               </div>
+              
+              {/* Payment Status Summary */}
+              <div className="flex flex-wrap items-center gap-3 mt-2 text-xs">
+                <div className="flex items-center gap-1 text-green-600">
+                  <CheckCircle className="w-3 h-3" />
+                  <span>Dibayar: {formatCurrency(paidRevenue)}</span>
+                </div>
+                {unpaidRevenue > 0 && (
+                  <div className="flex items-center gap-1 text-amber-600">
+                    <XCircle className="w-3 h-3" />
+                    <span>Belum dibayar: {formatCurrency(unpaidRevenue)}</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           
-          <div className="flex items-center gap-2 self-start sm:self-auto">
+          <div className="flex items-center gap-3 self-start sm:self-auto">
+            {/* Header payment toggle */}
+            <div
+              className="inline-flex items-center gap-2 text-sm"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <input
+                type="checkbox"
+                checked={allPaidState}
+                onChange={(e) => toggleAllPaid(e.target.checked)}
+                className="w-4 h-4 text-green-600 border-gray-300 rounded"
+                title="Tandai semua item customer ini sudah dibayar"
+              />
+              <span className="text-gray-600 select-none">Semua dibayar</span>
+            </div>
             <button
               onClick={(e) => {
                 e.stopPropagation()
