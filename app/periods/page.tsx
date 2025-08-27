@@ -268,28 +268,25 @@ function PeriodsContent() {
                       <span className={`ml-2 px-2 py-0.5 text-[10px] rounded-full ${period.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>{period.isActive ? 'Aktif' : 'Tidak Aktif'}</span>
                     </div>
                     <div className="ml-auto flex items-center gap-2">
-                      <button
-                        type="button"
+                      <div
                         onClick={(e) => { e.stopPropagation(); handleToggleActive(period.id, !period.isActive) }}
-                        className={`px-3 py-1.5 text-xs rounded border ${period.isActive ? 'border-orange-300 text-orange-600 hover:bg-orange-50' : 'bg-green-500 text-white hover:bg-green-600'}`}
+                        className={`px-3 py-1.5 text-xs rounded border cursor-pointer ${period.isActive ? 'border-orange-300 text-orange-600 hover:bg-orange-50' : 'bg-green-500 text-white hover:bg-green-600'}`}
                       >
                         {period.isActive ? 'Nonaktifkan' : 'Aktifkan'}
-                      </button>
-                      <button
-                        type="button"
+                      </div>
+                      <div
                         onClick={(e) => { e.stopPropagation(); handleOpenEditPeriod(period) }}
-                        className="px-3 py-1.5 text-xs rounded border border-blue-300 text-blue-600 hover:bg-blue-50 flex items-center gap-1"
+                        className="px-3 py-1.5 text-xs rounded border border-blue-300 text-blue-600 hover:bg-blue-50 flex items-center gap-1 cursor-pointer"
                         title="Ganti Periode"
                       >
                         <Pencil className="w-3 h-3" /> Ganti Periode
-                      </button>
-                      <button
-                        type="button"
+                      </div>
+                      <div
                         onClick={(e) => { e.stopPropagation(); handleDeletePeriod(period.id) }}
-                        className="px-3 py-1.5 text-xs rounded bg-red-500 text-white hover:bg-red-600"
+                        className="px-3 py-1.5 text-xs rounded bg-red-500 text-white hover:bg-red-600 cursor-pointer"
                       >
                         Hapus
-                      </button>
+                      </div>
                     </div>
                   </AccordionTrigger>
                   <AccordionContent>

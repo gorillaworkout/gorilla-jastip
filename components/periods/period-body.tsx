@@ -56,11 +56,20 @@ export function PeriodBody({
       <CardContent className="p-4">
         {period.items.length > 0 ? (
           <div className="space-y-4">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="p-2 bg-purple-500 rounded-lg">
-                <Package className="w-4 h-4 text-white" />
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-purple-500 rounded-lg">
+                  <Package className="w-4 h-4 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold">Data Customer</h3>
               </div>
-              <h3 className="text-lg font-semibold">Data Customer</h3>
+              <button
+                onClick={() => onAddCustomer(period)}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Tambah Orderan
+              </button>
             </div>
             {(() => {
               const customerGroups = period.items.reduce((groups, item) => {

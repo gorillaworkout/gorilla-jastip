@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChevronDown, ChevronRight, User, Edit, Trash2, CheckCircle, XCircle } from "lucide-react"
+import { ChevronDown, ChevronRight, User, Edit, Trash2, CheckCircle, XCircle, Plus } from "lucide-react"
 import type { Period, PeriodItem } from "@/lib/types"
 // TODO: Pastikan file ItemRow ada dan path sudah benar
 import { ItemRow } from "@/components/periods/item-row"
@@ -127,8 +127,20 @@ export function CustomerGroup({
                 onEditCustomer(period, customerName, items)
               }}
               className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+              title="Edit Customer"
             >
               <Edit className="w-4 h-4" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onEditCustomer(period, customerName, items)
+              }}
+              className="px-3 py-1.5 text-xs bg-green-500 text-white rounded hover:bg-green-600 flex items-center gap-1"
+              title="Tambah Orderan"
+            >
+              <Plus className="w-3 h-3" />
+              Tambah Orderan
             </button>
             {isExpanded ? (
               <ChevronDown className="w-5 h-5 text-gray-500" />
@@ -151,6 +163,15 @@ export function CustomerGroup({
                 formatCurrency={formatCurrency}
               />
             ))}
+            <div className="p-4 border-t border-gray-200 bg-gray-50">
+              <button
+                onClick={() => onEditCustomer(period, customerName, items)}
+                className="w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center justify-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Tambah Orderan Baru
+              </button>
+            </div>
           </div>
         </CardContent>
       )}
