@@ -225,7 +225,7 @@ export default function JastipersPage() {
                 <SelectTrigger className="w-full bg-slate-900/50 border-slate-700 text-slate-200 placeholder:text-slate-300">
                   <SelectValue placeholder="Urutkan berdasarkan" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-900 border-slate-700">
+                <SelectContent className="bg-slate-900 border-slate-700 text-white">
                   <SelectItem value="name">Nama (A-Z)</SelectItem>
                   <SelectItem value="orders">Order Terbanyak</SelectItem>
                   <SelectItem value="newest">Terbaru</SelectItem>
@@ -238,7 +238,7 @@ export default function JastipersPage() {
                 <SelectTrigger className="w-full bg-slate-900/50 border-slate-700 text-slate-200 placeholder:text-slate-300">
                   <SelectValue placeholder="Filter status" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-900 border-slate-700">
+                <SelectContent className="bg-slate-900 border-slate-700 text-white">
                   <SelectItem value="all">Semua Status</SelectItem>
                   <SelectItem value="verified">Terverifikasi</SelectItem>
                   <SelectItem value="unverified">Belum Terverifikasi</SelectItem>
