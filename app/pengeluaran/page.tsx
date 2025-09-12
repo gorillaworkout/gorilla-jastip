@@ -15,14 +15,20 @@ import type { Expense, Period } from "@/lib/types"
 import { Plus, Wallet } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useToast } from "@/hooks/use-toast"
 
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(amount)
 }
 
+function formatYen(amount: number) {
+  return new Intl.NumberFormat("ja-JP", { style: "currency", currency: "JPY", minimumFractionDigits: 0 }).format(amount)
+}
+
 function PengeluaranContent() {
   const { user } = useAuth()
+  const { toast } = useToast()
   const [periods, setPeriods] = useState<Period[]>([])
   const [expensesByPeriod, setExpensesByPeriod] = useState<Record<string, Expense[]>>({})
   const [loading, setLoading] = useState(true)
@@ -49,7 +55,9 @@ function PengeluaranContent() {
         const entries = await Promise.all(
           ps.map(async (p) => {
             const ex = await ExpensesService.getExpensesByPeriod(p.id)
-            return [p.id, ex] as const
+            // Sort by createdAt descending (newest first)
+            const sortedEx = ex.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            return [p.id, sortedEx] as const
           })
         )
         const map: Record<string, Expense[]> = {}
@@ -69,25 +77,118 @@ function PengeluaranContent() {
 
   const handleAddExpense = async (data: any) => {
     if (!selectedPeriod) return
-    await ExpensesService.addExpense(data)
-    const updated = await ExpensesService.getExpensesByPeriod(selectedPeriod.id)
-    setExpensesByPeriod((prev) => ({ ...prev, [selectedPeriod.id]: updated }))
-    setIsAddOpen(false)
+    try {
+      const expenseId = await ExpensesService.addExpense(data)
+      
+      // Create new expense object to add to local state
+      const newExpense: Expense = {
+        id: expenseId,
+        periodId: data.periodId,
+        date: new Date(data.date),
+        itemName: data.itemName,
+        expensePrice: Number.parseFloat(data.expensePrice),
+        exchangeRate: Number.parseFloat(data.exchangeRate),
+        totalInIDR: Number.parseFloat(data.expensePrice) * Number.parseFloat(data.exchangeRate),
+        category: data.category,
+        notes: data.notes || "",
+        createdBy: user?.id || "",
+        createdByName: user?.name || "",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+      
+      // Add to local state and sort by createdAt descending (newest first)
+      setExpensesByPeriod((prev) => {
+        const currentList = prev[selectedPeriod.id] || []
+        const updatedList = [newExpense, ...currentList].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        return { ...prev, [selectedPeriod.id]: updatedList }
+      })
+      
+      setIsAddOpen(false)
+      toast({
+        title: "Berhasil!",
+        description: "Pengeluaran berhasil ditambahkan.",
+        variant: "default",
+      })
+    } catch (error) {
+      console.error("Error adding expense:", error)
+      toast({
+        title: "Error",
+        description: "Gagal menambahkan pengeluaran. Silakan coba lagi.",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleEditExpense = async (expenseId: string, data: any) => {
     if (!selectedPeriod) return
-    await ExpensesService.updateExpense(expenseId, data)
-    const updated = await ExpensesService.getExpensesByPeriod(selectedPeriod.id)
-    setExpensesByPeriod((prev) => ({ ...prev, [selectedPeriod.id]: updated }))
-    setIsEditOpen(false)
-    setSelectedExpense(null)
+    try {
+      await ExpensesService.updateExpense(expenseId, data)
+      
+      // Update local state directly
+      setExpensesByPeriod((prev) => {
+        const currentList = prev[selectedPeriod.id] || []
+        const updatedList = currentList.map(expense => {
+          if (expense.id === expenseId) {
+            return {
+              ...expense,
+              date: new Date(data.date),
+              itemName: data.itemName,
+              expensePrice: Number.parseFloat(data.expensePrice),
+              exchangeRate: Number.parseFloat(data.exchangeRate),
+              totalInIDR: Number.parseFloat(data.expensePrice) * Number.parseFloat(data.exchangeRate),
+              category: data.category,
+              notes: data.notes || "",
+              updatedAt: new Date(),
+            }
+          }
+          return expense
+        })
+        // Sort by createdAt descending (newest first)
+        return { ...prev, [selectedPeriod.id]: updatedList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) }
+      })
+      
+      setIsEditOpen(false)
+      setSelectedExpense(null)
+      toast({
+        title: "Berhasil!",
+        description: "Pengeluaran berhasil diperbarui.",
+        variant: "default",
+      })
+    } catch (error) {
+      console.error("Error updating expense:", error)
+      toast({
+        title: "Error",
+        description: "Gagal memperbarui pengeluaran. Silakan coba lagi.",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleDeleteExpense = async (expenseId: string, period: Period) => {
-    await ExpensesService.deleteExpense(expenseId)
-    const updated = await ExpensesService.getExpensesByPeriod(period.id)
-    setExpensesByPeriod((prev) => ({ ...prev, [period.id]: updated }))
+    try {
+      await ExpensesService.deleteExpense(expenseId)
+      
+      // Remove from local state directly
+      setExpensesByPeriod((prev) => {
+        const currentList = prev[period.id] || []
+        const updatedList = currentList.filter(expense => expense.id !== expenseId)
+        return { ...prev, [period.id]: updatedList }
+      })
+      
+      toast({
+        title: "Berhasil!",
+        description: "Pengeluaran berhasil dihapus.",
+        variant: "default",
+      })
+    } catch (error) {
+      console.error("Error deleting expense:", error)
+      toast({
+        title: "Error",
+        description: "Gagal menghapus pengeluaran. Silakan coba lagi.",
+        variant: "destructive",
+      })
+    }
   }
 
   if (loading) {
@@ -159,13 +260,14 @@ function PengeluaranContent() {
                   list = list.filter((e) => e.createdBy === ownerFilter)
                 }
                 const total = list.reduce((sum, e) => sum + e.totalInIDR, 0)
+                const totalYen = list.reduce((sum, e) => sum + e.expensePrice, 0)
                 return (
                   <Card key={p.id} className="overflow-hidden">
                     <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div>
                         <CardTitle>{p.name}</CardTitle>
                         <div className="text-sm text-muted-foreground truncate">
-                          {p.startDate.toLocaleDateString("id-ID")} - {p.endDate.toLocaleDateString("id-ID")} • Total: <span className="font-semibold text-red-600">{formatCurrency(total)}</span>
+                          {p.startDate.toLocaleDateString("id-ID")} - {p.endDate.toLocaleDateString("id-ID")} • Total: <span className="font-semibold text-red-600">{formatYen(totalYen)}</span> / <span className="font-semibold text-red-600">{formatCurrency(total)}</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 flex-wrap">

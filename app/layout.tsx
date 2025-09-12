@@ -4,6 +4,7 @@ import { Inter, Playfair_Display } from "next/font/google"
 import "./globals.css"
 import { AuthProvider } from "@/contexts/auth-context"
 import { ReduxProvider } from "@/contexts/redux-provider"
+import { Toaster } from "@/components/ui/toaster"
 
 const inter = Inter({
 	subsets: ["latin"],
@@ -103,6 +104,7 @@ export default function RootLayout({
 				<ReduxProvider>
 					<AuthProvider>{children}</AuthProvider>
 				</ReduxProvider>
+				<Toaster />
 			</body>
 		</html>
 	)
