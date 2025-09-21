@@ -208,17 +208,17 @@ function AnalyticsContent() {
     <div className="flex min-h-[100dvh] bg-background">
       <Sidebar />
       <main className="flex-1 min-w-0 overflow-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6 space-y-6">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6 space-y-4 sm:space-y-6">
           {/* Mobile-first header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex flex-col gap-3 sm:gap-4">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold">Analytics Dashboard</h1>
-              <p className="text-muted-foreground">Insights bisnis jastip Anda</p>
+              <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold">Analytics Dashboard</h1>
+              <p className="text-muted-foreground text-sm sm:text-base">Insights bisnis jastip Anda</p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
               <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-                <SelectTrigger className="w-full sm:w-48">
+                <SelectTrigger className="w-full mobile-input">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -228,22 +228,22 @@ function AnalyticsContent() {
                 </SelectContent>
               </Select>
 
-              <Button variant="outline" className="w-full sm:w-auto bg-transparent">
-                <Download className="h-4 w-4 mr-2" />
-                Export
+              <Button variant="outline" className="w-full mobile-button bg-transparent">
+                <Download className="h-3 h-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="text-xs sm:text-sm">Export</span>
               </Button>
             </div>
           </div>
 
           {/* Mobile-first summary cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-xl md:text-2xl font-bold">{formatCurrency(analytics.totalRevenue)}</div>
+                <div className="text-sm sm:text-base md:text-xl lg:text-2xl font-bold break-words">{formatCurrency(analytics.totalRevenue)}</div>
                 <div className="flex items-center text-xs text-green-600 mt-1">
                   <TrendingUp className="h-3 w-3 mr-1" />{analytics.revenueGrowth >= 0 ? "+" : ""}{analytics.revenueGrowth}% dari periode sebelumnya
                 </div>
@@ -256,7 +256,7 @@ function AnalyticsContent() {
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-xl md:text-2xl font-bold text-green-600">
+                <div className="text-sm sm:text-base md:text-xl lg:text-2xl font-bold text-green-600 break-words">
                   {formatCurrency(analytics.totalProfit)}
                 </div>
                 <div className="flex items-center text-xs text-green-600 mt-1">
@@ -271,7 +271,7 @@ function AnalyticsContent() {
                 <Package className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-xl md:text-2xl font-bold">{analytics.totalProducts}</div>
+                <div className="text-sm sm:text-base md:text-xl lg:text-2xl font-bold">{analytics.totalProducts}</div>
                 <p className="text-xs text-muted-foreground mt-1">Produk terjual</p>
               </CardContent>
             </Card>
@@ -282,7 +282,7 @@ function AnalyticsContent() {
                 <Percent className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-xl md:text-2xl font-bold text-green-600">{analytics.averageMargin}%</div>
+                <div className="text-sm sm:text-base md:text-xl lg:text-2xl font-bold text-green-600">{analytics.averageMargin}%</div>
                 <p className="text-xs text-muted-foreground mt-1">Margin keuntungan</p>
               </CardContent>
             </Card>

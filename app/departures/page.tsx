@@ -174,16 +174,16 @@ function DeparturesContent() {
         <MobileHeader />
         
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6 space-y-4 sm:space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+          <div className="flex flex-col gap-3 sm:gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground font-serif">List Keberangkatan</h1>
-              <p className="text-muted-foreground text-sm sm:text-base">Kelola jadwal keberangkatan dan trip Anda</p>
+              <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-foreground font-serif">List Keberangkatan</h1>
+              <p className="text-muted-foreground text-xs sm:text-sm md:text-base">Kelola jadwal keberangkatan dan trip Anda</p>
             </div>
             <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
               <DialogTrigger asChild>
-                <Button className="w-full sm:w-auto">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Tambah Trip
+                <Button className="w-full sm:w-auto mobile-button">
+                  <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="text-xs sm:text-sm">Tambah Trip</span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[600px] w-[95vw] max-h-[90vh] overflow-y-auto">

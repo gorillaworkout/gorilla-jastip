@@ -185,20 +185,20 @@ export default function JastipersPage() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
         {/* Mobile Header Spacing */}
         <MobileHeader />
         
         {/* Page Header */}
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2">Kelola Jastiper</h1>
-          <p className="text-slate-300 text-sm sm:text-base">
+        <div className="mb-4 sm:mb-6 md:mb-8">
+          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-2">Kelola Jastiper</h1>
+          <p className="text-slate-300 text-xs sm:text-sm md:text-base">
             Temukan dan hubungi jastiper terverifikasi kami untuk layanan titip terbaik
           </p>
         </div>
 
         {/* Search and Filters */}
-        <div className="mb-6 sm:mb-8 space-y-4">
+        <div className="mb-4 sm:mb-6 md:mb-8 space-y-3 sm:space-y-4">
           <div className="flex flex-col gap-4">
             {/* Search Input with Clear Button */}
             <div className="relative flex-1">
@@ -220,7 +220,7 @@ export default function JastipersPage() {
             </div>
             
             {/* Filter Controls */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-full bg-slate-900/50 border-slate-700 text-slate-200 placeholder:text-slate-300">
                   <SelectValue placeholder="Urutkan berdasarkan" />

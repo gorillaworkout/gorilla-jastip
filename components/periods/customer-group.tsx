@@ -74,24 +74,24 @@ export function CustomerGroup({
   return (
     <Card className="border border-gray-200 overflow-hidden">
       <CardHeader 
-        className="cursor-pointer hover:bg-gray-50 p-4"
+        className="cursor-pointer hover:bg-gray-50 p-3 sm:p-4"
         onClick={() => onToggleExpanded(customerKey)}
       >
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div className="flex flex-col gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="p-2 bg-blue-100 rounded-lg">
+            <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
               <User className="w-4 h-4 text-blue-600" />
             </div>
-            <div className="min-w-0">
-              <CardTitle className="text-lg font-semibold truncate">{customerName}</CardTitle>
-              <div className="flex flex-wrap items-center gap-3 mt-1 text-sm text-gray-600">
+            <div className="min-w-0 flex-1">
+              <CardTitle className="text-base sm:text-lg font-semibold truncate">{customerName}</CardTitle>
+              <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-1 sm:gap-3 mt-1 text-xs sm:text-sm text-gray-600">
                 <span>{totalItems} produk</span>
                 <span className="truncate">Revenue: {formatCurrency(totalRevenue)}</span>
                 <span className="truncate">Profit: {formatCurrency(totalProfit)}</span>
               </div>
               
               {/* Payment Status Summary */}
-              <div className="flex flex-wrap items-center gap-3 mt-2 text-xs">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-1 sm:gap-3 mt-2 text-xs">
                 <div className="flex items-center gap-1 text-green-600">
                   <CheckCircle className="w-3 h-3" />
                   <span>Dibayar: {formatCurrency(paidRevenue)}</span>
@@ -106,47 +106,54 @@ export function CustomerGroup({
             </div>
           </div>
           
-          <div className="flex items-center gap-3 self-start sm:self-auto">
-            {/* Header payment toggle */}
+          <div className="flex flex-col gap-3">
+            {/* Header payment toggle - Mobile: Full width */}
             <div
-              className="inline-flex items-center gap-2 text-sm"
+              className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
               onClick={(e) => e.stopPropagation()}
             >
               <input
                 type="checkbox"
                 checked={allPaidState}
                 onChange={(e) => toggleAllPaid(e.target.checked)}
-                className="w-4 h-4 text-green-600 border-gray-300 rounded"
+                className="w-4 h-4 text-green-600 border-gray-300 rounded flex-shrink-0"
                 title="Tandai semua item customer ini sudah dibayar"
               />
-              <span className="text-gray-600 select-none">Semua dibayar</span>
+              <span className="text-xs sm:text-sm text-gray-600 select-none font-medium">Semua dibayar</span>
             </div>
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                onEditCustomer(period, customerName, items)
-              }}
-              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
-              title="Edit Customer"
-            >
-              <Edit className="w-4 h-4" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                onEditCustomer(period, customerName, items)
-              }}
-              className="px-3 py-1.5 text-xs bg-green-500 text-white rounded hover:bg-green-600 flex items-center gap-1"
-              title="Tambah Orderan"
-            >
-              <Plus className="w-3 h-3" />
-              Tambah Orderan
-            </button>
-            {isExpanded ? (
-              <ChevronDown className="w-5 h-5 text-gray-500" />
-            ) : (
-              <ChevronRight className="w-5 h-5 text-gray-500" />
-            )}
+            
+            {/* Action buttons - Mobile: Grid layout */}
+            <div className="grid grid-cols-3 gap-2 sm:flex sm:items-center sm:gap-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onEditCustomer(period, customerName, items)
+                }}
+                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg flex items-center justify-center"
+                title="Edit Customer"
+              >
+                <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onEditCustomer(period, customerName, items)
+                }}
+                className="px-2 py-2 text-xs bg-green-500 text-white rounded hover:bg-green-600 flex items-center justify-center gap-1"
+                title="Tambah Orderan"
+              >
+                <Plus className="w-3 h-3" />
+                <span className="hidden sm:inline">Tambah Orderan</span>
+                <span className="sm:hidden">Tambah</span>
+              </button>
+              <div className="flex items-center justify-center">
+                {isExpanded ? (
+                  <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
+                ) : (
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </CardHeader>

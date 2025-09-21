@@ -69,3 +69,49 @@
     scrollbar-width: none;
   }
 }
+
+@layer utilities {
+  /* Mobile-first responsive utilities */
+  .mobile-padding {
+    @apply px-3 sm:px-4 md:px-6 lg:px-8;
+  }
+  
+  .mobile-text {
+    @apply text-xs sm:text-sm md:text-base;
+  }
+  
+  .mobile-heading {
+    @apply text-lg sm:text-xl md:text-2xl lg:text-3xl;
+  }
+  
+  .mobile-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+  }
+  
+  .mobile-flex-col {
+    @apply flex flex-col sm:flex-row;
+  }
+  
+  .mobile-gap {
+    @apply gap-2 sm:gap-3 md:gap-4 lg:gap-6;
+  }
+  
+  .mobile-card {
+    @apply p-3 sm:p-4 md:p-6;
+  }
+  
+  /* Prevent text overflow on mobile */
+  .mobile-truncate {
+    @apply truncate max-w-full;
+  }
+  
+  /* Mobile-friendly buttons */
+  .mobile-button {
+    @apply w-full sm:w-auto min-h-[44px] touch-manipulation;
+  }
+  
+  /* Mobile-friendly inputs */
+  .mobile-input {
+    @apply text-base sm:text-sm;
+  }
+}

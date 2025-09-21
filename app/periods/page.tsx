@@ -243,7 +243,7 @@ function PeriodsContent() {
         {/* Mobile header menu */}
         <MobileHeader />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6 space-y-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6 space-y-4 sm:space-y-6 md:space-y-8">
           {/* Header */}
           <PageHeader
             onCreatePeriod={() => setIsCreatePeriodOpen(true)}
@@ -255,37 +255,49 @@ function PeriodsContent() {
           {periods.length > 0 ? (
             <Accordion type="single" collapsible value={accordionValue} onValueChange={setAccordionValue}>
               {periods.map((period) => (
-                <AccordionItem key={period.id} value={period.id} className="bg-white rounded-md border mb-4">
-                  <AccordionTrigger className="px-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-blue-500 rounded-lg">
-                        <Calendar className="w-4 h-4 text-white" />
+                <AccordionItem key={period.id} value={period.id} className="bg-white rounded-md border mb-3 sm:mb-4">
+                  <AccordionTrigger className="px-3 sm:px-4 py-3 sm:py-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full">
+                      <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                        <div className="p-1.5 sm:p-2 bg-blue-500 rounded-lg flex-shrink-0">
+                          <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                            <span className="font-semibold text-sm sm:text-base truncate">{period.name}</span>
+                            <span className={`px-2 py-0.5 text-xs rounded-full w-fit ${period.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+                              {period.isActive ? 'Aktif' : 'Tidak Aktif'}
+                            </span>
+                          </div>
+                          <span className="text-xs text-gray-600 truncate block sm:inline">
+                            {formatDate(period.startDate)} - {formatDate(period.endDate)}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex flex-col">
-                        <span className="font-semibold">{period.name}</span>
-                        <span className="text-xs text-gray-600">{formatDate(period.startDate)} - {formatDate(period.endDate)}</span>
-                      </div>
-                      <span className={`ml-2 px-2 py-0.5 text-[10px] rounded-full ${period.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>{period.isActive ? 'Aktif' : 'Tidak Aktif'}</span>
-                    </div>
-                    <div className="ml-auto flex items-center gap-2">
-                      <div
-                        onClick={(e) => { e.stopPropagation(); handleToggleActive(period.id, !period.isActive) }}
-                        className={`px-3 py-1.5 text-xs rounded border cursor-pointer ${period.isActive ? 'border-orange-300 text-orange-600 hover:bg-orange-50' : 'bg-green-500 text-white hover:bg-green-600'}`}
-                      >
-                        {period.isActive ? 'Nonaktifkan' : 'Aktifkan'}
-                      </div>
-                      <div
-                        onClick={(e) => { e.stopPropagation(); handleOpenEditPeriod(period) }}
-                        className="px-3 py-1.5 text-xs rounded border border-blue-300 text-blue-600 hover:bg-blue-50 flex items-center gap-1 cursor-pointer"
-                        title="Ganti Periode"
-                      >
-                        <Pencil className="w-3 h-3" /> Ganti Periode
-                      </div>
-                      <div
-                        onClick={(e) => { e.stopPropagation(); handleDeletePeriod(period.id) }}
-                        className="px-3 py-1.5 text-xs rounded bg-red-500 text-white hover:bg-red-600 cursor-pointer"
-                      >
-                        Hapus
+                      
+                      {/* Action buttons - Mobile: Stacked, Desktop: Horizontal */}
+                      <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 w-full sm:w-auto">
+                        <div
+                          onClick={(e) => { e.stopPropagation(); handleToggleActive(period.id, !period.isActive) }}
+                          className={`px-3 py-2 text-xs rounded border cursor-pointer text-center ${period.isActive ? 'border-orange-300 text-orange-600 hover:bg-orange-50' : 'bg-green-500 text-white hover:bg-green-600'}`}
+                        >
+                          {period.isActive ? 'Nonaktifkan' : 'Aktifkan'}
+                        </div>
+                        <div
+                          onClick={(e) => { e.stopPropagation(); handleOpenEditPeriod(period) }}
+                          className="px-3 py-2 text-xs rounded border border-blue-300 text-blue-600 hover:bg-blue-50 flex items-center justify-center gap-1 cursor-pointer"
+                          title="Ganti Periode"
+                        >
+                          <Pencil className="w-3 h-3" /> 
+                          <span className="hidden sm:inline">Ganti Periode</span>
+                          <span className="sm:hidden">Edit</span>
+                        </div>
+                        <div
+                          onClick={(e) => { e.stopPropagation(); handleDeletePeriod(period.id) }}
+                          className="px-3 py-2 text-xs rounded bg-red-500 text-white hover:bg-red-600 cursor-pointer text-center"
+                        >
+                          Hapus
+                        </div>
                       </div>
                     </div>
                   </AccordionTrigger>

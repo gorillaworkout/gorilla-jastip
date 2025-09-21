@@ -214,32 +214,34 @@ function PengeluaranContent() {
         {/* Mobile header menu */}
         <MobileHeader title="Pengeluaran" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="hidden md:flex items-center gap-3">
-              <div className="p-2 bg-blue-500 rounded-lg">
-                <Wallet className="w-5 h-5 text-white" />
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6 space-y-4 sm:space-y-6">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-500 rounded-lg">
+                  <Wallet className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-lg sm:text-xl md:text-2xl font-bold">Pengeluaran</h1>
+                  <p className="text-muted-foreground text-sm sm:text-base">Catat pengeluaran harian per periode</p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-2xl font-bold">Pengeluaran</h1>
-                <p className="text-muted-foreground">Catat pengeluaran harian per periode</p>
+              <div className="flex items-center gap-2">
+                <Select value={ownerFilter} onValueChange={(v) => setOwnerFilter(v)}>
+                  <SelectTrigger className="w-full sm:w-44">
+                    <SelectValue placeholder="Filter admin" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Semua Admin</SelectItem>
+                    {user?.id && <SelectItem value={user.id}>Admin: {user.name || user.id}</SelectItem>}
+                    {adminOptions
+                      .filter(([uid]) => uid !== user?.id)
+                      .map(([uid, name]) => (
+                        <SelectItem key={uid} value={uid}>Admin: {name || uid}</SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
               </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Select value={ownerFilter} onValueChange={(v) => setOwnerFilter(v)}>
-                <SelectTrigger className="w-44">
-                  <SelectValue placeholder="Filter admin" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua Admin</SelectItem>
-                  {user?.id && <SelectItem value={user.id}>Admin: {user.name || user.id}</SelectItem>}
-                  {adminOptions
-                    .filter(([uid]) => uid !== user?.id)
-                    .map(([uid, name]) => (
-                      <SelectItem key={uid} value={uid}>Admin: {name || uid}</SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
             </div>
           </div>
 
@@ -283,24 +285,24 @@ function PengeluaranContent() {
                       ) : (
                         <div className="space-y-3">
                           {list.map((e) => (
-                            <div key={e.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 rounded-lg border">
+                            <div key={e.id} className="flex flex-col gap-3 p-3 rounded-lg border">
                               <div className="flex items-center gap-3 min-w-0">
-                                <div className="w-9 h-9 rounded-full bg-red-50 border border-red-100 flex items-center justify-center">
-                                  <span className="text-red-600 text-sm">¥</span>
+                                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0">
+                                  <span className="text-red-600 text-xs sm:text-sm">¥</span>
                                 </div>
-                                <div className="min-w-0">
-                                  <div className="font-medium truncate">{e.itemName}</div>
-                                  <div className="text-xs text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis">{e.date.toLocaleDateString("id-ID")} • {e.category}{e.createdByName ? ` • ${e.createdByName}` : ""}</div>
+                                <div className="min-w-0 flex-1">
+                                  <div className="font-medium truncate text-sm sm:text-base">{e.itemName}</div>
+                                  <div className="text-xs text-muted-foreground mt-1">{e.date.toLocaleDateString("id-ID")} • {e.category}{e.createdByName ? ` • ${e.createdByName}` : ""}</div>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2 flex-wrap sm:self-end sm:justify-end w-full sm:w-auto">
-                                <div className="text-right mr-0 sm:mr-2 min-w-[160px] sm:min-w-[160px] ml-auto">
-                                  <div className="text-sm text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis">{e.expensePrice.toLocaleString()} YEN × {e.exchangeRate.toLocaleString()}</div>
-                                  <div className="font-semibold">{formatCurrency(e.totalInIDR)}</div>
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                <div className="text-left sm:text-right">
+                                  <div className="text-xs sm:text-sm text-muted-foreground">{e.expensePrice.toLocaleString()} YEN × {e.exchangeRate.toLocaleString()}</div>
+                                  <div className="font-semibold text-sm sm:text-base">{formatCurrency(e.totalInIDR)}</div>
                                 </div>
                                 <div className="flex gap-2 w-full sm:w-auto">
-                                  <Button variant="outline" size="sm" className="flex-1 sm:flex-none" onClick={() => { setSelectedPeriod(p); setSelectedExpense(e); setIsEditOpen(true) }}>Edit</Button>
-                                  <Button variant="destructive" size="sm" className="flex-1 sm:flex-none" onClick={() => handleDeleteExpense(e.id, p)}>Hapus</Button>
+                                  <Button variant="outline" size="sm" className="flex-1 sm:flex-none mobile-button" onClick={() => { setSelectedPeriod(p); setSelectedExpense(e); setIsEditOpen(true) }}>Edit</Button>
+                                  <Button variant="destructive" size="sm" className="flex-1 sm:flex-none mobile-button" onClick={() => handleDeleteExpense(e.id, p)}>Hapus</Button>
                                 </div>
                               </div>
                             </div>

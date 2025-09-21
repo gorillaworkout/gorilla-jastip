@@ -88,19 +88,19 @@ export default function HomePage() {
     <main className="min-h-[100dvh] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
       {/* Header */}
       <header className="sticky top-0 z-30 bg-slate-950/60 backdrop-blur border-b border-slate-800">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3 font-bold tracking-tight">
-            <Image src="/jastipdigw.png" alt="JastipdiGW" width={64} height={64} className="rounded-sm" />
-            <span className="text-xl md:text-2xl">JastipdiGW</span>
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-3 font-bold tracking-tight">
+            <Image src="/jastipdigw.png" alt="JastipdiGW" width={48} height={48} className="rounded-sm sm:w-16 sm:h-16" />
+            <span className="text-lg sm:text-xl md:text-2xl">JastipdiGW</span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <Button
               size="icon"
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300 w-10 h-10 sm:w-12 sm:h-12"
               aria-label="Login"
               onClick={() => router.push("/login")}
             >
-              <LogIn className="h-5 w-5" />
+              <LogIn className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           </div>
         </div>
@@ -134,12 +134,12 @@ export default function HomePage() {
           <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-blue-600 blur-3xl" />
           <div className="absolute top-1/2 -right-24 h-72 w-72 rounded-full bg-indigo-500 blur-3xl" />
         </div>
-        <div className="max-w-7xl mx-auto px-6 py-24 sm:py-28 lg:py-32 relative">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-16 sm:py-20 md:py-24 lg:py-32 relative">
           <div className="max-w-3xl">
-            <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight">Jastip Jepang Cepat, Aman, dan Transparan</h1>
-            <p className="mt-4 text-slate-300 text-lg">Titip barang dari Indonesia ke Jepang dan sebaliknya, atau kami bantu checkout dari marketplace Jepang. Harga jujur, update real-time, pengiriman rapi.</p>
-            <div className="mt-8 flex flex-col sm:flex-row gap-3">
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white" asChild>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight">Jastip Jepang Cepat, Aman, dan Transparan</h1>
+            <p className="mt-4 text-slate-300 text-sm sm:text-base md:text-lg">Titip barang dari Indonesia ke Jepang dan sebaliknya, atau kami bantu checkout dari marketplace Jepang. Harga jujur, update real-time, pengiriman rapi.</p>
+            <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3">
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto mobile-button" asChild>
                 <a href="https://wa.me/6287700600208" target="_blank" rel="noopener noreferrer">
                   Titip Barang Sekarang <ArrowRight className="ml-2 h-4 w-4" />
                 </a>
@@ -150,8 +150,8 @@ export default function HomePage() {
       </section>
 
       {/* Features */}
-      <section className="max-w-7xl mx-auto px-6 pb-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <section className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 pb-12 sm:pb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-6">
             <ShieldCheck className="h-6 w-6 text-blue-400" />
             <h3 className="mt-3 font-semibold">Aman & Terpercaya</h3>

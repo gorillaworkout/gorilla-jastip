@@ -22,14 +22,14 @@ export function ItemRow({
   }
 
   return (
-    <div className="flex items-center justify-between p-4 hover:bg-gray-50 border-b border-gray-100 last:border-b-0">
-      <div className="flex-1">
-        <div className="flex items-center gap-4">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 gap-3 sm:gap-4">
+      <div className="flex-1 min-w-0">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <h4 className="font-medium text-gray-900 truncate">{item.itemName}</h4>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <h4 className="font-medium text-gray-900 truncate text-sm sm:text-base">{item.itemName}</h4>
               {/* Payment Status Badge */}
-              <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+              <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium w-fit ${
                 item.isPaymentReceived 
                   ? 'bg-green-100 text-green-800 border border-green-200' 
                   : 'bg-amber-100 text-amber-800 border border-amber-200'
@@ -47,25 +47,25 @@ export function ItemRow({
                 )}
               </div>
             </div>
-            <p className="text-sm text-gray-500">Customer: {item.customerName}</p>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">Customer: {item.customerName}</p>
           </div>
         </div>
       </div>
       
-      <div className="flex items-center gap-4">
-        {/* Price Cards */}
-        <div className="flex items-center gap-2">
-          <div className="text-right p-2 bg-green-50 rounded border border-green-200 min-w-[80px]">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+        {/* Price Cards - Mobile Stacked, Desktop Horizontal */}
+        <div className="grid grid-cols-3 gap-2 sm:flex sm:items-center sm:gap-2">
+          <div className="text-center sm:text-right p-2 bg-green-50 rounded border border-green-200">
             <div className="text-xs text-green-600">Harga Jual</div>
-            <div className="font-semibold text-green-700">{formatCurrency(item.sellingPrice)}</div>
+            <div className="font-semibold text-green-700 text-xs sm:text-sm">{formatCurrency(item.sellingPrice)}</div>
           </div>
           
-          <div className="text-right p-2 bg-blue-50 rounded border border-blue-200 min-w-[80px]">
+          <div className="text-center sm:text-right p-2 bg-blue-50 rounded border border-blue-200">
             <div className="text-xs text-blue-600">Harga Beli</div>
-            <div className="font-semibold text-blue-700">{formatYen(item.itemPrice)}</div>
+            <div className="font-semibold text-blue-700 text-xs sm:text-sm">{formatYen(item.itemPrice)}</div>
           </div>
           
-          <div className={`text-right p-2 rounded border min-w-[80px] ${
+          <div className={`text-center sm:text-right p-2 rounded border ${
             item.isPaymentReceived 
               ? 'bg-purple-50 border-purple-200' 
               : 'bg-gray-50 border-gray-200'
@@ -73,7 +73,7 @@ export function ItemRow({
             <div className={`text-xs ${item.isPaymentReceived ? 'text-purple-600' : 'text-gray-500'}`}>
               Profit
             </div>
-            <div className={`font-semibold ${
+            <div className={`font-semibold text-xs sm:text-sm ${
               item.isPaymentReceived 
                 ? (item.profit >= 0 ? 'text-purple-700' : 'text-red-700')
                 : 'text-gray-400'
@@ -83,19 +83,21 @@ export function ItemRow({
           </div>
         </div>
         
-        {/* Action Buttons */}
-        <div className="flex items-center gap-1">
+        {/* Action Buttons - Mobile: Grid, Desktop: Flex */}
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:justify-end sm:gap-1">
           <button
             onClick={() => onEdit(item)}
-            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg flex items-center justify-center"
+            title="Edit Item"
           >
-            <Edit className="w-4 h-4" />
+            <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
           </button>
           <button
             onClick={() => onDelete(item.id)}
-            className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+            className="p-2 text-red-600 hover:bg-red-50 rounded-lg flex items-center justify-center"
+            title="Delete Item"
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
           </button>
         </div>
       </div>
