@@ -45,7 +45,26 @@ function DeparturesContent() {
     try {
       setLoading(true)
       const tripsData = await TripsService.getAllTrips()
-      setTrips(tripsData)
+
+      // Auto-update status: if returnDate < today and status is upcoming/planning -> completed
+      const now = new Date()
+      const updates: Promise<void>[] = []
+      const normalized = tripsData.map((t) => {
+        const returnAt = t.returnDate ? new Date(t.returnDate) : null
+        const shouldComplete = returnAt && returnAt.getTime() < now.getTime() && (t.status === 'upcoming' || t.status === 'planning')
+        if (shouldComplete && t.id) {
+          updates.push(TripsService.updateTripStatus(t.id, 'completed'))
+          return { ...t, status: 'completed' as const }
+        }
+        return t
+      })
+
+      if (updates.length > 0) {
+        // Fire-and-forget updates, but await to keep local state consistent
+        await Promise.allSettled(updates)
+      }
+
+      setTrips(normalized)
     } catch (error) {
       console.error("Error loading trips:", error)
       setError("Gagal memuat data trip")

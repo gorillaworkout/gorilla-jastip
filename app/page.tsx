@@ -44,11 +44,8 @@ export default function HomePage() {
     }
   }, [brandsApi])
 
-  useEffect(() => {
-    if (!loading && user?.role === "admin") {
-      router.replace("/dashboard")
-    }
-  }, [user, loading, router])
+  // Note: Do NOT auto-redirect logged-in users away from home. Users should be able
+  // to view the landing page even when authenticated.
 
   // Load trips for home page
   useEffect(() => {

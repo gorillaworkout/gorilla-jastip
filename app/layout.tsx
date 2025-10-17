@@ -5,6 +5,7 @@ import "./globals.css"
 import { AuthProvider } from "@/contexts/auth-context"
 import { ReduxProvider } from "@/contexts/redux-provider"
 import { Toaster } from "@/components/ui/toaster"
+import { ClientOnly } from "@/components/client-only"
 
 const inter = Inter({
 	subsets: ["latin"],
@@ -101,10 +102,12 @@ export default function RootLayout({
 	return (
 		<html lang="id" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
 			<body className="font-sans antialiased" suppressHydrationWarning>
-				<ReduxProvider>
-					<AuthProvider>{children}</AuthProvider>
-				</ReduxProvider>
-				<Toaster />
+				<ClientOnly>
+					<ReduxProvider>
+						<AuthProvider>{children}</AuthProvider>
+					</ReduxProvider>
+					<Toaster />
+				</ClientOnly>
 			</body>
 		</html>
 	)
