@@ -54,7 +54,7 @@ export default function LoginPage() {
               <h1 className="text-5xl font-bold text-white mb-3 tracking-tight bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
                 JastipdiGW
               </h1>
-              <p className="text-blue-200 text-lg font-medium mb-2">Admin Dashboard</p>
+              <p className="text-blue-200 text-lg font-medium mb-2">Admin Dashboards</p>
               <p className="text-blue-300/70 text-sm">Masuk ke panel administrasi</p>
             </div>
 
@@ -79,7 +79,7 @@ export default function LoginPage() {
             {/* Footer */}
             <div className="text-center mt-6">
               <p className="text-sm text-blue-300/70">
-                © 2024 JastipdiGW. All rights reserved.
+                © 2026 JastipdiGW. All rights reserved.
               </p>
             </div>
           </div>
