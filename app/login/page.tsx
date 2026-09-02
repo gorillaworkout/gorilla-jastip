@@ -1,12 +1,16 @@
+import { Suspense } from "react"
 import { LoginForm } from "@/components/auth/login-form"
 import { RoleRedirect } from "@/components/auth/role-redirect"
+import { BrandedAuthLoading } from "@/components/auth/branded-auth-loading"
 import Image from "next/image"
 import Link from "next/link"
 
 export default function LoginPage() {
   return (
     <>
-      <RoleRedirect />
+      <Suspense fallback={<BrandedAuthLoading message="Memuat..." />}>
+        <RoleRedirect />
+      </Suspense>
       <div className="h-screen relative bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 overflow-hidden">
         {/* Animated background elements */}
         <div className="absolute inset-0">
@@ -42,6 +46,7 @@ export default function LoginPage() {
                     alt="JastipdiGW Logo" 
                     width={80} 
                     height={80}
+                    priority
                     className="relative z-10 object-contain drop-shadow-lg"
                   />
                   
@@ -60,7 +65,9 @@ export default function LoginPage() {
 
             {/* Login form - integrated design */}
             <div className="space-y-4">
-              <LoginForm />
+              <Suspense fallback={<p className="text-center text-blue-200 text-sm">Memuat form login...</p>}>
+                <LoginForm />
+              </Suspense>
             </div>
 
             {/* Back to Home button */}

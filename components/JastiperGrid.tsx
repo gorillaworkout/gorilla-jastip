@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Jastiper } from "@/lib/types"
 import { JastiperService } from "@/lib/jastiper-service"
+import { whatsappHref } from "@/lib/jastiper-display"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Package, Phone, Facebook, CheckCircle } from "lucide-react"
@@ -116,9 +117,9 @@ export default function JastiperGrid() {
             )}
 
             <div className="flex gap-3 pt-2">
-              {jastiper.phoneNumber && (
+              {whatsappHref(jastiper.phoneNumber) && (
                 <a
-                  href={`https://wa.me/${jastiper.phoneNumber.replace(/\D/g, '')}`}
+                  href={whatsappHref(jastiper.phoneNumber)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white text-sm font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-green-600/25"

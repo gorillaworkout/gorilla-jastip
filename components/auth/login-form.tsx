@@ -4,15 +4,17 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuth } from "@/contexts/auth-context"
-import { useRouter } from "next/navigation"
-import { Loader2, AlertTriangle } from "lucide-react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Loader2 } from "lucide-react"
 import { RoleError } from "./role-error"
+import { getSafeNextPath } from "@/lib/admin-routes"
 
 export function LoginForm() {
   const { loginWithGoogle, loading, user } = useAuth()
   const [isLoggingIn, setIsLoggingIn] = useState(false)
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   useEffect(() => {
     setMounted(true)
@@ -22,12 +24,11 @@ export function LoginForm() {
   useEffect(() => {
     if (!loading && user) {
       if (user.role === "admin") {
-        // Admin redirect to dashboard
-        router.push("/dashboard")
+        router.replace(getSafeNextPath(searchParams.get("next")))
       }
       // Non-admin users will stay here and see role error
     }
-  }, [user, loading, router])
+  }, [user, loading, router, searchParams])
 
   const handleGoogleLogin = async () => {
     try {

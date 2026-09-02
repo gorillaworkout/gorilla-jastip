@@ -3,9 +3,9 @@
 import type React from "react"
 
 import { useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
-import { Loader2 } from "lucide-react"
+import { BrandedAuthLoading } from "./branded-auth-loading"
 
 interface AuthGuardProps {
   children: React.ReactNode
@@ -14,26 +14,20 @@ interface AuthGuardProps {
 export function AuthGuard({ children }: AuthGuardProps) {
   const { user, loading } = useAuth()
   const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
     if (!loading && !user) {
-      router.push("/login")
+      router.replace(`/login?next=${encodeURIComponent(pathname)}`)
     }
-  }, [user, loading, router])
+  }, [user, loading, router, pathname])
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
-          <p className="text-muted-foreground">Memuat...</p>
-        </div>
-      </div>
-    )
+    return <BrandedAuthLoading message="Memverifikasi akses..." />
   }
 
   if (!user) {
-    return null
+    return <BrandedAuthLoading message="Mengalihkan ke halaman login..." />
   }
 
   return <>{children}</>
