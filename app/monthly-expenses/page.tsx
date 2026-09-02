@@ -31,6 +31,8 @@ import {
 import { useToast } from "@/hooks/use-toast"
 import { format } from "date-fns"
 import { id } from "date-fns/locale"
+import { AdminGuard } from "@/components/auth/admin-guard"
+import { Sidebar } from "@/components/layout/sidebar"
 
 function MonthlyExpensesPageContent() {
     // Custom CSS untuk memastikan dropdown muncul dengan benar
@@ -1010,8 +1012,7 @@ function MonthlyExpensesPageContent() {
     )
 }
 
-// Export with client-only wrapper to prevent hydration issues
-const MonthlyExpensesPage = dynamic(() => Promise.resolve(MonthlyExpensesPageContent), {
+const MonthlyExpensesInner = dynamic(() => Promise.resolve(MonthlyExpensesPageContent), {
     ssr: false,
     loading: () => (
         <div className="p-6 space-y-6">
@@ -1023,4 +1024,15 @@ const MonthlyExpensesPage = dynamic(() => Promise.resolve(MonthlyExpensesPageCon
     )
 })
 
-export default MonthlyExpensesPage
+export default function MonthlyExpensesPage() {
+    return (
+        <AdminGuard>
+            <div className="flex h-screen">
+                <Sidebar />
+                <main className="flex-1 overflow-y-auto bg-background">
+                    <MonthlyExpensesInner />
+                </main>
+            </div>
+        </AdminGuard>
+    )
+}

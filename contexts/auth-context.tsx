@@ -50,6 +50,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (!db) {
             throw new Error("Firestore database not available")
           }
+
+          const token = await firebaseUser.getIdToken()
+          await fetch("/api/auth/session", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token }),
+          })
           
           // Check if user exists in Firestore
           const userDoc = await getDoc(doc(db, "users", firebaseUser.uid))
@@ -78,6 +85,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.error("Error handling user auth state:", error)
         }
       } else {
+        try {
+          await fetch("/api/auth/session", { method: "DELETE" })
+        } catch (error) {
+          console.error("Error clearing auth session:", error)
+        }
         setUser(null)
         setFirebaseUser(null)
       }
@@ -143,6 +155,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     if (auth) {
       await signOut(auth)
+    }
+    try {
+      await fetch("/api/auth/session", { method: "DELETE" })
+    } catch (error) {
+      console.error("Error clearing auth session:", error)
     }
     setUser(null)
     setFirebaseUser(null)

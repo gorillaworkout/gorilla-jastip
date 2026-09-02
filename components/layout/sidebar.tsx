@@ -24,7 +24,7 @@ import {
 } from "lucide-react"
 
 const navigation = [
-  { name: "Dashboard", href: "/", icon: Home },
+  { name: "Dashboard", href: "/dashboard", icon: Home },
   { 
     name: "Jastip", 
     icon: DollarSign,
@@ -35,7 +35,7 @@ const navigation = [
       { name: "Analytics", href: "/analytics", icon: PieChart },
     ]
   },
-  { name: "Jastiper", href: "/jastipers", icon: Users },
+  { name: "Jastiper", href: "/jastipers/manage", icon: Users },
   { name: "Keberangkatan", href: "/departures", icon: Plane },
   { name: "Pengeluaran Bulanan", href: "/monthly-expenses", icon: TrendingUp },
   { name: "Pengaturan", href: "/settings", icon: Settings },

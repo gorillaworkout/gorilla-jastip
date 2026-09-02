@@ -175,25 +175,32 @@ function CarouselPrevious({
   className,
   variant = "outline",
   size = "icon",
+  onClick,
   ...props
 }: React.ComponentProps<typeof Button>) {
-  const { orientation, scrollPrev, canScrollPrev } = useCarousel()
+  const { orientation, scrollPrev, canScrollPrev, opts } = useCarousel()
+  const looping = Boolean(opts?.loop)
 
   return (
     <Button
       data-slot="carousel-previous"
+      type="button"
       variant={variant}
       size={size}
       className={cn(
-        "absolute size-8 rounded-full",
+        "absolute size-8 rounded-full z-10",
         orientation === "horizontal"
-          ? "top-1/2 -left-12 -translate-y-1/2"
+          ? "top-1/2 left-1 -translate-y-1/2"
           : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
         className
       )}
-      disabled={!canScrollPrev}
-      onClick={scrollPrev}
+      disabled={!looping && !canScrollPrev}
+      aria-label="Previous slide"
       {...props}
+      onClick={(event) => {
+        scrollPrev()
+        onClick?.(event)
+      }}
     >
       <ArrowLeft />
       <span className="sr-only">Previous slide</span>
@@ -205,25 +212,32 @@ function CarouselNext({
   className,
   variant = "outline",
   size = "icon",
+  onClick,
   ...props
 }: React.ComponentProps<typeof Button>) {
-  const { orientation, scrollNext, canScrollNext } = useCarousel()
+  const { orientation, scrollNext, canScrollNext, opts } = useCarousel()
+  const looping = Boolean(opts?.loop)
 
   return (
     <Button
       data-slot="carousel-next"
+      type="button"
       variant={variant}
       size={size}
       className={cn(
-        "absolute size-8 rounded-full",
+        "absolute size-8 rounded-full z-10",
         orientation === "horizontal"
-          ? "top-1/2 -right-12 -translate-y-1/2"
+          ? "top-1/2 right-1 -translate-y-1/2"
           : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
         className
       )}
-      disabled={!canScrollNext}
-      onClick={scrollNext}
+      disabled={!looping && !canScrollNext}
+      aria-label="Next slide"
       {...props}
+      onClick={(event) => {
+        scrollNext()
+        onClick?.(event)
+      }}
     >
       <ArrowRight />
       <span className="sr-only">Next slide</span>

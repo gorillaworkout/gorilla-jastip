@@ -1,17 +1,11 @@
-import { Sidebar } from "@/components/layout/sidebar"
+import type { ReactNode } from "react"
+
+export const dynamic = "force-dynamic"
 
 export default function MonthlyExpensesLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: ReactNode
 }) {
-  return (
-    <div className="flex h-screen">
-      <Sidebar />
-      <main className="flex-1 overflow-y-auto bg-background">
-        {children}
-        
-      </main>
-    </div>
-  )
+  return children
 }

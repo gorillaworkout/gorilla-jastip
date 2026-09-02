@@ -13,6 +13,7 @@ import {
   serverTimestamp 
 } from "firebase/firestore"
 import { Jastiper, CreateJastiperData, UpdateJastiperData } from "./types"
+import { applyJastiperDisplayFixes } from "./jastiper-display"
 
 const COLLECTION_NAME = "jastipers"
 
@@ -33,7 +34,7 @@ export class JastiperService {
       
       querySnapshot.forEach((doc) => {
         const data = doc.data()
-        jastipers.push({
+        jastipers.push(applyJastiperDisplayFixes({
           id: doc.id,
           name: data.name || "",
           imageUrl: data.imageUrl || "",
@@ -48,7 +49,7 @@ export class JastiperService {
           verifiedByFacebookLink: data.verifiedByFacebookLink || "",
           createdAt: data.createdAt?.toDate() || new Date(),
           updatedAt: data.updatedAt?.toDate() || new Date(),
-        })
+        }))
       })
       
       return jastipers
@@ -73,7 +74,7 @@ export class JastiperService {
       
       querySnapshot.forEach((doc) => {
         const data = doc.data()
-        jastipers.push({
+        jastipers.push(applyJastiperDisplayFixes({
           id: doc.id,
           name: data.name || "",
           imageUrl: data.imageUrl || "",
@@ -88,7 +89,7 @@ export class JastiperService {
           verifiedByFacebookLink: data.verifiedByFacebookLink || "",
           createdAt: data.createdAt?.toDate() || new Date(),
           updatedAt: data.updatedAt?.toDate() || new Date(),
-        })
+        }))
       })
       
       return jastipers
@@ -108,7 +109,7 @@ export class JastiperService {
       
       if (docSnap.exists()) {
         const data = docSnap.data()
-        return {
+        return applyJastiperDisplayFixes({
           id: docSnap.id,
           name: data.name || "",
           imageUrl: data.imageUrl || "",
@@ -123,7 +124,7 @@ export class JastiperService {
           verifiedByFacebookLink: data.verifiedByFacebookLink || "",
           createdAt: data.createdAt?.toDate() || new Date(),
           updatedAt: data.updatedAt?.toDate() || new Date(),
-        }
+        })
       }
       
       return null
@@ -246,7 +247,7 @@ export class JastiperService {
       
       querySnapshot.forEach((doc) => {
         const data = doc.data()
-        jastipers.push({
+        jastipers.push(applyJastiperDisplayFixes({
           id: doc.id,
           name: data.name || "",
           imageUrl: data.imageUrl || "",
@@ -261,7 +262,7 @@ export class JastiperService {
           verifiedByFacebookLink: data.verifiedByFacebookLink || "",
           createdAt: data.createdAt?.toDate() || new Date(),
           updatedAt: data.updatedAt?.toDate() || new Date(),
-        })
+        }))
       })
       
       // Apply search filter client-side for better flexibility

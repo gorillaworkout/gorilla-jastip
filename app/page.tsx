@@ -82,7 +82,7 @@ export default function HomePage() {
   ]
 
   return (
-    <main className="min-h-[100dvh] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
+    <main className="min-h-[100dvh] overflow-x-clip bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
       {/* Header */}
       <header className="sticky top-0 z-30 bg-slate-950/60 backdrop-blur border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-3 flex items-center justify-between">
@@ -181,7 +181,7 @@ export default function HomePage() {
             }
           }}
         >
-          <Carousel setApi={setBrandsApi} className="px-8" opts={{ loop: true, dragFree: true, align: "start" }}>
+          <Carousel setApi={setBrandsApi} className="px-10 sm:px-12" opts={{ loop: true, align: "start" }}>
             <CarouselContent className="items-center">
               {[
                 { name: "Nike", logo: "https://cdn.simpleicons.org/nike/111111" },
@@ -189,7 +189,7 @@ export default function HomePage() {
                 { name: "Coach", logo: "/coach.jpg" },
                 { name: "Uniqlo", logo: "/uniqlo.jpg" },
                 { name: "GU", logo: "/gu.jpg" },
-                { name: "MUJI", logo: "https://upload.wikimedia.org/wikipedia/commons/6/6a/Muji_logo.svg" },
+                { name: "MUJI", logo: "/brands/muji.svg" },
                 { name: "ZARA", logo: "https://cdn.simpleicons.org/zara/111111" },
                 { name: "Onitsuka Tiger", logo: "/onitsuka.jpg" },
                 { name: "New Balance", logo: "https://cdn.simpleicons.org/newbalance/BE0027" },
@@ -223,8 +223,8 @@ export default function HomePage() {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious className="hidden sm:flex bg-slate-900/70 border-slate-700 hover:bg-slate-900" />
-            <CarouselNext className="hidden sm:flex bg-slate-900/70 border-slate-700 hover:bg-slate-900" />
+            <CarouselPrevious className="hidden sm:flex left-1 right-auto bg-slate-900/70 border-slate-700 hover:bg-slate-900" />
+            <CarouselNext className="hidden sm:flex right-1 left-auto bg-slate-900/70 border-slate-700 hover:bg-slate-900" />
           </Carousel>
         </div>
       </section>
@@ -479,8 +479,8 @@ export default function HomePage() {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious className="hidden sm:flex bg-slate-900/70 border-slate-700 hover:bg-slate-900" />
-            <CarouselNext className="hidden sm:flex bg-slate-900/70 border-slate-700 hover:bg-slate-900" />
+            <CarouselPrevious className="hidden sm:flex left-1 right-auto bg-slate-900/70 border-slate-700 hover:bg-slate-900" />
+            <CarouselNext className="hidden sm:flex right-1 left-auto bg-slate-900/70 border-slate-700 hover:bg-slate-900" />
           </Carousel>
         </div>
       </section>
@@ -608,7 +608,7 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h3 className="text-xl font-bold">Siap titip barang dari Jepang?</h3>
-              <p className="text-slate-300">Klik untuk mulai proses titipan atau login sebagai admin.</p>
+              <p className="text-slate-300">Kirim detail barang yang ingin dititipkan, kami bantu proses dari Jepang.</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
               <Button className="bg-blue-600 hover:bg-blue-700 text-white" asChild>
@@ -778,28 +778,13 @@ export default function HomePage() {
                 © {new Date().getFullYear()} JastipdiGW. All rights reserved.
               </div>
               <div className="flex items-center gap-6 text-sm text-slate-400">
-                <a 
-                  href="https://wa.me/6287700600208?text=Halo%20saya%20ingin%20tanya%20tentang%20Privacy%20Policy" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="hover:text-blue-400 transition-colors"
-                >
+                <a href="/privacy" className="hover:text-blue-400 transition-colors">
                   Privacy Policy
                 </a>
-                <a 
-                  href="https://wa.me/6287700600208?text=Halo%20saya%20ingin%20tanya%20tentang%20Terms%20of%20Service" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="hover:text-blue-400 transition-colors"
-                >
+                <a href="/terms" className="hover:text-blue-400 transition-colors">
                   Terms of Service
                 </a>
-                <a 
-                  href="https://wa.me/6287700600208?text=Halo%20saya%20ingin%20tanya%20tentang%20FAQ" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="hover:text-blue-400 transition-colors"
-                >
+                <a href="/faq" className="hover:text-blue-400 transition-colors">
                   FAQ
                 </a>
               </div>
