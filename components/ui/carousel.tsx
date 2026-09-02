@@ -32,6 +32,32 @@ type CarouselContextProps = {
 
 const CarouselContext = React.createContext<CarouselContextProps | null>(null)
 
+/** Ignore leftover snaps (~16px / -ml-4) so prev/next always move a real card. */
+const MIN_SNAP_DELTA = 0.04
+
+function stepSnapIndex(
+  snaps: number[],
+  selected: number,
+  direction: -1 | 1,
+  loop: boolean
+) {
+  const count = snaps.length
+  if (count < 2) return selected
+
+  const origin = snaps[selected] ?? 0
+  for (let step = 1; step <= count; step++) {
+    const raw = selected + direction * step
+    if (!loop && (raw < 0 || raw >= count)) return selected
+    const index = ((raw % count) + count) % count
+    const delta = Math.abs((snaps[index] ?? 0) - origin)
+    // A wrap from 0 → last (or last → 0) is a real step even if both ends are near 0/1.
+    if (delta >= MIN_SNAP_DELTA || (loop && index !== selected && delta > 0.5)) {
+      return index
+    }
+  }
+  return selected
+}
+
 function useCarousel() {
   const context = React.useContext(CarouselContext)
 
@@ -68,12 +94,24 @@ function Carousel({
   }, [])
 
   const scrollPrev = React.useCallback(() => {
-    api?.scrollPrev()
-  }, [api])
+    if (!api) return
+    const snaps = api.scrollSnapList()
+    const selected = api.selectedScrollSnap()
+    const loop = Boolean(opts?.loop)
+    const target = stepSnapIndex(snaps, selected, -1, loop)
+    if (target === selected) return
+    api.scrollTo(target)
+  }, [api, opts?.loop])
 
   const scrollNext = React.useCallback(() => {
-    api?.scrollNext()
-  }, [api])
+    if (!api) return
+    const snaps = api.scrollSnapList()
+    const selected = api.selectedScrollSnap()
+    const loop = Boolean(opts?.loop)
+    const target = stepSnapIndex(snaps, selected, 1, loop)
+    if (target === selected) return
+    api.scrollTo(target)
+  }, [api, opts?.loop])
 
   const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -194,9 +232,9 @@ function CarouselPrevious({
           : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
         className
       )}
-      disabled={!looping && !canScrollPrev}
       aria-label="Previous slide"
       {...props}
+      disabled={!looping && !canScrollPrev}
       onClick={(event) => {
         scrollPrev()
         onClick?.(event)
@@ -231,9 +269,9 @@ function CarouselNext({
           : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
         className
       )}
-      disabled={!looping && !canScrollNext}
       aria-label="Next slide"
       {...props}
+      disabled={!looping && !canScrollNext}
       onClick={(event) => {
         scrollNext()
         onClick?.(event)

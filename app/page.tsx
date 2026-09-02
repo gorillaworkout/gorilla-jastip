@@ -181,7 +181,11 @@ export default function HomePage() {
             }
           }}
         >
-          <Carousel setApi={setBrandsApi} className="px-10 sm:px-12" opts={{ loop: true, align: "start" }}>
+          <Carousel
+            setApi={setBrandsApi}
+            className="px-10 sm:px-12"
+            opts={{ loop: true, align: "start", containScroll: "trimSnaps", slidesToScroll: 1, skipSnaps: false }}
+          >
             <CarouselContent className="items-center">
               {[
                 { name: "Nike", logo: "https://cdn.simpleicons.org/nike/111111" },
