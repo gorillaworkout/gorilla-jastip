@@ -20,6 +20,7 @@ import {
   DollarSign,
   PieChart,
   Users,
+  WalletCards,
   Plane,
 } from "lucide-react"
 
@@ -38,7 +39,8 @@ const navigation = [
   { name: "Jastiper", href: "/jastipers/manage", icon: Users },
   { name: "Keberangkatan", href: "/departures", icon: Plane },
   { name: "Pengeluaran Bulanan", href: "/monthly-expenses", icon: TrendingUp },
-  { name: "Pengaturan", href: "/settings", icon: Settings },
+  { name: "Uangkuh", href: "/uangkuh", icon: WalletCards },
+  { name: "Pengaturan", href: "/settings", icon: Settings }
 ]
 
 export function Sidebar() {
