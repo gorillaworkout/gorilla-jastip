@@ -47,6 +47,8 @@ function UangkuhContent() {
     const categoryRef = collection(db, "financeUsers", firebaseUser.uid, "categories")
     const unsubscribeTransactions = onSnapshot(query(transactionRef, orderBy("date", "desc")), (snapshot) => {
       setTransactions(snapshot.docs.map((item) => ({ id: item.id, ...item.data() } as Transaction)))
+    }, (error) => {
+      console.error("Uangkuh transaction listener failed:", error)
     })
     const unsubscribeCategories = onSnapshot(categoryRef, (snapshot) => {
       const items = snapshot.docs.map((item) => ({ id: item.id, ...item.data() } as Category))
