@@ -18,6 +18,7 @@ import { db } from "@/lib/firebase"
 type Kind = "income" | "expense"
 type Transaction = { id: string; kind: Kind; amount: number; date: string; category: string; note: string }
 type Category = { id: string; name: string; group: string }
+type Draft = { kind: Kind; amount: number; date: string; category: string; note: string; confidence?: number }
 
 const DEFAULT_CATEGORIES = [
   ["Keluarga", "Keluarga"], ["Kendaraan", "Kendaraan"], ["Makan", "Makan"],
@@ -40,6 +41,36 @@ function UangkuhContent() {
   const [newCategory, setNewCategory] = useState("")
   const [newGroup, setNewGroup] = useState("Lainnya")
   const [saving, setSaving] = useState(false)
+  const [drafts, setDrafts] = useState<Draft[]>([])
+  const [extracting, setExtracting] = useState(false)
+  const [extractError, setExtractError] = useState("")
+
+  const extractFile = async (file: File) => {
+    setExtracting(true); setExtractError("")
+    try {
+      const form = new FormData(); form.append("file", file)
+      const response = await fetch("/api/uangkuh/extract", { method: "POST", body: form })
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || "AI gagal membaca file.")
+      setDrafts(result.transactions || [])
+      if (!result.transactions?.length) setExtractError("Tidak ada transaksi yang terbaca. Coba screenshot lebih jelas.")
+    } catch (error) { setExtractError(error instanceof Error ? error.message : "AI gagal membaca file.")
+    } finally { setExtracting(false) }
+  }
+
+  const updateDraft = (index: number, field: keyof Draft, value: string) => setDrafts((items) => items.map((item, i) => i === index ? { ...item, [field]: field === "amount" ? Number(digits(value)) : value } : item))
+
+  const saveDrafts = async () => {
+    if (!firebaseUser || !db || !drafts.length) return
+    setSaving(true)
+    try {
+      const ref = collection(db, "financeUsers", firebaseUser.uid, "transactions")
+      await Promise.all(drafts.map((item) => addDoc(ref, { ...item, source: "ai-screenshot", createdAt: serverTimestamp(), updatedAt: serverTimestamp() })))
+      setDrafts([])
+    } finally { setSaving(false) }
+  }
+
+  const clearDraft = (index: number) => setDrafts((items) => items.filter((_, i) => i !== index))
 
   useEffect(() => {
     if (!firebaseUser || !db) return
@@ -90,7 +121,9 @@ function UangkuhContent() {
   const remove = (id: string) => firebaseUser && db && deleteDoc(doc(db, "financeUsers", firebaseUser.uid, "transactions", id))
 
   return <div className="flex min-h-[100dvh] bg-[#f7f8f4] text-[#183b36]"><Sidebar /><main className="min-w-0 flex-1 overflow-auto"><MobileHeader title="Uangkuh" /><div className="mx-auto max-w-6xl space-y-5 px-3 py-5 sm:px-6 lg:px-8">
-    <header className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-sm font-semibold tracking-wide text-[#4f9d69]">UANGKUH</p><h1 className="text-3xl font-bold tracking-tight">Biar uang nggak bikin mumet.</h1><p className="mt-1 text-sm text-[#55736c]">Catat, pahami, tenang.</p></div><Button className="bg-[#183b36] hover:bg-[#24574e]"><Bot className="mr-2 h-4 w-4" /> Import dengan AI</Button></header>
+    <header className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-sm font-semibold tracking-wide text-[#4f9d69]">UANGKUH</p><h1 className="text-3xl font-bold tracking-tight">Biar uang nggak bikin mumet.</h1><p className="mt-1 text-sm text-[#55736c]">Catat, pahami, tenang.</p></div><label className="inline-flex cursor-pointer items-center rounded-md bg-[#183b36] px-4 py-2 text-sm font-medium text-white hover:bg-[#24574e]"> <Bot className="mr-2 h-4 w-4" /> {extracting ? "Membaca…" : "Import dengan AI"}<input className="hidden" type="file" accept="image/jpeg,image/png,image/webp" disabled={extracting} onChange={(e) => { const file = e.target.files?.[0]; if (file) void extractFile(file); e.currentTarget.value = "" }} /></label></header>
+    {extractError && <div className="rounded-xl border border-[#f0c5bb] bg-[#fff4f1] p-4 text-sm text-[#9d4938]">{extractError}</div>}
+    {drafts.length > 0 && <Card className="border-[#d8d0fa] bg-[#fbfaff]"><CardHeader><CardTitle className="flex items-center justify-between"><span>Draft dari AI</span><span className="text-sm font-normal text-[#6f64a8]">Periksa sebelum simpan</span></CardTitle></CardHeader><CardContent className="space-y-3">{drafts.map((item, index) => <div key={`${item.date}-${index}`} className="grid gap-2 rounded-xl border bg-white p-3 sm:grid-cols-[100px_130px_1fr_1fr_auto]"><Select value={item.kind} onValueChange={(value) => updateDraft(index, "kind", value)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="expense">Pengeluaran</SelectItem><SelectItem value="income">Pemasukan</SelectItem></SelectContent></Select><Input inputMode="numeric" value={money(item.amount)} onChange={(e) => updateDraft(index, "amount", e.target.value)} /><Input type="date" value={item.date} onChange={(e) => updateDraft(index, "date", e.target.value)} /><Input value={item.note} onChange={(e) => updateDraft(index, "note", e.target.value)} placeholder="Catatan" /><Button variant="ghost" size="icon" onClick={() => clearDraft(index)}><X className="h-4 w-4" /></Button></div>)}<Button onClick={saveDrafts} disabled={saving} className="bg-[#183b36] hover:bg-[#24574e]">{saving ? "Menyimpan…" : `Simpan ${drafts.length} transaksi`}</Button></CardContent></Card>}
     <Card className="border-0 bg-[#183b36] text-white shadow-lg"><CardContent className="p-6"><p className="text-sm text-[#b8d8c6]">Saldo berjalan</p><p className="mt-2 text-4xl font-bold">{money(totals)}</p><p className="mt-2 text-sm text-[#b8d8c6]">Data pribadi · tersimpan di Firebase</p></CardContent></Card>
     <div className="grid gap-5 lg:grid-cols-[360px_1fr]"><Card className="border-[#dce9df] bg-white"><CardHeader><CardTitle className="flex items-center gap-2 text-lg"><Plus className="h-5 w-5 text-[#4f9d69]" /> Catat transaksi</CardTitle></CardHeader><CardContent className="space-y-4">
       <div className="grid grid-cols-2 gap-2"><Button variant={kind === "expense" ? "default" : "outline"} onClick={() => setKind("expense")} className={kind === "expense" ? "bg-[#d86b52] hover:bg-[#bd5943]" : ""}><ArrowDownLeft className="mr-2 h-4 w-4" />Keluar</Button><Button variant={kind === "income" ? "default" : "outline"} onClick={() => setKind("income")} className={kind === "income" ? "bg-[#4f9d69] hover:bg-[#3c8154]" : ""}><ArrowUpRight className="mr-2 h-4 w-4" />Masuk</Button></div>
