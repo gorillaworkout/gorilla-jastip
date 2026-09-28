@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
   const bytes = Buffer.from(await file.arrayBuffer())
   const baseUrl = (process.env.AI_BASE_URL || "https://llmdupoin.gorillaworkout.id/v1").replace(/\/$/, "")
-  const model = process.env.AI_MODEL
+  const model = process.env.AI_MODEL || "cx/gpt-5.6-sol"
   const userContent = file.type === "application/pdf"
     ? { role: "user", content: `${PROMPT}\n\nIsi PDF mutasi bank:\n${(await pdfParse(bytes)).text.slice(0, 120000)}` }
     : { role: "user", content: [{ type: "text", text: PROMPT }, { type: "image_url", image_url: { url: `data:${file.type};base64,${bytes.toString("base64")}`, detail: "high" } }] }
