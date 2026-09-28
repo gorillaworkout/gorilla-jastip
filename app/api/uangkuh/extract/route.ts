@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server"
 import pdfParse from "pdf-parse/lib/pdf-parse.js"
+import { execFile } from "node:child_process"
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises"
+import { tmpdir } from "node:os"
+import { promisify } from "node:util"
+
+const execFileAsync = promisify(execFile)
 
 const MAX_BYTES = 10 * 1024 * 1024
 const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp", "application/pdf"])
@@ -45,6 +51,21 @@ function parseTransactions(content: string) {
   }).filter((x: any) => x.amount > 0 && x.date)
 }
 
+async function renderPdfPages(bytes: Buffer, pageCount: number) {
+  const dir = await mkdtemp(`${tmpdir()}/uangkuh-pdf-`)
+  const input = `${dir}/input.pdf`
+  const prefix = `${dir}/page`
+  await writeFile(input, bytes)
+  try {
+    await execFileAsync("pdftoppm", ["-jpeg", "-r", "150", "-f", "1", "-l", String(Math.min(pageCount, 10)), input, prefix], { timeout: 45000 })
+    const pages = []
+    for (let page = 1; page <= Math.min(pageCount, 10); page++) {
+      try { pages.push({ type: "image_url", image_url: { url: `data:image/jpeg;base64,${(await readFile(`${prefix}-${page}.jpg`)).toString("base64")}`, detail: "high" } }) } catch { /* page unavailable */ }
+    }
+    return pages
+  } finally { await rm(dir, { recursive: true, force: true }) }
+}
+
 export async function POST(request: Request) {
   const key = process.env.AI_API_KEY
   if (!key) return NextResponse.json({ error: "AI belum dikonfigurasi. Tambahkan AI_API_KEY di environment production." }, { status: 503 })
@@ -58,11 +79,10 @@ export async function POST(request: Request) {
   const baseUrl = (process.env.AI_BASE_URL || "https://llmdupoin.gorillaworkout.id/v1").replace(/\/$/, "")
   const model = process.env.AI_MODEL || "cx/gpt-5.6-sol"
   const pdfText = file.type === "application/pdf" ? (await pdfParse(bytes)).text.trim() : ""
-  const pdfDataUrl = `data:application/pdf;base64,${bytes.toString("base64")}`
   const userContent = file.type === "application/pdf"
     ? pdfText
       ? { role: "user", content: `${PROMPT}\n\nBaca seluruh text mutasi berikut. Setiap baris transaksi wajib dipertahankan:\n${pdfText.slice(0, 120000)}` }
-      : { role: "user", content: [{ type: "text", text: `${PROMPT}\nPDF ini mungkin berupa scan. Baca semua halaman secara visual.` }, { type: "file", file: { filename: file.name, file_data: pdfDataUrl } }] }
+      : { role: "user", content: [{ type: "text", text: `${PROMPT}\nPDF ini scan. Baca semua halaman gambar.` }, ...(await renderPdfPages(bytes, 10))] }
     : { role: "user", content: [{ type: "text", text: PROMPT }, { type: "image_url", image_url: { url: `data:${file.type};base64,${bytes.toString("base64")}`, detail: "high" } }] }
 
   const response = await fetch(`${baseUrl}/chat/completions`, {
