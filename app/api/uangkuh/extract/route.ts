@@ -58,9 +58,11 @@ export async function POST(request: Request) {
   const baseUrl = (process.env.AI_BASE_URL || "https://llmdupoin.gorillaworkout.id/v1").replace(/\/$/, "")
   const model = process.env.AI_MODEL || "cx/gpt-5.6-sol"
   const pdfText = file.type === "application/pdf" ? (await pdfParse(bytes)).text.trim() : ""
-  if (file.type === "application/pdf" && !pdfText) return NextResponse.json({ error: "PDF ini berupa scan/gambar tanpa text layer. Simpan ulang sebagai PDF searchable atau upload screenshot tiap halaman." }, { status: 422 })
+  const pdfDataUrl = `data:application/pdf;base64,${bytes.toString("base64")}`
   const userContent = file.type === "application/pdf"
-    ? { role: "user", content: `${PROMPT}\n\nBaca seluruh text mutasi berikut. Setiap baris transaksi wajib dipertahankan:\n${pdfText.slice(0, 120000)}` }
+    ? pdfText
+      ? { role: "user", content: `${PROMPT}\n\nBaca seluruh text mutasi berikut. Setiap baris transaksi wajib dipertahankan:\n${pdfText.slice(0, 120000)}` }
+      : { role: "user", content: [{ type: "text", text: `${PROMPT}\nPDF ini mungkin berupa scan. Baca semua halaman secara visual.` }, { type: "file", file: { filename: file.name, file_data: pdfDataUrl } }] }
     : { role: "user", content: [{ type: "text", text: PROMPT }, { type: "image_url", image_url: { url: `data:${file.type};base64,${bytes.toString("base64")}`, detail: "high" } }] }
 
   const response = await fetch(`${baseUrl}/chat/completions`, {
