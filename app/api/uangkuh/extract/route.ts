@@ -11,10 +11,11 @@ export async function POST(request: Request) {
   if (!(file instanceof File)) return NextResponse.json({ error: "File wajib diupload." }, { status: 400 })
   if (!ALLOWED.has(file.type)) return NextResponse.json({ error: "Format file harus JPG, PNG, WebP, atau PDF." }, { status: 400 })
   if (file.size > MAX_BYTES) return NextResponse.json({ error: "Ukuran file maksimal 10 MB." }, { status: 400 })
-  if (file.type === "application/pdf") return NextResponse.json({ error: "PDF belum didukung. Upload screenshot JPG/PNG/WebP." }, { status: 415 })
-
   const bytes = Buffer.from(await file.arrayBuffer())
   const dataUrl = `data:${file.type};base64,${bytes.toString("base64")}`
+  const content = file.type === "application/pdf"
+    ? { type: "file", file: { filename: file.name, file_data: dataUrl } }
+    : { type: "image_url", image_url: { url: dataUrl, detail: "high" } } as const
   const baseUrl = (process.env.AI_BASE_URL || "https://llmdupoin.gorillaworkout.id/v1").replace(/\/$/, "")
   const model = process.env.AI_MODEL || "pecut-ai"
   const response = await fetch(`${baseUrl}/chat/completions`, {
@@ -26,7 +27,7 @@ export async function POST(request: Request) {
       response_format: { type: "json_object" },
       messages: [{ role: "user", content: [
         { type: "text", text: `Baca screenshot mutasi bank Indonesia. Kembalikan JSON saja dengan schema {"transactions":[{"kind":"income"|"expense","amount":number,"date":"YYYY-MM-DD","category":"string","note":"string","confidence":number}]}. amount harus angka Rupiah positif. Abaikan saldo, nomor rekening, header, biaya yang tidak jelas. Jika kredit/pemasukan gunakan income; debit/pembayaran gunakan expense. Jangan menebak: transaksi yang tidak terbaca jangan dimasukkan.` },
-        { type: "image_url", image_url: { url: dataUrl, detail: "high" } },
+        content,
       ] }],
     }),
   })
