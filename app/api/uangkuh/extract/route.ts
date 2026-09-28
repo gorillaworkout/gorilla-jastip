@@ -17,12 +17,12 @@ export async function POST(request: Request) {
     ? { type: "file", file: { filename: file.name, file_data: dataUrl } }
     : { type: "image_url", image_url: { url: dataUrl, detail: "high" } } as const
   const baseUrl = (process.env.AI_BASE_URL || "https://llmdupoin.gorillaworkout.id/v1").replace(/\/$/, "")
-  const model = process.env.AI_MODEL || "pecut-ai"
+  const model = process.env.AI_MODEL
   const response = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
     body: JSON.stringify({
-      model,
+      ...(model ? { model } : {}),
       temperature: 0,
       response_format: { type: "json_object" },
       messages: [{ role: "user", content: [
