@@ -34,7 +34,8 @@ function normalizeAmount(value: unknown) {
 }
 
 function parseTransactions(content: string) {
-  const cleaned = content.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim()
+  const cleaned = String(content ?? "").replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim()
+  if (!cleaned) return []
   let parsed: any
   try { parsed = JSON.parse(cleaned) } catch {
     const start = Math.min(...[cleaned.indexOf("{"), cleaned.indexOf("[")].filter((x) => x >= 0))
@@ -63,6 +64,8 @@ async function renderPdfPages(bytes: Buffer, pageCount: number) {
       try { pages.push({ type: "image_url", image_url: { url: `data:image/jpeg;base64,${(await readFile(`${prefix}-${page}.jpg`)).toString("base64")}`, detail: "high" } }) } catch { /* page unavailable */ }
     }
     return pages
+  } catch (error) {
+    throw new Error(`PDF scan tidak bisa dirender: ${error instanceof Error ? error.message : "renderer error"}`)
   } finally { await rm(dir, { recursive: true, force: true }) }
 }
 
@@ -79,12 +82,16 @@ export async function POST(request: Request) {
   const baseUrl = (process.env.AI_BASE_URL || "https://llmdupoin.gorillaworkout.id/v1").replace(/\/$/, "")
   const model = process.env.AI_MODEL || "cx/gpt-5.6-sol"
   const pdfText = file.type === "application/pdf" ? (await pdfParse(bytes)).text.trim() : ""
-  const userContent = file.type === "application/pdf"
-    ? pdfText
-      ? { role: "user", content: `${PROMPT}\n\nBaca seluruh text mutasi berikut. Setiap baris transaksi wajib dipertahankan:\n${pdfText.slice(0, 120000)}` }
-      : { role: "user", content: [{ type: "text", text: `${PROMPT}\nPDF ini scan. Baca semua halaman gambar.` }, ...(await renderPdfPages(bytes, 10))] }
-    : { role: "user", content: [{ type: "text", text: PROMPT }, { type: "image_url", image_url: { url: `data:${file.type};base64,${bytes.toString("base64")}`, detail: "high" } }] }
-
+  let userContent: { role: "user"; content: string | Array<Record<string, unknown>> }
+  try {
+    userContent = file.type === "application/pdf"
+      ? pdfText
+        ? { role: "user", content: `${PROMPT}\\n\\nBaca seluruh text mutasi berikut. Setiap baris transaksi wajib dipertahankan:\\n${pdfText.slice(0, 120000)}` }
+        : { role: "user", content: [{ type: "text", text: `${PROMPT}\\nPDF ini scan. Baca semua halaman gambar.` }, ...(await renderPdfPages(bytes, 10))] }
+      : { role: "user", content: [{ type: "text", text: PROMPT }, { type: "image_url", image_url: { url: `data:${file.type};base64,${bytes.toString("base64")}`, detail: "high" } }] }
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "File tidak bisa diproses." }, { status: 422 })
+  }
   const response = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
