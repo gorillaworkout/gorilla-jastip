@@ -78,6 +78,10 @@ function DeparturesContent() {
       setError("Mohon isi semua field yang wajib")
       return
     }
+    if (formData.returnDate < formData.departureDate) {
+      setError("Tanggal pulang tidak boleh sebelum tanggal berangkat")
+      return
+    }
 
     try {
       setError(null)
@@ -96,6 +100,10 @@ function DeparturesContent() {
 
     if (!formData.title || !formData.route || !formData.departureDate || !formData.returnDate) {
       setError("Mohon isi semua field yang wajib")
+      return
+    }
+    if (formData.returnDate < formData.departureDate) {
+      setError("Tanggal pulang tidak boleh sebelum tanggal berangkat")
       return
     }
 

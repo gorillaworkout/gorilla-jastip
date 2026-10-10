@@ -41,7 +41,7 @@ export class PeriodsService {
       querySnapshot.forEach((docSnap) => {
         const data = docSnap.data()
         if (data.customerName === customerName) {
-          const docRef = doc(db, ITEMS_COLLECTION, docSnap.id)
+          const docRef = doc(db!, ITEMS_COLLECTION, docSnap.id)
           updates.push(updateDoc(docRef, {
             isPaymentReceived: isPaid,
             updatedAt: serverTimestamp(),
@@ -217,6 +217,10 @@ export class PeriodsService {
         throw new Error("Firestore database not initialized")
       }
 
+      for (const collectionName of [ITEMS_COLLECTION, "incomes", "expenses"]) {
+        const related = await getDocs(query(collection(db, collectionName), where("periodId", "==", id)))
+        await Promise.all(related.docs.map((item) => deleteDoc(doc(db!, collectionName, item.id))))
+      }
       const docRef = doc(db, PERIODS_COLLECTION, id)
       await deleteDoc(docRef)
     } catch (error) {

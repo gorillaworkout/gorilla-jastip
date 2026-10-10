@@ -259,6 +259,7 @@ function PengeluaranContent() {
   }
 
   const handleDeleteExpense = async (expenseId: string, period: Period) => {
+    if (!confirm("Hapus pengeluaran ini?")) return
     try {
       await ExpensesService.deleteExpense(expenseId)
       

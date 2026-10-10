@@ -72,6 +72,7 @@ function PendapatanContent() {
   }
 
   const handleDeleteIncome = async (incomeId: string, period: Period) => {
+    if (!confirm("Hapus pendapatan ini?")) return
     await IncomesService.deleteIncome(incomeId)
     const updated = await IncomesService.getIncomesByPeriod(period.id)
     setIncomesByPeriod((prev) => ({ ...prev, [period.id]: updated }))

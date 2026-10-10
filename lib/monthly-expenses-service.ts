@@ -146,6 +146,24 @@ export class MonthlyExpensesService {
     }
   }
 
+  async getExpensesByDateRange(startDate: Date, endDate: Date): Promise<MonthlyExpense[]> {
+    const firestoreDb = this.checkFirebase()
+    const q = query(
+      collection(firestoreDb, this.collectionName),
+      where('date', '>=', startDate),
+      where('date', '<=', endDate),
+      orderBy('date', 'desc')
+    )
+    const querySnapshot = await getDocs(q)
+    return querySnapshot.docs.map(item => ({
+      id: item.id,
+      ...item.data(),
+      date: item.data().date.toDate(),
+      createdAt: item.data().createdAt.toDate(),
+      updatedAt: item.data().updatedAt.toDate(),
+    })) as MonthlyExpense[]
+  }
+
   // Update expense
   async updateExpense(id: string, updates: Partial<MonthlyExpense>): Promise<void> {
     try {

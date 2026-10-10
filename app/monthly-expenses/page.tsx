@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import dynamic from "next/dynamic"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -118,6 +118,11 @@ function MonthlyExpensesPageContent() {
     })
 
     const [filteredExpenses, setFilteredExpenses] = useState<MonthlyExpense[]>([])
+    const visibleTotal = useMemo(() => filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0), [filteredExpenses])
+    const visibleCategoryStats = useMemo(() => filteredExpenses.reduce((totals, expense) => {
+        totals[expense.category] = (totals[expense.category] || 0) + expense.amount
+        return totals
+    }, {} as Record<string, number>), [filteredExpenses])
     const [isInitialized, setIsInitialized] = useState(false)
     const { toast } = useToast()
     const modalRef = useRef<HTMLDivElement>(null)
@@ -128,7 +133,7 @@ function MonthlyExpensesPageContent() {
             filterData.month || 
             filterData.startDate || 
             filterData.endDate || 
-            (filterData.category && filterData.category !== "") || 
+            (filterData.category && filterData.category !== "all") || 
             filterData.searchQuery
         )
     }
@@ -211,11 +216,7 @@ function MonthlyExpensesPageContent() {
                 const endDate = new Date(filterData.endDate)
                 endDate.setHours(23, 59, 59, 999) // Set to end of day
 
-                expensesData = await monthlyExpensesService.getMonthExpenses(startDate.getFullYear(), startDate.getMonth() + 1)
-                // Filter by date range manually
-                expensesData = expensesData.filter(expense =>
-                    expense.date >= startDate && expense.date <= endDate
-                )
+                expensesData = await monthlyExpensesService.getExpensesByDateRange(startDate, endDate)
                 categoryData = await monthlyExpensesService.getExpensesByCategory()
                 // Calculate category stats for filtered data
                 categoryData = expensesData.reduce((acc, expense) => {
@@ -254,9 +255,10 @@ function MonthlyExpensesPageContent() {
                     if (expensesData.length === 0) {
                         console.log('🔍 No data in recent months, trying to get any available data')
                         // Try to get data from the last 6 months
-                        for (let i = 1; i <= 6; i++) {
-                            const testMonth = month - i <= 0 ? 12 + (month - i) : month - i
-                            const testYear = month - i <= 0 ? year - 1 : year
+                        for (let i = 2; i <= 6; i++) {
+                            const candidate = new Date(year, month - 1 - i, 1)
+                            const testMonth = candidate.getMonth() + 1
+                            const testYear = candidate.getFullYear()
                             console.log('🔍 Trying month:', testYear, testMonth)
                             const testData = await monthlyExpensesService.getMonthExpenses(testYear, testMonth)
                             if (testData.length > 0) {
@@ -655,12 +657,12 @@ function MonthlyExpensesPageContent() {
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-xl sm:text-2xl font-bold">{formatCurrency(totalExpenses)}</div>
+                        <div className="text-xl sm:text-2xl font-bold">{formatCurrency(visibleTotal)}</div>
                         <p className="text-xs text-muted-foreground">
                             {filterData.startDate && filterData.endDate ? (
                                 `${format(new Date(filterData.startDate), "dd MMM", { locale: id })} - ${format(new Date(filterData.endDate), "dd MMM yyyy", { locale: id })}`
                             ) : (
-                                format(new Date(filterData.month + "-01"), "MMMM yyyy", { locale: id })
+                                filterData.month ? format(new Date(`${filterData.month}-01T00:00:00`), "MMMM yyyy", { locale: id }) : (getMonthInfoFromExpenses() ? `Data terbaru: ${getMonthInfoFromExpenses()}` : "Belum ada data")
                             )}
                         </p>
                     </CardContent>
@@ -689,7 +691,7 @@ function MonthlyExpensesPageContent() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-xl sm:text-2xl font-bold">
-                            {filteredExpenses.length > 0 ? formatCurrency(totalExpenses / filteredExpenses.length) : formatCurrency(0)}
+                            {filteredExpenses.length > 0 ? formatCurrency(visibleTotal / filteredExpenses.length) : formatCurrency(0)}
                         </div>
                         <p className="text-xs text-muted-foreground">
                             Per transaksi
@@ -709,8 +711,8 @@ function MonthlyExpensesPageContent() {
                 <CardContent>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
                         {EXPENSE_CATEGORIES.map((category) => {
-                            const amount = categoryStats[category.id] || 0
-                            const percentage = totalExpenses > 0 ? (amount / totalExpenses) * 100 : 0
+                            const amount = visibleCategoryStats[category.id] || 0
+                            const percentage = visibleTotal > 0 ? (amount / visibleTotal) * 100 : 0
 
                             return (
                                 <div key={category.id} className="text-center p-3 sm:p-4 rounded-lg border">
@@ -905,7 +907,7 @@ function MonthlyExpensesPageContent() {
                                 {filterData.startDate && filterData.endDate ? (
                                     `Pengeluaran dari ${format(new Date(filterData.startDate), "dd MMMM yyyy", { locale: id })} sampai ${format(new Date(filterData.endDate), "dd MMMM yyyy", { locale: id })}`
                                 ) : (
-                                    `Pengeluaran bulan ${format(new Date(filterData.month + "-01"), "MMMM yyyy", { locale: id })}`
+                                    filterData.month ? `Pengeluaran bulan ${format(new Date(`${filterData.month}-01T00:00:00`), "MMMM yyyy", { locale: id })}` : "Data terbaru"
                                 )}
                                 {filterData.category && (
                                     <span className="text-blue-600 font-medium">

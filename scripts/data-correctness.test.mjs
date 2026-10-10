@@ -9,7 +9,7 @@ test("monthly expenses supports a true cross-month range and derives metrics fro
   const page = await source("app/monthly-expenses/page.tsx")
   assert.match(service, /getExpensesByDateRange/)
   assert.match(page, /getExpensesByDateRange\(startDate, endDate\)/)
-  assert.match(page, /const visibleTotal = filteredExpenses\.reduce/)
+  assert.match(page, /const visibleTotal = useMemo\(\(\) => filteredExpenses\.reduce/)
   assert.doesNotMatch(page, /new Date\(filterData\.month \+ "-01"\)/)
   assert.match(page, /Data terbaru:/)
 })

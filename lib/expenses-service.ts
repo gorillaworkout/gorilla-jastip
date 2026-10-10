@@ -1,5 +1,5 @@
 import { db, auth } from "./firebase"
-import { collection, addDoc, updateDoc, deleteDoc, getDocs, doc, query, where, serverTimestamp } from "firebase/firestore"
+import { collection, addDoc, updateDoc, deleteDoc, getDoc, getDocs, doc, query, where, serverTimestamp } from "firebase/firestore"
 import type { Expense, CreateExpenseData, UpdateExpenseData } from "./types"
 
 const EXPENSES_COLLECTION = "expenses"
@@ -43,6 +43,9 @@ export class ExpensesService {
     this.checkAuth()
     if (!db) throw new Error("Firestore database not initialized")
 
+    const expenseRef = doc(db, EXPENSES_COLLECTION, id)
+    const existing = await getDoc(expenseRef)
+    if (!existing.exists()) throw new Error("Pengeluaran tidak ditemukan")
     const updateData: any = { updatedAt: serverTimestamp() }
     if (data.date !== undefined) updateData.date = new Date(data.date)
     if (data.itemName !== undefined) updateData.itemName = data.itemName
@@ -53,14 +56,12 @@ export class ExpensesService {
 
     // Recalculate totalInIDR if price or rate changed
     if (data.expensePrice !== undefined || data.exchangeRate !== undefined) {
-      const price = updateData.expensePrice
-      const rate = updateData.exchangeRate
-      if (typeof price === "number" && typeof rate === "number") {
-        updateData.totalInIDR = price * rate
-      }
+      const price = updateData.expensePrice ?? existing.data().expensePrice
+      const rate = updateData.exchangeRate ?? existing.data().exchangeRate
+      updateData.totalInIDR = price * rate
     }
 
-    await updateDoc(doc(db, EXPENSES_COLLECTION, id), updateData)
+    await updateDoc(expenseRef, updateData)
   }
 
   static async deleteExpense(id: string): Promise<void> {

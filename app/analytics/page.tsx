@@ -56,6 +56,7 @@ function AnalyticsContent() {
   const [selectedPeriod, setSelectedPeriod] = useState("all")
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -73,6 +74,7 @@ function AnalyticsContent() {
     const load = async () => {
       try {
         setLoading(true)
+        setError("")
         const periods: Period[] = await PeriodsService.getPeriods()
         let targetPeriodIds: string[] = []
         if (selectedPeriod === "current") {
@@ -85,6 +87,7 @@ function AnalyticsContent() {
           targetPeriodIds.map((id) => PeriodsService.getPeriodItems(id))
         )
         let items: PeriodItem[] = itemsArrays.flat()
+        const comparisonItems = items
         if (selectedPeriod === "last30") {
           const cutoff = new Date()
           cutoff.setDate(cutoff.getDate() - 30)
@@ -99,8 +102,8 @@ function AnalyticsContent() {
         last30Start.setDate(now.getDate() - 30)
         const prev30Start = new Date(now)
         prev30Start.setDate(now.getDate() - 60)
-        const last30Items = items.filter((it) => it.createdAt >= last30Start)
-        const prev30Items = items.filter((it) => it.createdAt < last30Start && it.createdAt >= prev30Start)
+        const last30Items = comparisonItems.filter((it) => it.createdAt >= last30Start)
+        const prev30Items = comparisonItems.filter((it) => it.createdAt < last30Start && it.createdAt >= prev30Start)
         const last30Revenue = last30Items.reduce((s, it) => s + it.sellingPrice, 0)
         const prev30Revenue = prev30Items.reduce((s, it) => s + it.sellingPrice, 0)
         const last30Profit = last30Items.reduce((s, it) => s + it.profit, 0)
@@ -170,6 +173,7 @@ function AnalyticsContent() {
         })
       } catch (err) {
         console.error("Failed to load analytics:", err)
+        setError(err instanceof Error ? err.message : "Gagal memuat analytics")
         setAnalytics({
           totalRevenue: 0,
           totalProfit: 0,
@@ -211,6 +215,7 @@ function AnalyticsContent() {
       <main className="flex-1 min-w-0 overflow-auto">
         <MobileHeader title="Analytics" />
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6 space-y-4 sm:space-y-6">
+          {error && <div role="alert" className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">Gagal memuat analytics: {error}</div>}
           {/* Mobile-first header */}
           <div className="flex flex-col gap-3 sm:gap-4">
             <div>
