@@ -49,7 +49,8 @@ function UangkuhContent() {
     setExtracting(true); setExtractError("")
     try {
       const form = new FormData(); form.append("file", file)
-      const response = await fetch("/api/uangkuh/extract", { method: "POST", body: form })
+      const token = await firebaseUser?.getIdToken()
+      const response = await fetch("/api/uangkuh/extract", { method: "POST", headers: token ? { Authorization: `Bearer ${token}` } : {}, body: form })
       const result = await response.json()
       if (!response.ok) throw new Error(result.error || "AI gagal membaca file.")
       setDrafts(result.transactions || [])

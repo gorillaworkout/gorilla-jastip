@@ -22,8 +22,11 @@ test("global business collections are admin-only; monthly expenses are validated
 })
 
 test("Uangkuh is covered by server-side route protection", () => {
-  assert.match(read("lib/admin-routes.ts"), /["']\/uangkuh["']/)
-  assert.match(read("middleware.ts"), /["']\/uangkuh["']/)
+  const routes = read("lib/admin-routes.ts")
+  const middleware = read("middleware.ts")
+  assert.match(routes, /["']\/uangkuh["']/)
+  assert.match(middleware, /["']\/uangkuh["']/)
+  assert.match(middleware, /verifyAdminSessionCookie\(session\)/)
 })
 
 test("admin session verifies Firebase JWT and stores only signed server claims", () => {

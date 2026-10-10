@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-import { ADMIN_SESSION_COOKIE, isAdminPath } from "@/lib/admin-routes"
+import { ADMIN_SESSION_COOKIE, isAdminPath, verifyAdminSessionCookie } from "@/lib/admin-routes"
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl
 
   if (!isAdminPath(pathname)) {
@@ -10,7 +10,7 @@ export function middleware(request: NextRequest) {
   }
 
   const session = request.cookies.get(ADMIN_SESSION_COOKIE)?.value
-  if (session) {
+  if (await verifyAdminSessionCookie(session)) {
     return NextResponse.next()
   }
 
@@ -41,5 +41,7 @@ export const config = {
     "/departures/:path*",
     "/jastipers/manage",
     "/jastipers/manage/:path*",
+    "/uangkuh",
+    "/uangkuh/:path*",
   ],
 }

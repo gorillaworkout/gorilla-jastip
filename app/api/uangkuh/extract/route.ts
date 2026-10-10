@@ -4,10 +4,14 @@ import { execFile } from "node:child_process"
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { promisify } from "node:util"
+import { authenticateAdminRequest } from "@/lib/server-auth"
 
 const execFileAsync = promisify(execFile)
 
 const MAX_BYTES = 10 * 1024 * 1024
+const RATE_WINDOW_MS = 60_000
+const MAX_REQUESTS = 5
+const attempts = new Map<string, { count: number; resetAt: number }>()
 const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp", "application/pdf"])
 const PROMPT = `Ekstrak semua transaksi dari mutasi rekening bank apa pun (BCA, Jenius, bank lain, PDF atau screenshot). Kembalikan JSON saja dengan schema {"transactions":[{"kind":"income"|"expense","amount":number,"date":"YYYY-MM-DD","category":"string","note":"string","confidence":number}]}. Normalisasi tanggal DD/MM/YYYY, DD-MM-YYYY, atau format lain menjadi YYYY-MM-DD. Nominal Rupiah bisa memakai titik/koma; kirim sebagai angka positif tanpa pemisah. Kenali kolom debit/kredit, DB/CR, masuk/keluar; kredit/CR/masuk = income, debit/DB/keluar = expense. Abaikan saldo awal/akhir, nomor rekening, header, biaya laporan, dan total. Jangan menebak baris yang bukan transaksi.`
 
@@ -70,6 +74,15 @@ async function renderPdfPages(bytes: Buffer, pageCount: number) {
 }
 
 export async function POST(request: Request) {
+  const admin = await authenticateAdminRequest(request)
+  if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const now = Date.now()
+  const current = attempts.get(admin.sub)
+  if (!current || current.resetAt <= now) attempts.set(admin.sub, { count: 1, resetAt: now + RATE_WINDOW_MS })
+  else if (current.count >= MAX_REQUESTS) return NextResponse.json({ error: "Terlalu banyak permintaan. Coba lagi nanti." }, { status: 429 })
+  else current.count++
+  const declaredSize = Number(request.headers.get("content-length") || 0)
+  if (declaredSize > MAX_BYTES + 1024 * 1024) return NextResponse.json({ error: "Ukuran request terlalu besar." }, { status: 413 })
   const key = process.env.AI_API_KEY
   if (!key) return NextResponse.json({ error: "AI belum dikonfigurasi. Tambahkan AI_API_KEY di environment production." }, { status: 503 })
   const form = await request.formData()
