@@ -17,6 +17,7 @@ interface AuthContextType {
   user: User | null
   firebaseUser: FirebaseUser | null
   loading: boolean
+  sessionError: string
   loginWithGoogle: () => Promise<void>
   logout: () => Promise<void>
   isConfigured: boolean
@@ -28,6 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null)
   const [loading, setLoading] = useState(true)
+  const [sessionError, setSessionError] = useState("")
   const [mounted, setMounted] = useState(false)
 
   // Ensure component is mounted on client
@@ -52,7 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
 
           const token = await firebaseUser.getIdToken()
-          await fetch("/api/auth/session", {
+          const sessionResponse = await fetch("/api/auth/session", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ token }),
@@ -64,7 +66,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (userDoc.exists()) {
             // User exists, get their data
             const userData = userDoc.data() as Omit<User, "id">
-            setUser({ id: firebaseUser.uid, ...userData })
+            // Admin UI is unusable without a server session (middleware would loop to /login).
+            if (userData.role === "admin" && !sessionResponse.ok) {
+              setSessionError("Sesi admin gagal dibuat di server. Coba login ulang atau hubungi pengelola.")
+              setUser({ id: firebaseUser.uid, ...userData, role: "user" })
+            } else {
+              setSessionError("")
+              setUser({ id: firebaseUser.uid, ...userData })
+            }
           } else {
             // New user, create default profile
             const defaultUser: User = {
@@ -169,6 +178,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     firebaseUser,
     loading,
+    sessionError,
     loginWithGoogle,
     logout,
     isConfigured: !!isFirebaseConfigured,

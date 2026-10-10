@@ -27,7 +27,8 @@ export async function POST(request: Request) {
   try {
     const claims = await verifyFirebaseIdToken(token)
     if (!await isAdminUser(claims.sub, token)) return NextResponse.json({ ok: false }, { status: 403 })
-    const expiresAt = Math.min(claims.exp, Math.floor(Date.now() / 1000) + MAX_AGE)
+    // Session outlives the 1h ID token on purpose: role was just verified server-side.
+    const expiresAt = Math.floor(Date.now() / 1000) + MAX_AGE
     const response = NextResponse.json({ ok: true })
     response.cookies.set(ADMIN_SESSION_COOKIE, createAdminSession(claims.sub, expiresAt), sessionCookieOptions())
     return response

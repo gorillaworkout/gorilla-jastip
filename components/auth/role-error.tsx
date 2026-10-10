@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/auth-context"
 import { useRouter } from "next/navigation"
 
 export function RoleError() {
-  const { logout, user } = useAuth()
+  const { logout, user, sessionError } = useAuth()
   const router = useRouter()
 
   const handleLogout = async () => {
@@ -30,11 +30,17 @@ export function RoleError() {
         <CardContent className="space-y-4">
           <div className="text-center text-sm text-muted-foreground">
             <p>Email: <span className="font-medium">{user?.email}</span></p>
-            <p>Role: <span className="font-medium">{user?.role}</span></p>
-            <p className="mt-2">
-              Hanya user dengan role admin yang dapat mengakses sistem ini.
-              Silakan hubungi administrator untuk mendapatkan akses.
-            </p>
+            {sessionError ? (
+              <p role="alert" className="mt-2 text-destructive">{sessionError}</p>
+            ) : (
+              <>
+                <p>Role: <span className="font-medium">{user?.role}</span></p>
+                <p className="mt-2">
+                  Hanya user dengan role admin yang dapat mengakses sistem ini.
+                  Silakan hubungi administrator untuk mendapatkan akses.
+                </p>
+              </>
+            )}
           </div>
           
           <Button 

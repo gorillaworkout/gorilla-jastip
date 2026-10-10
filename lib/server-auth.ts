@@ -2,6 +2,7 @@ import { createHmac, createVerify, timingSafeEqual } from "node:crypto"
 
 const FIREBASE_CERTS_URL = "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com"
 const MAX_CERT_AGE_MS = 60 * 60 * 1000
+const CLOCK_SKEW_SECONDS = 300
 let certCache: { expires: number; certs: Record<string, string> } | undefined
 
 export type FirebaseClaims = { aud: string; auth_time?: number; exp: number; iat: number; iss: string; sub: string; user_id?: string }
@@ -10,8 +11,8 @@ function decodePart(value: string) {
   return Buffer.from(value, "base64url").toString("utf8")
 }
 
-async function getFirebaseCerts() {
-  if (certCache && certCache.expires > Date.now()) return certCache.certs
+async function getFirebaseCerts(force = false) {
+  if (!force && certCache && certCache.expires > Date.now()) return certCache.certs
   const response = await fetch(FIREBASE_CERTS_URL, { cache: "no-store" })
   if (!response.ok) throw new Error("Firebase signing keys unavailable")
   const certs = await response.json() as Record<string, string>
@@ -33,7 +34,8 @@ export async function verifyFirebaseIdToken(token: string): Promise<FirebaseClai
     throw new Error("Invalid Firebase ID token")
   }
   if (header.alg !== "RS256" || !header.kid) throw new Error("Invalid Firebase ID token")
-  const cert = (await getFirebaseCerts())[header.kid]
+  // Firebase rotates signing keys; refetch once before rejecting an unknown kid.
+  const cert = (await getFirebaseCerts())[header.kid] || (await getFirebaseCerts(true))[header.kid]
   if (!cert) throw new Error("Unknown Firebase signing key")
   const verifier = createVerify("RSA-SHA256")
   verifier.update(`${parts[0]}.${parts[1]}`)
@@ -41,7 +43,8 @@ export async function verifyFirebaseIdToken(token: string): Promise<FirebaseClai
   if (!verifier.verify(cert, Buffer.from(parts[2], "base64url"))) throw new Error("Invalid Firebase ID token signature")
 
   const now = Math.floor(Date.now() / 1000)
-  if (claims.aud !== projectId || claims.iss !== `https://securetoken.google.com/${projectId}` || !claims.sub || claims.sub.length > 128 || claims.exp <= now || claims.iat > now) {
+  if (claims.aud !== projectId || claims.iss !== `https://securetoken.google.com/${projectId}` || typeof claims.sub !== "string" || !claims.sub || claims.sub.length > 128
+    || typeof claims.exp !== "number" || typeof claims.iat !== "number" || claims.exp <= now - CLOCK_SKEW_SECONDS || claims.iat > now + CLOCK_SKEW_SECONDS) {
     throw new Error("Invalid Firebase ID token claims")
   }
   return claims
