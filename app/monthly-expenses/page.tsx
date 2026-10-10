@@ -510,7 +510,7 @@ function MonthlyExpensesPageContent() {
     return (
         <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
             {/* Mobile Header Spacing */}
-            <MobileHeader />
+            <MobileHeader title="Pengeluaran Bulanan" />
             
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">

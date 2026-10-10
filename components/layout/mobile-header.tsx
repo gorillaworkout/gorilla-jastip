@@ -1,8 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Menu } from "lucide-react"
+
 
 interface MobileHeaderProps {
   className?: string
@@ -11,17 +10,10 @@ interface MobileHeaderProps {
 
 export function MobileHeader({ className, title }: MobileHeaderProps) {
   return (
-    <div className={cn("md:hidden", className)}>
-      {title ? (
-        <div className="sticky top-0 z-20 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-          <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 flex items-center justify-between">
-            <div className="font-semibold text-sm sm:text-base ml-12 truncate">{title}</div>
-            <div className="w-9" />
-          </div>
-        </div>
-      ) : (
-        <div className="h-16" />
-      )}
+    <div className={cn("sticky top-0 z-20 h-14 border-b bg-background/95 backdrop-blur md:hidden", className)}>
+      <div className="mx-auto flex h-full max-w-7xl items-center px-4">
+        <h1 className="min-w-0 truncate pl-12 text-base font-semibold">{title}</h1>
+      </div>
     </div>
   )
 }

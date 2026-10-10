@@ -241,7 +241,7 @@ function PeriodsContent() {
       <Sidebar />
       <main className="flex-1 min-w-0 overflow-auto">
         {/* Mobile header menu */}
-        <MobileHeader />
+        <MobileHeader title="Periode" />
 
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6 space-y-4 sm:space-y-6 md:space-y-8">
           {/* Header */}

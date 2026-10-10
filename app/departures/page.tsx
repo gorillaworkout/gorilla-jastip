@@ -190,7 +190,7 @@ function DeparturesContent() {
     <div className="flex min-h-[100dvh] bg-background">
       <Sidebar />
       <main className="flex-1 min-w-0 overflow-auto">
-        <MobileHeader />
+        <MobileHeader title="Keberangkatan" />
         
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6 space-y-4 sm:space-y-6">
           <div className="flex flex-col gap-3 sm:gap-4">

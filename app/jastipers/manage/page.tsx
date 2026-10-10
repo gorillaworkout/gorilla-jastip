@@ -1,232 +1,136 @@
 "use client"
 
-import { useEffect, useState, useMemo, useCallback } from "react"
-import { Jastiper } from "@/lib/types"
-import { JastiperService } from "@/lib/jastiper-service"
-import { whatsappHref } from "@/lib/jastiper-display"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Package, Phone, Facebook, Search, Filter, CheckCircle, XCircle, X } from "lucide-react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import Image from "next/image"
+import { CheckCircle, Facebook, Filter, Package, Pencil, Phone, Plus, Search, ShieldCheck, ShieldOff, Trash2, X } from "lucide-react"
 import { AdminGuard } from "@/components/auth/admin-guard"
-import { Sidebar } from "@/components/layout/sidebar"
 import { MobileHeader } from "@/components/layout/mobile-header"
+import { Sidebar } from "@/components/layout/sidebar"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
+import { whatsappHref } from "@/lib/jastiper-display"
+import { JastiperService } from "@/lib/jastiper-service"
+import type { CreateJastiperData, Jastiper } from "@/lib/types"
+
+const emptyForm = (): CreateJastiperData => ({
+  name: "", imageUrl: "", facebookLink: "", instagramLink: "", phoneNumber: "",
+  description: "", completedOrders: 0, verifiedByFacebookLink: "",
+})
 
 function ManageJastipersContent() {
   const [jastipers, setJastipers] = useState<Jastiper[]>([])
   const [loading, setLoading] = useState(true)
-  const [filtering, setFiltering] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [sortBy, setSortBy] = useState("name")
-  const [filterVerified, setFilterVerified] = useState("all")
+  const [error, setError] = useState("")
+  const [search, setSearch] = useState("")
+  const [sort, setSort] = useState("name")
+  const [status, setStatus] = useState("all")
+  const [formOpen, setFormOpen] = useState(false)
+  const [editing, setEditing] = useState<Jastiper | null>(null)
+  const [form, setForm] = useState<CreateJastiperData>(emptyForm)
+  const [saving, setSaving] = useState(false)
+
+  const reload = useCallback(async () => {
+    setJastipers(await JastiperService.getAllJastipers())
+  }, [])
 
   useEffect(() => {
-    const fetchJastipers = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-        const data = await JastiperService.getAllJastipers()
-        setJastipers(data)
-      } catch (err) {
-        setError("Gagal memuat data jastiper")
-        console.error("Error fetching jastipers:", err)
-        setJastipers([])
-      } finally {
-        setLoading(false)
-      }
-    }
+    reload().catch((cause) => { console.error("Failed to load jastipers", cause); setError("Gagal memuat jastiper") }).finally(() => setLoading(false))
+  }, [reload])
 
-    fetchJastipers()
-  }, [])
+  const filtered = useMemo(() => {
+    const term = search.trim().toLowerCase()
+    return [...jastipers]
+      .filter((item) => status === "all" || (status === "verified" ? item.isVerified : !item.isVerified))
+      .filter((item) => !term || [item.name, item.description, item.phoneNumber].some((value) => String(value || "").toLowerCase().includes(term)))
+      .sort((a, b) => sort === "orders" ? (b.completedOrders || 0) - (a.completedOrders || 0) : String(a.name).localeCompare(String(b.name), "id"))
+  }, [jastipers, search, sort, status])
 
-  const filteredJastipers = useMemo(() => {
-    setFiltering(true)
+  const openForm = (item?: Jastiper) => {
+    setEditing(item || null)
+    setForm(item ? {
+      name: item.name, imageUrl: item.imageUrl || "", facebookLink: item.facebookLink || "",
+      instagramLink: item.instagramLink || "", phoneNumber: item.phoneNumber || "",
+      description: item.description || "", completedOrders: item.completedOrders || 0,
+      verifiedByFacebookLink: item.verifiedByFacebookLink || "",
+    } : emptyForm())
+    setFormOpen(true)
+  }
 
-    if (!Array.isArray(jastipers) || jastipers.length === 0) {
-      setTimeout(() => setFiltering(false), 100)
-      return []
-    }
+  const save = async () => {
+    if (!form.name.trim()) return setError("Nama jastiper wajib diisi")
+    setSaving(true); setError("")
+    try {
+      if (editing) await JastiperService.updateJastiper(editing.id, form)
+      else await JastiperService.createJastiper(form)
+      setFormOpen(false); await reload()
+    } catch (cause) { console.error("Failed to save jastiper", cause); setError("Gagal menyimpan jastiper") }
+    finally { setSaving(false) }
+  }
 
-    let filtered = [...jastipers]
+  const toggleVerification = async (item: Jastiper) => {
+    setError("")
+    try {
+      if (item.isVerified) await JastiperService.unverifyJastiper(item.id)
+      else await JastiperService.verifyJastiper(item.id)
+      await reload()
+    } catch (cause) { console.error("Failed to update verification", cause); setError("Gagal mengubah verifikasi") }
+  }
 
-    if (filterVerified === "verified") {
-      filtered = filtered.filter(j => j.isVerified === true)
-    } else if (filterVerified === "unverified") {
-      filtered = filtered.filter(j => j.isVerified === false)
-    }
+  const remove = async (item: Jastiper) => {
+    if (!confirm(`Hapus jastiper ${item.name}? Tindakan ini tidak dapat dibatalkan.`)) return
+    try { await JastiperService.deleteJastiper(item.id); await reload() }
+    catch (cause) { console.error("Failed to delete jastiper", cause); setError("Gagal menghapus jastiper") }
+  }
 
-    if (searchTerm.trim()) {
-      const searchLower = searchTerm.toLowerCase().trim()
-      filtered = filtered.filter(j => {
-        const name = String(j.name || "").toLowerCase()
-        const description = String(j.description || "").toLowerCase()
-        const phone = String(j.phoneNumber || "").toLowerCase()
-        const facebook = String(j.facebookLink || "").toLowerCase()
-        const instagram = String(j.instagramLink || "").toLowerCase()
-        return name.includes(searchLower) || description.includes(searchLower) || phone.includes(searchLower) || facebook.includes(searchLower) || instagram.includes(searchLower)
-      })
-    }
+  return <div className="flex min-h-[100dvh] bg-muted/20"><Sidebar /><main className="min-w-0 flex-1 overflow-auto">
+    <MobileHeader title="Jastiper" />
+    <div className="admin-page">
+      <header className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div className="admin-page-header"><h1 className="text-3xl font-bold tracking-tight">Jastiper</h1><p className="mt-1 text-muted-foreground">Kelola profil dan verifikasi jastiper.</p></div>
+        <Button className="w-full md:w-auto" onClick={() => openForm()}><Plus />Tambah jastiper</Button>
+      </header>
 
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case "name":
-          return String(a.name || "").localeCompare(String(b.name || ""), "id", { sensitivity: "base" })
-        case "orders":
-          return (Number(b.completedOrders) || 0) - (Number(a.completedOrders) || 0)
-        case "newest":
-          return (a.createdAt ? new Date(a.createdAt).getTime() : 0) > (b.createdAt ? new Date(b.createdAt).getTime() : 0) ? -1 : 1
-        case "oldest":
-          return (a.createdAt ? new Date(a.createdAt).getTime() : 0) - (b.createdAt ? new Date(b.createdAt).getTime() : 0)
-        case "rating":
-          return (Number(b.rating) || 0) - (Number(a.rating) || 0)
-        default:
-          return 0
-      }
-    })
+      <Card className="shadow-sm"><CardContent className="space-y-3 p-4">
+        <div className="relative"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input className="min-h-11 pl-10 pr-11" placeholder="Cari nama, deskripsi, atau WhatsApp" value={search} onChange={(e) => setSearch(e.target.value)} />{search && <button aria-label="Hapus pencarian" className="absolute right-0 top-1/2 grid min-h-11 min-w-11 -translate-y-1/2 place-items-center" onClick={() => setSearch("")}><X className="h-4 w-4" /></button>}</div>
+        <div className="grid grid-cols-2 gap-2"><Select value={sort} onValueChange={setSort}><SelectTrigger className="min-h-11"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="name">Nama A–Z</SelectItem><SelectItem value="orders">Trip terbanyak</SelectItem></SelectContent></Select><Select value={status} onValueChange={setStatus}><SelectTrigger className="min-h-11"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Semua status</SelectItem><SelectItem value="verified">Terverifikasi</SelectItem><SelectItem value="unverified">Belum diverifikasi</SelectItem></SelectContent></Select></div>
+        <p className="flex items-center gap-2 text-sm text-muted-foreground"><Filter className="h-4 w-4" />{filtered.length} dari {jastipers.length} jastiper</p>
+      </CardContent></Card>
 
-    setTimeout(() => setFiltering(false), 100)
-    return filtered
-  }, [jastipers, searchTerm, sortBy, filterVerified])
+      {error && <p role="alert" className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
+      {loading ? <p className="py-8 text-center text-muted-foreground">Memuat jastiper…</p> : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{filtered.map((item) => {
+        const wa = whatsappHref(item.phoneNumber)
+        return <Card key={item.id} className="shadow-sm"><CardHeader className="pb-3"><div className="flex items-center gap-3"><div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-muted"><Image src={item.imageUrl || "/placeholder-user.jpg"} alt={item.name} fill className="object-cover" /></div><div className="min-w-0"><h2 className="truncate font-semibold">{item.name}</h2><Badge variant={item.isVerified ? "default" : "secondary"} className="mt-1"><CheckCircle className="mr-1 h-3 w-3" />{item.isVerified ? "Terverifikasi" : "Belum diverifikasi"}</Badge></div></div></CardHeader><CardContent className="space-y-3">
+          {item.description && <p className="line-clamp-2 text-sm text-muted-foreground">{item.description}</p>}
+          <p className="flex items-center gap-2 text-sm"><Package className="h-4 w-4" />{item.completedOrders || 0} trip selesai</p>
+          <div className="flex flex-wrap gap-3 text-sm">{wa && <a className="flex min-h-11 items-center gap-2 text-green-700" href={wa} target="_blank" rel="noopener noreferrer"><Phone className="h-4 w-4" />WhatsApp</a>}{item.facebookLink && <a className="flex min-h-11 items-center gap-2 text-blue-700" href={item.facebookLink} target="_blank" rel="noopener noreferrer"><Facebook className="h-4 w-4" />Facebook</a>}</div>
+          <div className="grid grid-cols-2 gap-2 border-t pt-3"><Button variant="outline" size="sm" onClick={() => openForm(item)}><Pencil />Edit</Button><Button variant="outline" size="sm" onClick={() => toggleVerification(item)}>{item.isVerified ? <ShieldOff /> : <ShieldCheck />}{item.isVerified ? "Batalkan" : "Verifikasi"}</Button><Button variant="outline" size="sm" className="col-span-2 text-destructive hover:text-destructive" onClick={() => remove(item)}><Trash2 />Hapus</Button></div>
+        </CardContent></Card>
+      })}</div>}
 
-  const resetFilters = useCallback(() => {
-    setSearchTerm("")
-    setSortBy("name")
-    setFilterVerified("all")
-  }, [])
-
-  return (
-    <div className="flex min-h-[100dvh] bg-background">
-      <Sidebar />
-      <main className="flex-1 min-w-0 overflow-auto">
-        <MobileHeader />
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6 space-y-4 sm:space-y-6">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Kelola Jastiper</h1>
-            <p className="text-muted-foreground text-sm sm:text-base">
-              Lihat status verifikasi dan kontak jastiper. Halaman ini hanya untuk admin.
-            </p>
-          </div>
-
-          <div className="space-y-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Cari jastiper berdasarkan nama, deskripsi, nomor telepon, Facebook, atau Instagram..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-10"
-              />
-              {searchTerm && (
-                <button onClick={() => setSearchTerm("")} className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Urutkan berdasarkan" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="name">Nama (A-Z)</SelectItem>
-                  <SelectItem value="orders">Order Terbanyak</SelectItem>
-                  <SelectItem value="newest">Terbaru</SelectItem>
-                  <SelectItem value="oldest">Terlama</SelectItem>
-                  <SelectItem value="rating">Rating Tertinggi</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={filterVerified} onValueChange={setFilterVerified}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua Status</SelectItem>
-                  <SelectItem value="verified">Terverifikasi</SelectItem>
-                  <SelectItem value="unverified">Belum Terverifikasi</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Button onClick={resetFilters} variant="outline">Reset Filter</Button>
-            </div>
-
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Filter className="h-4 w-4" />
-              <span>Menampilkan {filteredJastipers.length} dari {jastipers.length} jastiper</span>
-            </div>
-          </div>
-
-          {error && <p className="text-red-500">{error}</p>}
-
-          {loading || filtering ? (
-            <p className="text-muted-foreground">Memuat data jastiper...</p>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredJastipers.map((jastiper) => {
-                const wa = whatsappHref(jastiper.phoneNumber)
-                return (
-                  <Card key={jastiper.id}>
-                    <CardHeader className="pb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="relative w-16 h-16 rounded-full overflow-hidden bg-muted flex-shrink-0">
-                          <Image src={jastiper.imageUrl || "/placeholder-user.jpg"} alt={jastiper.name} fill className="object-cover" />
-                        </div>
-                        <div className="min-w-0">
-                          <h3 className="font-bold truncate">{jastiper.name}</h3>
-                          <Badge variant={jastiper.isVerified ? "default" : "secondary"} className="mt-1">
-                            {jastiper.isVerified ? (
-                              <><CheckCircle className="h-3 w-3 mr-1" /> Terverifikasi</>
-                            ) : (
-                              <><XCircle className="h-3 w-3 mr-1" /> Belum Terverifikasi</>
-                            )}
-                          </Badge>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      {jastiper.description && <p className="text-sm text-muted-foreground line-clamp-2">{jastiper.description}</p>}
-                      <div className="text-sm flex items-center gap-2">
-                        <Package className="h-4 w-4" />
-                        {jastiper.completedOrders || 0} trip selesai
-                      </div>
-                      {jastiper.verifiedByFacebookLink && (
-                        <a href={jastiper.verifiedByFacebookLink} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">
-                          Verified by Facebook
-                        </a>
-                      )}
-                      <div className="flex flex-col gap-2">
-                        {wa && (
-                          <a href={wa} target="_blank" rel="noopener noreferrer" className="text-sm text-green-700 hover:underline flex items-center gap-2">
-                            <Phone className="h-4 w-4" /> WhatsApp
-                          </a>
-                        )}
-                        {jastiper.facebookLink && (
-                          <a href={jastiper.facebookLink} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-700 hover:underline flex items-center gap-2">
-                            <Facebook className="h-4 w-4" /> Facebook
-                          </a>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
-          )}
-        </div>
-      </main>
+      <Dialog open={formOpen} onOpenChange={setFormOpen}><DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-xl"><DialogHeader><DialogTitle>{editing ? "Edit jastiper" : "Tambah jastiper"}</DialogTitle></DialogHeader><div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Nama" id="name" className="sm:col-span-2"><Input id="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Field>
+        <Field label="WhatsApp" id="phone"><Input id="phone" value={form.phoneNumber} onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })} /></Field>
+        <Field label="Trip selesai" id="orders"><Input id="orders" type="number" min="0" value={form.completedOrders} onChange={(e) => setForm({ ...form, completedOrders: Number(e.target.value) || 0 })} /></Field>
+        <Field label="URL foto" id="image" className="sm:col-span-2"><Input id="image" value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} /></Field>
+        <Field label="Facebook" id="facebook"><Input id="facebook" value={form.facebookLink} onChange={(e) => setForm({ ...form, facebookLink: e.target.value })} /></Field>
+        <Field label="Instagram" id="instagram"><Input id="instagram" value={form.instagramLink} onChange={(e) => setForm({ ...form, instagramLink: e.target.value })} /></Field>
+        <Field label="Bukti verifikasi" id="proof" className="sm:col-span-2"><Input id="proof" value={form.verifiedByFacebookLink} onChange={(e) => setForm({ ...form, verifiedByFacebookLink: e.target.value })} /></Field>
+        <Field label="Deskripsi" id="description" className="sm:col-span-2"><Textarea id="description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></Field>
+      </div><Button onClick={save} disabled={saving || !form.name.trim()}>{saving ? "Menyimpan…" : "Simpan"}</Button></DialogContent></Dialog>
     </div>
-  )
+  </main></div>
+}
+
+function Field({ label, id, className = "", children }: { label: string; id: string; className?: string; children: React.ReactNode }) {
+  return <div className={`space-y-2 ${className}`}><Label htmlFor={id}>{label}</Label>{children}</div>
 }
 
 export default function ManageJastipersPage() {
-  return (
-    <AdminGuard>
-      <ManageJastipersContent />
-    </AdminGuard>
-  )
+  return <AdminGuard><ManageJastipersContent /></AdminGuard>
 }

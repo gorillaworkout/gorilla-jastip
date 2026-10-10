@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Button } from "@/components/ui/button"
+
 import { Badge } from "@/components/ui/badge"
 import {
   XAxis,
@@ -17,10 +17,11 @@ import {
   LineChart,
   Line,
 } from "recharts"
-import { TrendingUp, DollarSign, Package, Percent, Download } from "lucide-react"
+import { TrendingUp, DollarSign, Package, Percent } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { AdminGuard } from "@/components/auth/admin-guard"
 import { Sidebar } from "@/components/layout/sidebar"
+import { MobileHeader } from "@/components/layout/mobile-header"
 import { PeriodsService } from "@/lib/periods-service"
 import type { Period, PeriodItem } from "@/lib/types"
 
@@ -208,6 +209,7 @@ function AnalyticsContent() {
     <div className="flex min-h-[100dvh] bg-background">
       <Sidebar />
       <main className="flex-1 min-w-0 overflow-auto">
+        <MobileHeader title="Analytics" />
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6 space-y-4 sm:space-y-6">
           {/* Mobile-first header */}
           <div className="flex flex-col gap-3 sm:gap-4">
@@ -216,7 +218,7 @@ function AnalyticsContent() {
               <p className="text-muted-foreground text-sm sm:text-base">Insights bisnis jastip Anda</p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+            <div className="max-w-sm">
               <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
                 <SelectTrigger className="w-full mobile-input">
                   <SelectValue />
@@ -228,10 +230,6 @@ function AnalyticsContent() {
                 </SelectContent>
               </Select>
 
-              <Button variant="outline" className="w-full mobile-button bg-transparent">
-                <Download className="h-3 h-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                <span className="text-xs sm:text-sm">Export</span>
-              </Button>
             </div>
           </div>
 

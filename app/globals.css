@@ -116,6 +116,14 @@
   
   /* Mobile-friendly inputs */
   .mobile-input {
-    @apply text-base sm:text-sm;
+    @apply min-h-11 text-base sm:text-sm;
+  }
+
+  .admin-page {
+    @apply mx-auto max-w-7xl space-y-4 px-4 py-4 sm:px-6 md:space-y-6 md:py-6 lg:px-8;
+  }
+
+  .admin-page-header {
+    @apply hidden md:block;
   }
 }
