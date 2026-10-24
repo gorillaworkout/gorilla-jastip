@@ -1,5 +1,5 @@
 import { db, auth } from "./firebase"
-import { collection, addDoc, updateDoc, deleteDoc, getDocs, doc, query, where, serverTimestamp } from "firebase/firestore"
+import { collection, addDoc, updateDoc, deleteDoc, getDocs, getDoc, doc, query, where, serverTimestamp } from "firebase/firestore"
 import type { Income, CreateIncomeData, UpdateIncomeData } from "./types"
 
 const INCOMES_COLLECTION = "incomes"
@@ -10,11 +10,21 @@ export class IncomesService {
     return auth.currentUser
   }
 
+  private static async checkOwner(id: string, currentUserId: string) {
+    if (!db) throw new Error("Firestore database not initialized")
+    const snap = await getDoc(doc(db, INCOMES_COLLECTION, id))
+    if (!snap.exists()) throw new Error("Pemasukan tidak ditemukan.")
+    const owner = (snap.data() as any).createdBy
+    if (owner && owner !== currentUserId) throw new Error("Hanya pemilik yang boleh mengubah pemasukan ini.")
+  }
+
   static async addIncome(data: CreateIncomeData): Promise<string> {
     const currentUser = this.checkAuth()
     if (!db) throw new Error("Firestore database not initialized")
-
-    const incomeAmount = Number.parseFloat(data.incomeAmount)
+    if (!data.periodId) throw new Error("Periode wajib diisi.")
+    if (!data.customerName?.trim()) throw new Error("Nama customer wajib diisi.")
+    const incomeAmount = typeof data.incomeAmount === "number" ? data.incomeAmount : Number.parseFloat(String(data.incomeAmount))
+    if (!Number.isFinite(incomeAmount) || incomeAmount <= 0) throw new Error("Nominal pemasukan harus angka lebih dari 0.")
 
     const payload = {
       periodId: data.periodId,
@@ -33,21 +43,30 @@ export class IncomesService {
   }
 
   static async updateIncome(id: string, data: UpdateIncomeData): Promise<void> {
-    this.checkAuth()
+    const currentUser = this.checkAuth()
     if (!db) throw new Error("Firestore database not initialized")
+    await this.checkOwner(id, currentUser.uid)
 
     const updateData: any = { updatedAt: serverTimestamp() }
     if (data.date !== undefined) updateData.date = new Date(data.date)
-    if (data.customerName !== undefined) updateData.customerName = data.customerName
-    if (data.incomeAmount !== undefined) updateData.incomeAmount = Number.parseFloat(data.incomeAmount)
+    if (data.customerName !== undefined) {
+      if (!data.customerName.trim()) throw new Error("Nama customer wajib diisi.")
+      updateData.customerName = data.customerName
+    }
+    if (data.incomeAmount !== undefined) {
+      const incomeAmount = typeof data.incomeAmount === "number" ? data.incomeAmount : Number.parseFloat(String(data.incomeAmount))
+      if (!Number.isFinite(incomeAmount) || incomeAmount <= 0) throw new Error("Nominal pemasukan harus angka lebih dari 0.")
+      updateData.incomeAmount = incomeAmount
+    }
     if (data.notes !== undefined) updateData.notes = data.notes
 
     await updateDoc(doc(db, INCOMES_COLLECTION, id), updateData)
   }
 
   static async deleteIncome(id: string): Promise<void> {
-    this.checkAuth()
+    const currentUser = this.checkAuth()
     if (!db) throw new Error("Firestore database not initialized")
+    await this.checkOwner(id, currentUser.uid)
     await deleteDoc(doc(db, INCOMES_COLLECTION, id))
   }
 
@@ -76,5 +95,3 @@ export class IncomesService {
     return items
   }
 }
-
-

@@ -38,11 +38,6 @@ if (isFirebaseConfigured) {
     // Initialize Auth
     auth = getAuth(app)
 
-    console.log("✅ Firebase initialized successfully")
-    console.log("📁 Firestore database:", db ? "Initialized" : "Failed")
-    console.log("🔐 Auth service:", auth ? "Initialized" : "Failed")
-    console.log("🏗️ Project ID:", process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID)
-    
     // Verify that db is properly initialized
     if (!db) {
       throw new Error("Firestore database failed to initialize")

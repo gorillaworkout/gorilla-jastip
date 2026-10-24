@@ -1,4 +1,4 @@
-import { db } from './firebase'
+import { db, auth } from './firebase'
 import { 
   collection, 
   addDoc, 
@@ -61,6 +61,11 @@ export class MonthlyExpensesService {
   async addExpense(expense: Omit<MonthlyExpense, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
     try {
       const firestoreDb = this.checkFirebase()
+      if (!auth?.currentUser) throw new Error('User tidak terautentikasi. Silakan login.')
+      if (!expense.name?.trim()) throw new Error('Nama pengeluaran wajib diisi.')
+      if (!Number.isFinite(expense.amount) || expense.amount <= 0) throw new Error('Nominal harus angka lebih dari 0.')
+      if (!EXPENSE_CATEGORIES.some((c) => c.id === expense.category)) throw new Error('Kategori tidak valid.')
+      if (!(expense.date instanceof Date) || Number.isNaN(expense.date.getTime())) throw new Error('Tanggal tidak valid.')
       
       const docRef = await addDoc(collection(firestoreDb, this.collectionName), {
         ...expense,
@@ -81,10 +86,6 @@ export class MonthlyExpensesService {
   async getCurrentMonthExpenses(): Promise<MonthlyExpense[]> {
     try {
       const firestoreDb = this.checkFirebase()
-      
-      // Debug logging
-      console.log('🔍 Firebase check passed, db instance:', firestoreDb)
-      console.log('🔍 Collection name:', this.collectionName)
       
       const now = new Date()
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
@@ -168,10 +169,15 @@ export class MonthlyExpensesService {
   async updateExpense(id: string, updates: Partial<MonthlyExpense>): Promise<void> {
     try {
       const firestoreDb = this.checkFirebase()
+      if (!auth?.currentUser) throw new Error('User tidak terautentikasi. Silakan login.')
+      // Jangan biarkan createdAt/id ditimpa lewat updates.
+      const { id: _id, createdAt: _createdAt, ...safeUpdates } = updates
+      if (safeUpdates.amount !== undefined && (!Number.isFinite(safeUpdates.amount) || safeUpdates.amount <= 0)) throw new Error('Nominal harus angka lebih dari 0.')
+      if (safeUpdates.category !== undefined && !EXPENSE_CATEGORIES.some((c) => c.id === safeUpdates.category)) throw new Error('Kategori tidak valid.')
       
       const docRef = doc(firestoreDb, this.collectionName, id)
       await updateDoc(docRef, {
-        ...updates,
+        ...safeUpdates,
         updatedAt: Timestamp.now(),
       })
     } catch (error) {
@@ -187,6 +193,7 @@ export class MonthlyExpensesService {
   async deleteExpense(id: string): Promise<void> {
     try {
       const firestoreDb = this.checkFirebase()
+      if (!auth?.currentUser) throw new Error('User tidak terautentikasi. Silakan login.')
       
       const docRef = doc(firestoreDb, this.collectionName, id)
       await deleteDoc(docRef)
@@ -199,12 +206,14 @@ export class MonthlyExpensesService {
     }
   }
 
-  // Get expenses by category for current month
-  async getExpensesByCategory(): Promise<{ [key: string]: number }> {
+  // Get expenses by category. Bila tahun/bulan diisi, statistik mengikuti
+  // bulan tersebut (sebelumnya selalu bulan berjalan walau halaman
+  // menampilkan bulan lain).
+  async getExpensesByCategory(year?: number, month?: number): Promise<{ [key: string]: number }> {
     try {
-      const firestoreDb = this.checkFirebase()
-      
-      const expenses = await this.getCurrentMonthExpenses()
+      const expenses = year !== undefined && month !== undefined
+        ? await this.getMonthExpenses(year, month)
+        : await this.getCurrentMonthExpenses()
       const categoryTotals: { [key: string]: number } = {}
       
       expenses.forEach(expense => {
@@ -217,7 +226,7 @@ export class MonthlyExpensesService {
       
       return categoryTotals
     } catch (error) {
-      console.error('Error getting expenses by category:', error)
+      console.error('Error getting category stats:', error)
       if (error instanceof Error) {
         throw new Error(`Gagal mengambil statistik kategori: ${error.message}`)
       }

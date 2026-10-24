@@ -4,6 +4,12 @@ import type { Expense, CreateExpenseData, UpdateExpenseData } from "./types"
 
 const EXPENSES_COLLECTION = "expenses"
 
+function parsePositiveNumber(value: unknown, label: string) {
+  const num = typeof value === "number" ? value : Number.parseFloat(String(value))
+  if (!Number.isFinite(num) || num <= 0) throw new Error(`${label} harus angka lebih dari 0.`)
+  return num
+}
+
 export class ExpensesService {
   private static checkAuth() {
     if (!auth?.currentUser) {
@@ -12,12 +18,24 @@ export class ExpensesService {
     return auth.currentUser
   }
 
+  // Hanya pemilik dokumen yang boleh mengubah/menghapusnya.
+  private static async checkOwner(id: string, currentUserId: string) {
+    if (!db) throw new Error("Firestore database not initialized")
+    const snap = await getDoc(doc(db, EXPENSES_COLLECTION, id))
+    if (!snap.exists()) throw new Error("Pengeluaran tidak ditemukan.")
+    const owner = (snap.data() as any).createdBy
+    if (owner && owner !== currentUserId) throw new Error("Hanya pemilik yang boleh mengubah pengeluaran ini.")
+  }
+
   static async addExpense(data: CreateExpenseData): Promise<string> {
     const currentUser = this.checkAuth()
     if (!db) throw new Error("Firestore database not initialized")
+    if (!data.periodId) throw new Error("Periode wajib diisi.")
+    if (!data.itemName?.trim()) throw new Error("Nama item wajib diisi.")
+    if (!data.category?.trim()) throw new Error("Kategori wajib diisi.")
 
-    const expensePrice = Number.parseFloat(data.expensePrice)
-    const exchangeRate = Number.parseFloat(data.exchangeRate)
+    const expensePrice = parsePositiveNumber(data.expensePrice, "Harga pengeluaran")
+    const exchangeRate = parsePositiveNumber(data.exchangeRate, "Kurs")
     const totalInIDR = expensePrice * exchangeRate
 
     const payload = {
@@ -40,21 +58,27 @@ export class ExpensesService {
   }
 
   static async updateExpense(id: string, data: UpdateExpenseData): Promise<void> {
-    this.checkAuth()
+    const currentUser = this.checkAuth()
     if (!db) throw new Error("Firestore database not initialized")
+    await this.checkOwner(id, currentUser.uid)
 
     const expenseRef = doc(db, EXPENSES_COLLECTION, id)
     const existing = await getDoc(expenseRef)
     if (!existing.exists()) throw new Error("Pengeluaran tidak ditemukan")
     const updateData: any = { updatedAt: serverTimestamp() }
     if (data.date !== undefined) updateData.date = new Date(data.date)
-    if (data.itemName !== undefined) updateData.itemName = data.itemName
-    if (data.expensePrice !== undefined) updateData.expensePrice = Number.parseFloat(data.expensePrice)
-    if (data.exchangeRate !== undefined) updateData.exchangeRate = Number.parseFloat(data.exchangeRate)
-    if (data.category !== undefined) updateData.category = data.category
+    if (data.itemName !== undefined) {
+      if (!data.itemName.trim()) throw new Error("Nama item wajib diisi.")
+      updateData.itemName = data.itemName
+    }
+    if (data.expensePrice !== undefined) updateData.expensePrice = parsePositiveNumber(data.expensePrice, "Harga pengeluaran")
+    if (data.exchangeRate !== undefined) updateData.exchangeRate = parsePositiveNumber(data.exchangeRate, "Kurs")
+    if (data.category !== undefined) {
+      if (!data.category.trim()) throw new Error("Kategori wajib diisi.")
+      updateData.category = data.category
+    }
     if (data.notes !== undefined) updateData.notes = data.notes
 
-    // Recalculate totalInIDR if price or rate changed
     if (data.expensePrice !== undefined || data.exchangeRate !== undefined) {
       const price = updateData.expensePrice ?? existing.data().expensePrice
       const rate = updateData.exchangeRate ?? existing.data().exchangeRate
@@ -65,8 +89,9 @@ export class ExpensesService {
   }
 
   static async deleteExpense(id: string): Promise<void> {
-    this.checkAuth()
+    const currentUser = this.checkAuth()
     if (!db) throw new Error("Firestore database not initialized")
+    await this.checkOwner(id, currentUser.uid)
     await deleteDoc(doc(db, EXPENSES_COLLECTION, id))
   }
 

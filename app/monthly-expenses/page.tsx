@@ -230,7 +230,7 @@ function MonthlyExpensesPageContent() {
                 const [year, month] = filterData.month.split('-').map(Number)
                 console.log('🔍 Year:', year, 'Month:', month)
                 expensesData = await monthlyExpensesService.getMonthExpenses(year, month)
-                categoryData = await monthlyExpensesService.getExpensesByCategory()
+                categoryData = await monthlyExpensesService.getExpensesByCategory(year, month)
                 total = expensesData.reduce((sum, expense) => sum + expense.amount, 0)
             } else {
                 console.log('📅 No filter applied, loading all available data')
@@ -274,7 +274,12 @@ function MonthlyExpensesPageContent() {
                     expensesData = []
                 }
                 
-                categoryData = await monthlyExpensesService.getExpensesByCategory()
+                // Statistik kategori dihitung dari bulan yang benar-benar
+                // dimuat (sebelumnya selalu bulan berjalan).
+                categoryData = expensesData.reduce((acc, expense) => {
+                    acc[expense.category] = (acc[expense.category] || 0) + expense.amount
+                    return acc
+                }, {} as { [key: string]: number })
                 total = expensesData.reduce((sum, expense) => sum + expense.amount, 0)
             }
 
