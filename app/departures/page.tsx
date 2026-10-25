@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { TripsService, type DepartureTrip, type CreateTripData, type UpdateTripData } from "@/lib/trips-service"
+import OsakaTripCard from "@/components/osaka-trip-card"
 
 const initialFormData: CreateTripData = {
   title: "",
@@ -205,6 +206,13 @@ function DeparturesContent() {
             <div>
               <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-foreground font-serif">List Keberangkatan</h1>
               <p className="text-muted-foreground text-xs sm:text-sm md:text-base">Kelola jadwal keberangkatan dan trip Anda</p>
+            </div>
+            <div className="rounded-xl border border-blue-200 bg-blue-50/50 p-4">
+              <p className="text-sm font-semibold text-foreground">Trip unggulan yang tampil di homepage</p>
+              <p className="mt-1 text-sm text-muted-foreground">Trip Osaka di bawah ini tampil statis di homepage dan di halaman ini. Trip ini belum masuk daftar Firestore di bawah, jadi tambahkan lewat tombol Tambah Trip bila ingin mengelolanya dari database.</p>
+              <div className="mt-4">
+                <OsakaTripCard variant="light" />
+              </div>
             </div>
             <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
               <DialogTrigger asChild>

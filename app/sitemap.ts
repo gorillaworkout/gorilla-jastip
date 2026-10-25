@@ -8,6 +8,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/privacy`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
     { url: `${base}/terms`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
     { url: `${base}/faq`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.4 },
+    { url: `${base}/panduan-tax-free`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/login`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.2 },
   ]
 }

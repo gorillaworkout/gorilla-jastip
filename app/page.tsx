@@ -8,6 +8,11 @@ import { ShieldCheck, Clock, Sparkles, ArrowRight, LogIn } from "lucide-react"
 import Image from "next/image"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel"
 import { TripsService, type DepartureTrip } from "@/lib/trips-service"
+import OsakaTripBanner from "@/components/osaka-trip-banner"
+import OsakaTripCard from "@/components/osaka-trip-card"
+import FeeCalculator from "@/components/fee-calculator"
+import OrderForm from "@/components/order-form"
+import ProductCatalog from "@/components/product-catalog"
  
 
 export default function HomePage() {
@@ -102,6 +107,7 @@ export default function HomePage() {
           </div>
         </div>
       </header>
+      <OsakaTripBanner />
       {/* Hero with JSON-LD */}
       <script
         type="application/ld+json"
@@ -134,7 +140,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-16 sm:py-20 md:py-24 lg:py-32 relative">
           <div className="max-w-3xl">
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight">Jastip Jepang Cepat, Aman, dan Transparan</h1>
-            <p className="mt-4 text-slate-300 text-sm sm:text-base md:text-lg">Titip barang dari Indonesia ke Jepang dan sebaliknya, atau kami bantu checkout dari marketplace Jepang. Harga jujur, update real-time, pengiriman rapi.</p>
+            <p className="mt-4 text-slate-300 text-sm sm:text-base md:text-lg">Titip barang dari Indonesia ke Jepang dan sebaliknya, atau kami bantu checkout dari marketplace Jepang. Harga jujur, update berkala via WhatsApp, pengiriman rapi.</p>
             <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3">
               <Button className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto mobile-button" asChild>
                 <a href="https://wa.me/6287700600208" target="_blank" rel="noopener noreferrer">
@@ -157,7 +163,7 @@ export default function HomePage() {
           <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-6">
             <Clock className="h-6 w-6 text-blue-400" />
             <h3 className="mt-3 font-semibold">Cepat & Tepat Waktu</h3>
-            <p className="mt-2 text-slate-300 text-sm">Estimasi waktu yang realistis dan tracking status titipan yang akurat.</p>
+            <p className="mt-2 text-slate-300 text-sm">Estimasi waktu yang realistis dan update status manual via WhatsApp tiap tahap.</p>
           </div>
           <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-6">
             <Sparkles className="h-6 w-6 text-blue-400" />
@@ -255,6 +261,14 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Kalkulator fee dan form order */}
+      <section className="max-w-7xl mx-auto px-6 pb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <FeeCalculator />
+          <OrderForm />
+        </div>
+      </section>
+
       {/* List Keberangkatanku */}
       <section className="max-w-7xl mx-auto px-6 pb-16">
         <div className="flex items-center justify-between mb-6">
@@ -271,6 +285,7 @@ export default function HomePage() {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <OsakaTripCard />
           {tripsLoading ? (
             // Loading skeleton
             Array.from({ length: 3 }).map((_, i) => (
@@ -459,6 +474,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      <ProductCatalog />
       {/* Proof Gallery */}
       <section className="max-w-7xl mx-auto px-6 pb-16">
       
@@ -528,8 +544,7 @@ export default function HomePage() {
               </div>
               <h2 className="mt-3 text-2xl font-bold">Keamanan & Transparansi</h2>
               <p className="mt-2 text-slate-300 text-sm">
-                Kami beroperasi secara profesional dan transparan. Setiap transaksi memiliki bukti, dan status
-                pesanan dapat dipantau. Kami tidak pernah meminta kode OTP atau data sensitif apa pun.
+                Kami beroperasi secara profesional dan transparan. Setiap transaksi memiliki bukti, dan status pesanan kami kabari manual via WhatsApp tiap tahap. Kami tidak pernah meminta kode OTP atau data sensitif apa pun.
               </p>
               <ul className="mt-4 space-y-2 text-slate-300 text-sm">
                 <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 text-blue-400 mt-0.5" /> Bukti pembayaran & pengiriman disediakan</li>
