@@ -26,6 +26,35 @@ const DEFAULT_CATEGORIES = [
   ["Belanja", "Belanja"], ["Tagihan", "Tagihan"], ["Pendapatan", "Pendapatan"], ["Lainnya", "Lainnya"],
 ] as const
 
+// Tebak kategori dari isi pengeluaran (catatan/merchant), BUKAN dari label AI.
+// Aturan merchant spesifik menang atas kata kunci umum; hasil selalu nama dari
+// daftar kategori user, fallback "Lainnya". Tebakan salah dibetulkan user di draf.
+const GUESS_RULES: [string, string[]][] = [
+  ["Tagihan", ["pln", "listrik", "pdam", "internet", "wifi", "pulsa", "paket data", "netflix", "spotify", "langganan"]],
+  ["Kesehatan & Proteksi", ["apotek", "klinik", "rumah sakit", "dokter", "obat", "vitamin", "asuransi", "bpjs", "puskesmas"]],
+  ["Kendaraan", ["pertamina", "shell", "bensin", "parkir", "tol", "ojek", "grab", "gojek", "taksi", "bengkel", "kereta", "busway", "transjakarta"]],
+  ["Makan", ["warung", "rm ", "rumah makan", "resto", "restoran", "cafe", "kopi", "jajan", "kuliner", "food", "bakso", "soto", "ayam", "geprek", "seblak", "martabak", "makanan", "sarapan"]],
+  ["Belanja", ["indomaret", "alfamart", "alfamidi", "market", "supermarket", "minimarket", "mall", "toko", "shop", "store", "shopee", "tokopedia", "belanja"]],
+  ["Tabungan", ["tabungan", "deposito", "reksa", "investasi", "nabung"]],
+  ["Pendapatan", ["gaji", "honor", "bonus", "thr", "dividen", "pendapatan", "upah"]],
+  ["Keluarga", ["sekolah", "spp", "les", "orang tua"]],
+]
+
+const isKasLatihanNote = (note: string) => {
+  const text = (note || "").toLowerCase()
+  return text.includes("warung cr") || text.includes("warung crown")
+}
+
+const guessCategory = (note: string, knownNames: string[], kasLatihanReady: boolean): string => {
+  if (isKasLatihanNote(note)) return kasLatihanReady ? "Kas Latihan" : "Lainnya"
+  const text = (note || "").toLowerCase()
+  for (const [name, keywords] of GUESS_RULES) {
+    if (!knownNames.includes(name)) continue
+    if (keywords.some((keyword) => text.includes(keyword))) return name
+  }
+  return "Lainnya"
+}
+
 const WALLETS = ["BCA", "Jenius", "Tunai", "E-Wallet"] as const
 
 const money = (value: number) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(value)
@@ -131,7 +160,20 @@ function UangkuhContent() {
       const response = await fetch("/api/uangkuh/extract", { method: "POST", headers: token ? { Authorization: `Bearer ${token}` } : {}, body: form })
       const result = await response.json()
       if (!response.ok) throw new Error(result.error || "AI gagal membaca file.")
-      setDrafts(result.transactions || [])
+      const rawDrafts = (result.transactions || []) as Draft[]
+      // Tebak kategori dari isi pengeluaran, bukan dari label AI. Kategori
+      // "Kas Latihan" dibuat otomatis bila ada draf kas latihan dan kategorinya
+      // belum ada (sama seperti tombol Kelola kategori).
+      const knownNames = categories.length ? categories.map((c) => c.name) : DEFAULT_CATEGORIES.map(([name]) => name)
+      let kasLatihanReady = knownNames.includes("Kas Latihan")
+      if (rawDrafts.some((t) => isKasLatihanNote(t.note)) && !kasLatihanReady && firebaseUser && db) {
+        try {
+          const ref = await addDoc(collection(db, "financeUsers", firebaseUser.uid, "categories"), { name: "Kas Latihan", group: "Lainnya", createdAt: serverTimestamp() })
+          setCategories((items) => [...items, { id: ref.id, name: "Kas Latihan", group: "Lainnya" }])
+          kasLatihanReady = true
+        } catch { /* gagal dibuat: kas latihan jatuh ke Lainnya, bukan Makan */ }
+      }
+      setDrafts(rawDrafts.map((t) => ({ ...t, category: guessCategory(t.note, knownNames, kasLatihanReady) })))
       setDraftSource("ai")
       setImportWarnings(result.warnings || [])
       if (!result.transactions?.length) setExtractError("Tidak ada transaksi yang terbaca. Coba screenshot lebih jelas.")
