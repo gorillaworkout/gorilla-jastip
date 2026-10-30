@@ -1,5 +1,5 @@
 import { initializeApp, FirebaseApp } from "firebase/app"
-import { getFirestore, Firestore } from "firebase/firestore"
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, Firestore } from "firebase/firestore"
 import { getAuth, Auth } from "firebase/auth"
 
 const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true"
@@ -32,8 +32,12 @@ if (isFirebaseConfigured) {
     // Initialize Firebase
     app = initializeApp(firebaseConfig)
 
-    // Initialize Firestore
-    db = getFirestore(app)
+    // Initialize Firestore dengan cache lokal persisten: data yang sudah
+    // pernah dimuat (mis. transaksi uangkuh) tetap bisa dibaca dan ditulis
+    // saat offline, lalu tersinkron otomatis begitu internet kembali.
+    db = initializeFirestore(app, {
+      localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+    })
 
     // Initialize Auth
     auth = getAuth(app)

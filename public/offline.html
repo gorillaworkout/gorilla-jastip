@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Offline — JastipdiGW</title>
+<style>
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f7f8f4; color: #183b36; display: flex; min-height: 100dvh; align-items: center; justify-content: center; padding: 24px; box-sizing: border-box; }
+  .card { background: #fff; border-radius: 20px; padding: 32px 24px; max-width: 420px; width: 100%; text-align: center; box-shadow: 0 8px 30px rgba(24, 59, 54, 0.12); }
+  h1 { font-size: 22px; margin: 0 0 8px; }
+  p { font-size: 15px; line-height: 1.6; color: #55736c; margin: 0 0 16px; }
+  button, a.btn { display: inline-block; border: 0; border-radius: 10px; background: #183b36; color: #fff; font-size: 15px; font-weight: 600; padding: 12px 20px; cursor: pointer; text-decoration: none; margin: 4px; }
+  a.btn.secondary { background: #edf5ef; color: #183b36; }
+</style>
+</head>
+<body>
+<main class="card">
+  <h1>Kamu sedang offline</h1>
+  <p>Halaman ini belum pernah dibuka saat online, jadi belum tersimpan di HP.</p>
+  <p>Halaman yang sudah pernah kamu buka — misalnya Uangkuh — tetap bisa dibuka tanpa internet, dan transaksi yang kamu catat offline akan tersinkron otomatis begitu internet kembali.</p>
+  <button onclick="window.location.reload()">Coba lagi</button>
+  <a class="btn secondary" href="/">Ke beranda</a>
+</main>
+</body>
+</html>

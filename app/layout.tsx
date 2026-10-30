@@ -1,11 +1,12 @@
 import type React from "react"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Inter, Playfair_Display } from "next/font/google"
 import "./globals.css"
 import { AuthProvider } from "@/contexts/auth-context"
 import { ReduxProvider } from "@/contexts/redux-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { ClientOnly } from "@/components/client-only"
+import { PwaRegister } from "@/components/pwa-register"
 
 const inter = Inter({
 	subsets: ["latin"],
@@ -53,6 +54,11 @@ export const metadata: Metadata = {
 		],
 	},
 	manifest: "/site.webmanifest",
+	appleWebApp: {
+		capable: true,
+		title: "JastipdiGW",
+		statusBarStyle: "default",
+	},
 	openGraph: {
 		type: "website",
 		locale: "id_ID",
@@ -94,6 +100,10 @@ export const metadata: Metadata = {
 	generator: "Gorichan",
 }
 
+export const viewport: Viewport = {
+	themeColor: "#000000",
+}
+
 export default function RootLayout({
 	children,
 }: Readonly<{
@@ -107,6 +117,7 @@ export default function RootLayout({
 						<AuthProvider>{children}</AuthProvider>
 					</ReduxProvider>
 					<Toaster />
+					<PwaRegister />
 				</ClientOnly>
 			</body>
 		</html>
