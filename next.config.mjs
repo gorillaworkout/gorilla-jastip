@@ -8,12 +8,11 @@ const nextConfig = {
   },
   // Paket native/Node khusus server (renderer PDF) tidak ikut di-bundle webpack.
   serverExternalPackages: ["pdfjs-dist", "@napi-rs/canvas", "canvas"],
-  experimental: {
-    // File worker pdf.js dimuat dinamis (bukan import statis) sehingga tidak
-    // ikut ter-trace ke bundle serverless Vercel; paksa sertakan di rute ini.
-    outputFileTracingIncludes: {
-      "/api/uangkuh/extract": ["./node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs"],
-    },
+  // File worker pdf.js dimuat dinamis (bukan import statis) sehingga tidak
+  // ikut ter-trace ke bundle serverless Vercel; paksa sertakan di rute ini.
+  // (Next 15: outputFileTracingIncludes adalah opsi top-level, bukan experimental.)
+  outputFileTracingIncludes: {
+    "/api/uangkuh/extract": ["./node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs"],
   },
   images: {
     unoptimized: true,
