@@ -1,12 +1,8 @@
 import { NextResponse } from "next/server"
 import pdfParse from "pdf-parse/lib/pdf-parse.js"
-import { execFile } from "node:child_process"
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises"
-import { tmpdir } from "node:os"
-import { promisify } from "node:util"
+import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs"
+import { createCanvas } from "@napi-rs/canvas"
 import { authenticateAdminRequest } from "@/lib/server-auth"
-
-const execFileAsync = promisify(execFile)
 
 const MAX_BYTES = 10 * 1024 * 1024
 const RATE_WINDOW_MS = 60_000
@@ -163,22 +159,31 @@ function parseTransactions(content: string) {
 }
 
 async function renderPdfPages(bytes: Buffer, pageCount: number) {
+  // Render PDF scan murni JavaScript (pdfjs-dist + @napi-rs/canvas), tanpa
+  // program sistem pdftoppm, supaya jalan di runtime serverless Vercel
+  // maupun Docker/VPS. Output disamakan dengan jalur lama: JPEG per halaman
+  // pada 150 DPI, dikirim sebagai data URL detail "high" ke AI vision.
   const totalPages = Math.max(1, pageCount)
   const renderCount = Math.min(totalPages, MAX_SCAN_PAGES)
-  const dir = await mkdtemp(`${tmpdir()}/uangkuh-pdf-`)
-  const input = `${dir}/input.pdf`
-  const prefix = `${dir}/page`
-  await writeFile(input, bytes)
   try {
-    await execFileAsync("pdftoppm", ["-jpeg", "-r", "150", "-f", "1", "-l", String(renderCount), input, prefix], { timeout: 45000 })
+    const doc = await getDocument({ data: new Uint8Array(bytes), useWorkerFetch: false, isEvalSupported: false }).promise
+    const count = Math.min(renderCount, doc.numPages)
     const pages = []
-    for (let page = 1; page <= renderCount; page++) {
-      try { pages.push({ type: "image_url", image_url: { url: `data:image/jpeg;base64,${(await readFile(`${prefix}-${page}.jpg`)).toString("base64")}`, detail: "high" } }) } catch { /* page unavailable */ }
+    for (let pageNum = 1; pageNum <= count; pageNum++) {
+      try {
+        const page = await doc.getPage(pageNum)
+        const viewport = page.getViewport({ scale: 150 / 72 })
+        const canvas = createCanvas(Math.ceil(viewport.width), Math.ceil(viewport.height))
+        const context = canvas.getContext("2d")
+        await page.render({ canvasContext: context as unknown as CanvasRenderingContext2D, viewport }).promise
+        const jpeg = canvas.encodeSync("jpeg", 90)
+        pages.push({ type: "image_url", image_url: { url: `data:image/jpeg;base64,${jpeg.toString("base64")}`, detail: "high" } })
+      } catch { /* page unavailable */ }
     }
     return { pages, totalPages, renderCount }
   } catch (error) {
     throw new Error(`PDF scan tidak bisa dirender: ${error instanceof Error ? error.message : "renderer error"}`)
-  } finally { await rm(dir, { recursive: true, force: true }) }
+  }
 }
 
 // Verifikasi Firebase ID Token lewat Identity Toolkit (tanpa Admin SDK).

@@ -6,6 +6,8 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Paket native/Node khusus server (renderer PDF) tidak ikut di-bundle webpack.
+  serverExternalPackages: ["pdfjs-dist", "@napi-rs/canvas", "canvas"],
   images: {
     unoptimized: true,
   },

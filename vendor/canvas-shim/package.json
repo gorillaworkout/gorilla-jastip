@@ -1,0 +1,6 @@
+{
+  "name": "canvas",
+  "version": "2.11.2",
+  "description": "Adapter: memenuhi import 'canvas' milik pdfjs-dist dengan @napi-rs/canvas (prebuilt, tanpa dependensi sistem), karena node-canvas asli butuh Cairo/Pango yang tidak ada di serverless Vercel maupun VPS ini.",
+  "main": "index.js"
+}
