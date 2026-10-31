@@ -39,6 +39,9 @@ export default function CinaPesananBaruPage() {
   const [specs, setSpecs] = useState("");
   const [estimateIdr, setEstimateIdr] = useState("");
   const [hargaJual, setHargaJual] = useState("");
+  const [biayaForwarder, setBiayaForwarder] = useState("");
+  const [biayaJne, setBiayaJne] = useState("");
+  const [biayaTakTerduga, setBiayaTakTerduga] = useState("");
   const [statusAwal, setStatusAwal] = useState<CinaStatus>("inquiry");
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
@@ -62,6 +65,9 @@ export default function CinaPesananBaruPage() {
         specs: specs.trim(),
         estimateIdr: estimateIdr.trim() ? Number(estimateIdr.replace(/[^0-9]/g, "")) || null : null,
         hargaJual: hargaJual.trim() ? Number(hargaJual.replace(/[^0-9]/g, "")) || null : null,
+        biayaForwarder: biayaForwarder.trim() ? Number(biayaForwarder.replace(/[^0-9]/g, "")) || null : null,
+        biayaJne: biayaJne.trim() ? Number(biayaJne.replace(/[^0-9]/g, "")) || null : null,
+        biayaTakTerduga: biayaTakTerduga.trim() ? Number(biayaTakTerduga.replace(/[^0-9]/g, "")) || null : null,
         initialStatus: statusAwal,
         notes: notes.trim(),
         createdBy: user?.id,
@@ -143,6 +149,34 @@ export default function CinaPesananBaruPage() {
         <Input
           value={estimateIdr}
           onChange={(e) => setEstimateIdr(e.target.value)}
+          inputMode="numeric"
+          placeholder="Opsional"
+          className="h-11"
+        />
+      </Field>
+      <p className="pt-1 text-sm font-bold">Biaya dan ongkir (opsional, bisa diisi belakangan)</p>
+      <Field label="Biaya forwarder (Rp)" hint="Ongkir Cina ke Indonesia, total per pesanan">
+        <Input
+          value={biayaForwarder}
+          onChange={(e) => setBiayaForwarder(e.target.value)}
+          inputMode="numeric"
+          placeholder="Opsional"
+          className="h-11"
+        />
+      </Field>
+      <Field label="Biaya JNE (Rp)" hint="Ongkir domestik, total per pesanan">
+        <Input
+          value={biayaJne}
+          onChange={(e) => setBiayaJne(e.target.value)}
+          inputMode="numeric"
+          placeholder="Opsional"
+          className="h-11"
+        />
+      </Field>
+      <Field label="Biaya tak terduga (Rp)" hint="Biaya lain di luar perkiraan, total per pesanan">
+        <Input
+          value={biayaTakTerduga}
+          onChange={(e) => setBiayaTakTerduga(e.target.value)}
           inputMode="numeric"
           placeholder="Opsional"
           className="h-11"

@@ -40,6 +40,9 @@ function orderFromDoc(id: string, data: Record<string, unknown>): CinaOrder {
     specs: (data.specs as string) ?? "",
     estimateIdr: (data.estimateIdr as number | null) ?? null,
     hargaJual: (data.hargaJual as number | null) ?? null,
+    biayaForwarder: (data.biayaForwarder as number | null) ?? null,
+    biayaJne: (data.biayaJne as number | null) ?? null,
+    biayaTakTerduga: (data.biayaTakTerduga as number | null) ?? null,
     status: (data.status as CinaOrder["status"]) ?? "inquiry",
     chinaTracking: (data.chinaTracking as string) ?? "",
     domesticTracking: (data.domesticTracking as string) ?? "",
@@ -75,6 +78,9 @@ export interface NewCinaOrderInput {
   specs: string;
   estimateIdr: number | null;
   hargaJual: number | null;
+  biayaForwarder: number | null;
+  biayaJne: number | null;
+  biayaTakTerduga: number | null;
   initialStatus?: CinaStatus;
   notes: string;
   createdBy?: string;

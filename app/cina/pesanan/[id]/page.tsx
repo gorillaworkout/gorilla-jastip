@@ -41,6 +41,9 @@ export default function CinaPesananDetailPage({
   const [notes, setNotes] = useState("");
   const [hargaJual, setHargaJual] = useState("");
   const [estimasiBeli, setEstimasiBeli] = useState("");
+  const [biayaForwarder, setBiayaForwarder] = useState("");
+  const [biayaJne, setBiayaJne] = useState("");
+  const [biayaTakTerduga, setBiayaTakTerduga] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -59,6 +62,9 @@ export default function CinaPesananDetailPage({
           setNotes(row.notes);
           setHargaJual(row.hargaJual != null ? String(row.hargaJual) : "");
           setEstimasiBeli(row.estimateIdr != null ? String(row.estimateIdr) : "");
+          setBiayaForwarder(row.biayaForwarder != null ? String(row.biayaForwarder) : "");
+          setBiayaJne(row.biayaJne != null ? String(row.biayaJne) : "");
+          setBiayaTakTerduga(row.biayaTakTerduga != null ? String(row.biayaTakTerduga) : "");
         }
       })
       .catch(() => {
@@ -81,6 +87,9 @@ export default function CinaPesananDetailPage({
         status,
         hargaJual: hargaJual.trim() ? Number(hargaJual.replace(/[^0-9]/g, "")) || null : null,
         estimateIdr: estimasiBeli.trim() ? Number(estimasiBeli.replace(/[^0-9]/g, "")) || null : null,
+        biayaForwarder: biayaForwarder.trim() ? Number(biayaForwarder.replace(/[^0-9]/g, "")) || null : null,
+        biayaJne: biayaJne.trim() ? Number(biayaJne.replace(/[^0-9]/g, "")) || null : null,
+        biayaTakTerduga: biayaTakTerduga.trim() ? Number(biayaTakTerduga.replace(/[^0-9]/g, "")) || null : null,
         chinaTracking: chinaTracking.trim(),
         domesticTracking: domesticTracking.trim(),
         notes: notes.trim(),
@@ -114,6 +123,12 @@ export default function CinaPesananDetailPage({
   const meta = CINA_STATUS_META[order.status];
   const currentIdx = CINA_STATUS_FLOW.indexOf(order.status);
   const wa = waLink(order.customerWa);
+  const biayaTotal =
+    (order.biayaForwarder ?? 0) + (order.biayaJne ?? 0) + (order.biayaTakTerduga ?? 0);
+  const untungBersih =
+    order.hargaJual != null && order.estimateIdr != null
+      ? (order.hargaJual - order.estimateIdr) * order.quantity - biayaTotal
+      : null;
 
   return (
     <div className="space-y-5">
@@ -156,9 +171,9 @@ export default function CinaPesananDetailPage({
           {order.quantity}x &middot; Harga jual {formatRupiah(order.hargaJual)} &middot; Estimasi
           beli {formatRupiah(order.estimateIdr)}
         </p>
-        {order.hargaJual != null && order.estimateIdr != null && (
-          <p className="font-semibold text-emerald-700">
-            Perkiraan untung: {formatRupiah((order.hargaJual - order.estimateIdr) * order.quantity)}
+        {untungBersih != null && (
+          <p className={`font-semibold ${untungBersih < 0 ? "text-red-600" : "text-emerald-700"}`}>
+            Perkiraan untung bersih: {formatRupiah(untungBersih)}
           </p>
         )}
         {order.specs && <p className="text-muted-foreground">Spesifikasi: {order.specs}</p>}
@@ -166,6 +181,40 @@ export default function CinaPesananDetailPage({
           Dibuat {formatTanggal(order.createdAt)}
           {order.createdByName ? ` oleh ${order.createdByName}` : ""} &middot; Diubah{" "}
           {formatTanggal(order.updatedAt)}
+        </p>
+      </section>
+
+      <section className="space-y-1.5 rounded-xl border bg-card p-3">
+        <h2 className="mb-1 text-sm font-bold">Rincian Uang</h2>
+        <div className="flex justify-between text-sm">
+          <span>Pemasukan ({order.quantity}x harga jual)</span>
+          <span>{order.hargaJual != null ? formatRupiah(order.hargaJual * order.quantity) : "-"}</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span>Modal barang ({order.quantity}x estimasi beli)</span>
+          <span>{order.estimateIdr != null ? formatRupiah(order.estimateIdr * order.quantity) : "-"}</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span>Biaya forwarder</span>
+          <span>{formatRupiah(order.biayaForwarder)}</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span>Biaya JNE</span>
+          <span>{formatRupiah(order.biayaJne)}</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span>Biaya tak terduga</span>
+          <span>{formatRupiah(order.biayaTakTerduga)}</span>
+        </div>
+        <div className="flex justify-between border-t pt-1.5 text-sm font-bold">
+          <span>Perkiraan untung bersih</span>
+          <span className={untungBersih != null && untungBersih < 0 ? "text-red-600" : "text-emerald-700"}>
+            {untungBersih != null ? formatRupiah(untungBersih) : "-"}
+          </span>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Biaya yang belum diisi dihitung Rp 0. Untung hanya dihitung kalau harga jual dan estimasi
+          beli sudah diisi.
         </p>
       </section>
 
@@ -229,6 +278,36 @@ export default function CinaPesananDetailPage({
           <Input
             value={estimasiBeli}
             onChange={(e) => setEstimasiBeli(e.target.value)}
+            inputMode="numeric"
+            placeholder="Opsional"
+            className="h-11"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label>Biaya forwarder (Rp, total per pesanan)</Label>
+          <Input
+            value={biayaForwarder}
+            onChange={(e) => setBiayaForwarder(e.target.value)}
+            inputMode="numeric"
+            placeholder="Opsional"
+            className="h-11"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label>Biaya JNE (Rp, total per pesanan)</Label>
+          <Input
+            value={biayaJne}
+            onChange={(e) => setBiayaJne(e.target.value)}
+            inputMode="numeric"
+            placeholder="Opsional"
+            className="h-11"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label>Biaya tak terduga (Rp, total per pesanan)</Label>
+          <Input
+            value={biayaTakTerduga}
+            onChange={(e) => setBiayaTakTerduga(e.target.value)}
             inputMode="numeric"
             placeholder="Opsional"
             className="h-11"

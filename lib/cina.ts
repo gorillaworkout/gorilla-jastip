@@ -24,6 +24,9 @@ export interface CinaOrder {
   specs: string;
   estimateIdr: number | null;
   hargaJual: number | null;
+  biayaForwarder: number | null;
+  biayaJne: number | null;
+  biayaTakTerduga: number | null;
   status: CinaStatus;
   chinaTracking: string;
   domesticTracking: string;

@@ -73,6 +73,19 @@ export default function CinaDashboardPage() {
     .filter((o) => PERLU_TINDAKAN.includes(o.status))
     .slice(0, 5);
   const terbaru = orders.slice(0, 5);
+  const pemasukan = orders.reduce(
+    (sum, o) => sum + (o.hargaJual != null ? o.hargaJual * o.quantity : 0),
+    0,
+  );
+  const modal = orders.reduce(
+    (sum, o) => sum + (o.estimateIdr != null ? o.estimateIdr * o.quantity : 0),
+    0,
+  );
+  const totalBiaya = orders.reduce(
+    (sum, o) => sum + (o.biayaForwarder ?? 0) + (o.biayaJne ?? 0) + (o.biayaTakTerduga ?? 0),
+    0,
+  );
+  const untungBersih = pemasukan - modal - totalBiaya;
 
   if (loading) {
     return <p className="py-12 text-center text-sm text-muted-foreground">Memuat…</p>;
@@ -102,6 +115,32 @@ export default function CinaDashboardPage() {
           <p className="mt-1 text-2xl font-black text-emerald-600">{count("selesai")}</p>
         </div>
       </div>
+
+      <section className="space-y-1.5 rounded-xl border bg-card p-3">
+        <h2 className="text-sm font-bold">Money Tracker</h2>
+        <div className="flex justify-between text-sm">
+          <span>Total pemasukan</span>
+          <span>{formatRupiah(pemasukan)}</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span>Total modal barang</span>
+          <span>{formatRupiah(modal)}</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span>Total ongkir dan biaya</span>
+          <span>{formatRupiah(totalBiaya)}</span>
+        </div>
+        <div className="flex justify-between border-t pt-1.5 text-sm font-bold">
+          <span>Total untung bersih</span>
+          <span className={untungBersih < 0 ? "text-red-600" : "text-emerald-700"}>
+            {formatRupiah(untungBersih)}
+          </span>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Dihitung dari pesanan yang tampil (maks 200). Pesanan tanpa harga jual/beli tidak masuk
+          pemasukan/modal.
+        </p>
+      </section>
 
       <section className="space-y-2">
         <h2 className="text-sm font-bold">Perlu Tindakan</h2>
