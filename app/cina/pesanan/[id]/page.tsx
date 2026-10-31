@@ -129,6 +129,57 @@ export default function CinaPesananDetailPage({
     order.hargaJual != null && order.estimateIdr != null
       ? (order.hargaJual - order.estimateIdr) * order.quantity - biayaTotal
       : null;
+  const stepGuide: { label: string; done?: boolean }[] = (() => {
+    switch (order.status) {
+      case "inquiry":
+        return [
+          {
+            label: "Data pelanggan dan produk sudah lengkap",
+            done: Boolean(order.customerName && order.productName),
+          },
+        ];
+      case "quotation":
+        return [
+          { label: "Harga jual (harga ke pelanggan)", done: order.hargaJual != null },
+          { label: "Estimasi harga beli dari Cina", done: order.estimateIdr != null },
+        ];
+      case "menunggu_pembayaran":
+        return [{ label: "Tidak ada yang perlu diisi, tinggal tunggu pelanggan bayar" }];
+      case "dibayar":
+        return [{ label: "Tidak ada yang perlu diisi, pembayaran terverifikasi, siap dibeli" }];
+      case "dibeli":
+        return [
+          {
+            label: "Harga beli sebenarnya (perbarui Estimasi harga beli kalau beda dari perkiraan)",
+            done: order.estimateIdr != null,
+          },
+        ];
+      case "dikirim_cina":
+        return [
+          { label: "Resi Cina / forwarder", done: Boolean(order.chinaTracking) },
+          { label: "Biaya forwarder (ongkir Cina ke Indonesia)", done: order.biayaForwarder != null },
+        ];
+      case "diterima_id":
+        return [
+          {
+            label: "Tidak ada yang perlu diisi, cukup periksa barang; isi Biaya tak terduga kalau ada",
+          },
+        ];
+      case "sortir_repack":
+        return [{ label: "Biaya tak terduga (mis. repack/packing tambahan) kalau ada" }];
+      case "dikirim_kurir":
+        return [
+          { label: "Resi kurir domestik", done: Boolean(order.domesticTracking) },
+          { label: "Biaya JNE (ongkir ke customer)", done: order.biayaJne != null },
+        ];
+      case "selesai":
+        return [{ label: "Tidak ada yang perlu diisi, cek Rincian Uang untuk untung bersih final" }];
+      case "bermasalah":
+        return [{ label: "Tulis masalahnya di Catatan tim", done: Boolean(order.notes) }];
+      default:
+        return [];
+    }
+  })();
 
   return (
     <div className="space-y-5">
@@ -247,6 +298,23 @@ export default function CinaPesananDetailPage({
         </ol>
       </section>
 
+      <section className="space-y-1.5 rounded-xl border bg-card p-3">
+        <h2 className="text-sm font-bold">Step {meta.label}: isi apa?</h2>
+        <ul className="space-y-1">
+          {stepGuide.map((item) => (
+            <li key={item.label} className="flex items-start gap-2 text-sm">
+              <span className={item.done ? "text-emerald-600" : "text-muted-foreground"}>
+                {item.done === undefined ? "•" : item.done ? "✓" : "○"}
+              </span>
+              <span className={item.done ? "text-muted-foreground" : ""}>{item.label}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="text-xs text-muted-foreground">
+          Field lain tetap bisa diubah di bawah, tapi baru perlu diisi saat step-nya tiba.
+        </p>
+      </section>
+
       <section className="space-y-3 rounded-xl border bg-card p-3">
         <h2 className="text-sm font-bold">Perbarui Pesanan</h2>
         <div className="space-y-1.5">
@@ -272,6 +340,7 @@ export default function CinaPesananDetailPage({
             placeholder="Opsional"
             className="h-11"
           />
+          <p className="text-xs text-muted-foreground">Diisi saat step Quotation.</p>
         </div>
         <div className="space-y-1.5">
           <Label>Estimasi harga beli (Rp, per barang)</Label>
@@ -282,6 +351,7 @@ export default function CinaPesananDetailPage({
             placeholder="Opsional"
             className="h-11"
           />
+          <p className="text-xs text-muted-foreground">Diisi harga sebenarnya saat step Dibeli di Cina.</p>
         </div>
         <div className="space-y-1.5">
           <Label>Biaya forwarder (Rp, total per pesanan)</Label>
@@ -292,6 +362,7 @@ export default function CinaPesananDetailPage({
             placeholder="Opsional"
             className="h-11"
           />
+          <p className="text-xs text-muted-foreground">Diisi saat step Dikirim dari Cina.</p>
         </div>
         <div className="space-y-1.5">
           <Label>Biaya JNE (Rp, total per pesanan)</Label>
@@ -302,6 +373,7 @@ export default function CinaPesananDetailPage({
             placeholder="Opsional"
             className="h-11"
           />
+          <p className="text-xs text-muted-foreground">Diisi saat step Dikirim Kurir.</p>
         </div>
         <div className="space-y-1.5">
           <Label>Biaya tak terduga (Rp, total per pesanan)</Label>
@@ -312,6 +384,7 @@ export default function CinaPesananDetailPage({
             placeholder="Opsional"
             className="h-11"
           />
+          <p className="text-xs text-muted-foreground">Diisi kapan saja kalau ada biaya di luar perkiraan.</p>
         </div>
         <div className="space-y-1.5">
           <Label>Resi Cina / forwarder</Label>
@@ -321,6 +394,7 @@ export default function CinaPesananDetailPage({
             placeholder="Nomor resi dari Cina"
             className="h-11"
           />
+          <p className="text-xs text-muted-foreground">Diisi saat step Dikirim dari Cina.</p>
         </div>
         <div className="space-y-1.5">
           <Label>Resi kurir domestik</Label>
@@ -330,6 +404,7 @@ export default function CinaPesananDetailPage({
             placeholder="Nomor resi kurir Indonesia"
             className="h-11"
           />
+          <p className="text-xs text-muted-foreground">Diisi saat step Dikirim Kurir.</p>
         </div>
         <div className="space-y-1.5">
           <Label>Catatan tim</Label>
