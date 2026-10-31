@@ -23,6 +23,7 @@ export interface CinaOrder {
   quantity: number;
   specs: string;
   estimateIdr: number | null;
+  hargaJual: number | null;
   status: CinaStatus;
   chinaTracking: string;
   domesticTracking: string;

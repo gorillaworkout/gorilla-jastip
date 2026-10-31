@@ -39,6 +39,8 @@ export default function CinaPesananDetailPage({
   const [chinaTracking, setChinaTracking] = useState("");
   const [domesticTracking, setDomesticTracking] = useState("");
   const [notes, setNotes] = useState("");
+  const [hargaJual, setHargaJual] = useState("");
+  const [estimasiBeli, setEstimasiBeli] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -55,6 +57,8 @@ export default function CinaPesananDetailPage({
           setChinaTracking(row.chinaTracking);
           setDomesticTracking(row.domesticTracking);
           setNotes(row.notes);
+          setHargaJual(row.hargaJual != null ? String(row.hargaJual) : "");
+          setEstimasiBeli(row.estimateIdr != null ? String(row.estimateIdr) : "");
         }
       })
       .catch(() => {
@@ -75,6 +79,8 @@ export default function CinaPesananDetailPage({
     try {
       await updateCinaOrder(order.id, {
         status,
+        hargaJual: hargaJual.trim() ? Number(hargaJual.replace(/[^0-9]/g, "")) || null : null,
+        estimateIdr: estimasiBeli.trim() ? Number(estimasiBeli.replace(/[^0-9]/g, "")) || null : null,
         chinaTracking: chinaTracking.trim(),
         domesticTracking: domesticTracking.trim(),
         notes: notes.trim(),
@@ -147,8 +153,14 @@ export default function CinaPesananDetailPage({
           ) : null}
         </p>
         <p className="text-muted-foreground">
-          {order.quantity}x &middot; Estimasi {formatRupiah(order.estimateIdr)}
+          {order.quantity}x &middot; Harga jual {formatRupiah(order.hargaJual)} &middot; Estimasi
+          beli {formatRupiah(order.estimateIdr)}
         </p>
+        {order.hargaJual != null && order.estimateIdr != null && (
+          <p className="font-semibold text-emerald-700">
+            Perkiraan untung: {formatRupiah((order.hargaJual - order.estimateIdr) * order.quantity)}
+          </p>
+        )}
         {order.specs && <p className="text-muted-foreground">Spesifikasi: {order.specs}</p>}
         <p className="text-xs text-muted-foreground">
           Dibuat {formatTanggal(order.createdAt)}
@@ -201,6 +213,26 @@ export default function CinaPesananDetailPage({
               </option>
             ))}
           </select>
+        </div>
+        <div className="space-y-1.5">
+          <Label>Harga jual (Rp, per barang)</Label>
+          <Input
+            value={hargaJual}
+            onChange={(e) => setHargaJual(e.target.value)}
+            inputMode="numeric"
+            placeholder="Opsional"
+            className="h-11"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label>Estimasi harga beli (Rp, per barang)</Label>
+          <Input
+            value={estimasiBeli}
+            onChange={(e) => setEstimasiBeli(e.target.value)}
+            inputMode="numeric"
+            placeholder="Opsional"
+            className="h-11"
+          />
         </div>
         <div className="space-y-1.5">
           <Label>Resi Cina / forwarder</Label>

@@ -17,7 +17,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db } from "./firebase";
-import { jakartaYYMM, type CinaOrder, type CinaTeamMember } from "./cina";
+import { jakartaYYMM, type CinaOrder, type CinaStatus, type CinaTeamMember } from "./cina";
 
 const ORDERS = "cina-orders";
 const TEAM = "cina-team";
@@ -39,6 +39,7 @@ function orderFromDoc(id: string, data: Record<string, unknown>): CinaOrder {
     quantity: (data.quantity as number) ?? 1,
     specs: (data.specs as string) ?? "",
     estimateIdr: (data.estimateIdr as number | null) ?? null,
+    hargaJual: (data.hargaJual as number | null) ?? null,
     status: (data.status as CinaOrder["status"]) ?? "inquiry",
     chinaTracking: (data.chinaTracking as string) ?? "",
     domesticTracking: (data.domesticTracking as string) ?? "",
@@ -73,6 +74,8 @@ export interface NewCinaOrderInput {
   quantity: number;
   specs: string;
   estimateIdr: number | null;
+  hargaJual: number | null;
+  initialStatus?: CinaStatus;
   notes: string;
   createdBy?: string;
   createdByName?: string;
@@ -83,15 +86,16 @@ export async function createCinaOrder(input: NewCinaOrderInput): Promise<CinaOrd
   const database = mustDb();
   const counterRef = doc(database, COUNTERS, "orders");
   const orderRef = doc(collection(database, ORDERS));
+  const { initialStatus, ...rest } = input;
   const created = await runTransaction(database, async (tx) => {
     const counterSnap = await tx.get(counterRef);
     const seq = ((counterSnap.data()?.seq as number | undefined) ?? 0) + 1;
     tx.set(counterRef, { seq, updatedAt: serverTimestamp() }, { merge: true });
     const orderId = `CN-${jakartaYYMM()}-${String(seq).padStart(3, "0")}`;
     const data = {
-      ...input,
+      ...rest,
       orderId,
-      status: "inquiry",
+      status: initialStatus ?? "inquiry",
       chinaTracking: "",
       domesticTracking: "",
       createdAt: serverTimestamp(),

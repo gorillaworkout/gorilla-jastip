@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createCinaOrder } from "@/lib/cina-service";
+import { type CinaStatus } from "@/lib/cina";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,6 +38,8 @@ export default function CinaPesananBaruPage() {
   const [quantity, setQuantity] = useState("1");
   const [specs, setSpecs] = useState("");
   const [estimateIdr, setEstimateIdr] = useState("");
+  const [hargaJual, setHargaJual] = useState("");
+  const [statusAwal, setStatusAwal] = useState<CinaStatus>("inquiry");
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -58,6 +61,8 @@ export default function CinaPesananBaruPage() {
         quantity: Math.max(1, Number.parseInt(quantity, 10) || 1),
         specs: specs.trim(),
         estimateIdr: estimateIdr.trim() ? Number(estimateIdr.replace(/[^0-9]/g, "")) || null : null,
+        hargaJual: hargaJual.trim() ? Number(hargaJual.replace(/[^0-9]/g, "")) || null : null,
+        initialStatus: statusAwal,
         notes: notes.trim(),
         createdBy: user?.id,
         createdByName: user?.name,
@@ -75,7 +80,7 @@ export default function CinaPesananBaruPage() {
       <div>
         <h1 className="text-base font-bold">Pesanan Baru</h1>
         <p className="text-xs text-muted-foreground">
-          Order baru mulai dari status Inquiry, lalu lanjut ke Quotation.
+          Pilih status awal pesanan. Kalau pelanggan langsung pesan dan bayar, pilih Dibayar (step 4).
         </p>
       </div>
 
@@ -124,16 +129,25 @@ export default function CinaPesananBaruPage() {
             className="h-11"
           />
         </Field>
-        <Field label="Estimasi harga (Rp)">
+        <Field label="Harga jual (Rp)" hint="Harga ke pelanggan, per barang">
           <Input
-            value={estimateIdr}
-            onChange={(e) => setEstimateIdr(e.target.value)}
+            value={hargaJual}
+            onChange={(e) => setHargaJual(e.target.value)}
             inputMode="numeric"
             placeholder="Opsional"
             className="h-11"
           />
         </Field>
       </div>
+      <Field label="Estimasi harga beli (Rp)" hint="Perkiraan harga beli dari Cina, per barang">
+        <Input
+          value={estimateIdr}
+          onChange={(e) => setEstimateIdr(e.target.value)}
+          inputMode="numeric"
+          placeholder="Opsional"
+          className="h-11"
+        />
+      </Field>
       <Field label="Spesifikasi">
         <Textarea
           value={specs}
@@ -149,6 +163,19 @@ export default function CinaPesananBaruPage() {
           placeholder="Catatan internal tim"
           rows={3}
         />
+      </Field>
+
+      <Field label="Status awal" hint="Kalau pelanggan langsung pesan dan bayar, pilih Dibayar (step 4).">
+        <select
+          value={statusAwal}
+          onChange={(e) => setStatusAwal(e.target.value as CinaStatus)}
+          className="flex h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+        >
+          <option value="inquiry">Inquiry</option>
+          <option value="quotation">Quotation</option>
+          <option value="menunggu_pembayaran">Menunggu Pembayaran</option>
+          <option value="dibayar">Dibayar</option>
+        </select>
       </Field>
 
       <Button type="submit" disabled={saving} className="h-12 w-full text-base">
