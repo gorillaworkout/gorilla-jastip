@@ -12,12 +12,14 @@ import {
 import { doc, getDoc, setDoc } from "firebase/firestore"
 import { auth, db, isFirebaseConfigured } from "@/lib/firebase"
 import type { User } from "@/lib/types"
+import { getCinaAccess } from "@/lib/cina-service"
 
 interface AuthContextType {
   user: User | null
   firebaseUser: FirebaseUser | null
   loading: boolean
   sessionError: string
+  chinaAccess: boolean
   loginWithGoogle: () => Promise<void>
   logout: () => Promise<void>
   isConfigured: boolean
@@ -30,6 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null)
   const [loading, setLoading] = useState(true)
   const [sessionError, setSessionError] = useState("")
+  const [chinaAccess, setChinaAccess] = useState(false)
   const [mounted, setMounted] = useState(false)
 
   // Ensure component is mounted on client
@@ -70,9 +73,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (userData.role === "admin" && !sessionResponse.ok) {
               setSessionError("Sesi admin gagal dibuat di server. Coba login ulang atau hubungi pengelola.")
               setUser({ id: firebaseUser.uid, ...userData, role: "user" })
+              setChinaAccess(await getCinaAccess(firebaseUser.email || ""))
             } else {
               setSessionError("")
               setUser({ id: firebaseUser.uid, ...userData })
+              // Workspace Cina: super admin langsung lolos, selain itu cek allowlist email.
+              setChinaAccess(
+                userData.role === "admin" ||
+                  (await getCinaAccess(firebaseUser.email || "")),
+              )
             }
           } else {
             // New user, create default profile
@@ -87,6 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // Save to Firestore
             await setDoc(doc(db, "users", firebaseUser.uid), defaultUser)
             setUser(defaultUser)
+            setChinaAccess(await getCinaAccess(firebaseUser.email || ""))
           }
           
           setFirebaseUser(firebaseUser)
@@ -101,6 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         setUser(null)
         setFirebaseUser(null)
+        setChinaAccess(false)
       }
       setLoading(false)
     })
@@ -172,6 +183,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     setUser(null)
     setFirebaseUser(null)
+    setChinaAccess(false)
   }
 
   const value = {
@@ -179,6 +191,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     firebaseUser,
     loading,
     sessionError,
+    chinaAccess,
     loginWithGoogle,
     logout,
     isConfigured: !!isFirebaseConfigured,

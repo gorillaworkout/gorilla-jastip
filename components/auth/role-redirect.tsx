@@ -7,7 +7,7 @@ import { getSafeNextPath } from "@/lib/admin-routes"
 import { BrandedAuthLoading } from "./branded-auth-loading"
 
 export function RoleRedirect() {
-  const { user, loading } = useAuth()
+  const { user, loading, chinaAccess } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -16,12 +16,15 @@ export function RoleRedirect() {
       // Redirect based on role
       if (user.role === "admin") {
         router.replace(getSafeNextPath(searchParams.get("next")))
+      } else if (chinaAccess) {
+        // Tim Jastip Cina langsung masuk workspace Cina
+        router.replace("/cina")
       } else {
         // Non-admin users stay on login page and will see role error
         // This is handled by the login form
       }
     }
-  }, [user, loading, router, searchParams])
+  }, [user, loading, chinaAccess, router, searchParams])
 
   if (loading) {
     return <BrandedAuthLoading message="Memverifikasi akses..." />

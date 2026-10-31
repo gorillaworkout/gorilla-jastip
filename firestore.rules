@@ -70,6 +70,23 @@ service cloud.firestore {
       }
     }
 
+    // Workspace tim Jastip Cina: super admin atau email terdaftar di cina-team.
+    function isChinaTeam() {
+      return request.auth != null
+        && (isAdmin() || exists(/databases/$(database)/documents/cina-team/$(request.auth.token.email)));
+    }
+
+    match /cina-orders/{document} {
+      allow read, write: if isChinaTeam();
+    }
+    match /cina-counters/{document} {
+      allow read, write: if isChinaTeam();
+    }
+    match /cina-team/{document} {
+      allow read: if isChinaTeam();
+      allow create, update, delete: if isAdmin();
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

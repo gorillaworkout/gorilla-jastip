@@ -103,6 +103,16 @@ function DashboardContent() {
             </Button>
           </header>
 
+          <Card className="shadow-sm">
+            <CardContent className="flex items-center justify-between gap-3 p-4">
+              <div>
+                <p className="font-semibold">Workspace: Jastip Jepang (Pribadi)</p>
+                <p className="text-sm text-muted-foreground">Kelola jastip tim Cina di workspace terpisah.</p>
+              </div>
+              <Button variant="outline" className="shrink-0" onClick={() => router.push("/cina")}>Buka Jastip Cina<ArrowRight className="h-4 w-4" /></Button>
+            </CardContent>
+          </Card>
+
           {!isConfigured && <Alert><AlertCircle className="h-4 w-4" /><AlertDescription>Firebase belum dikonfigurasi.</AlertDescription></Alert>}
           {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertDescription>{error}</AlertDescription></Alert>}
 
