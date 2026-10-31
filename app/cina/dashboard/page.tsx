@@ -52,10 +52,12 @@ export default function CinaDashboardPage() {
       .then((rows) => {
         if (active) setOrders(rows);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error("cina dashboard load error", err);
+        const code = (err as { code?: string } | null)?.code ?? "tidak diketahui";
         if (active)
           setError(
-            "Gagal memuat pesanan. Periksa koneksi dan pastikan rules Firestore terbaru sudah di-publish.",
+            `Gagal memuat pesanan. (kode: ${code}) Periksa koneksi dan pastikan rules Firestore terbaru sudah di-publish.`,
           );
       })
       .finally(() => {

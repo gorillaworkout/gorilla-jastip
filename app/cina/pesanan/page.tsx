@@ -33,8 +33,11 @@ export default function CinaPesananPage() {
       .then((rows) => {
         if (active) setOrders(rows);
       })
-      .catch(() => {
-        if (active) setError("Gagal memuat pesanan. Periksa koneksi lalu coba lagi.");
+      .catch((err) => {
+        console.error("cina pesanan load error", err);
+        const code = (err as { code?: string } | null)?.code ?? "tidak diketahui";
+        if (active)
+          setError(`Gagal memuat pesanan. (kode: ${code}) Periksa koneksi lalu coba lagi.`);
       })
       .finally(() => {
         if (active) setLoading(false);
