@@ -2,7 +2,9 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
-import { getCinaOrder, updateCinaOrder } from "@/lib/cina-service";
+import { useRouter } from "next/navigation";
+import { getCinaOrder, deleteCinaOrder, updateCinaOrder } from "@/lib/cina-service";
+import { useAuth } from "@/contexts/auth-context";
 import {
   CINA_STATUS_FLOW,
   CINA_STATUS_META,
@@ -15,6 +17,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 
 const ALL_STATUSES: CinaStatus[] = [...CINA_STATUS_FLOW, "bermasalah"];
@@ -32,6 +45,9 @@ export default function CinaPesananDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const router = useRouter();
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
   const [order, setOrder] = useState<CinaOrder | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -45,6 +61,7 @@ export default function CinaPesananDetailPage({
   const [biayaJne, setBiayaJne] = useState("");
   const [biayaTakTerduga, setBiayaTakTerduga] = useState("");
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -102,6 +119,19 @@ export default function CinaPesananDetailPage({
       setMessage("Gagal menyimpan. Periksa koneksi lalu coba lagi.");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!order?.id) return;
+    setDeleting(true);
+    try {
+      await deleteCinaOrder(order.id);
+      router.push("/cina/pesanan");
+    } catch (cause) {
+      console.error("Gagal menghapus pesanan Cina", cause);
+      setMessage("Gagal menghapus. Periksa koneksi lalu coba lagi.");
+      setDeleting(false);
     }
   }
 
@@ -422,6 +452,41 @@ export default function CinaPesananDetailPage({
           {saving ? "Menyimpan…" : "Simpan Perubahan"}
         </Button>
       </section>
+
+      {isAdmin && (
+        <section className="space-y-3 rounded-xl border border-red-200 bg-card p-3">
+          <h2 className="text-sm font-bold text-red-700">Hapus Pesanan</h2>
+          <p className="text-sm text-muted-foreground">
+            Pesanan yang dihapus tidak bisa dikembalikan. Nomor pesanan tidak dipakai ulang.
+          </p>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" className="h-12 w-full text-base">
+                Hapus Pesanan
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Hapus {order.orderId}?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Pesanan {order.productName} untuk {order.customerName} akan dihapus permanen dan
+                  tidak bisa dikembalikan.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Batal</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  {deleting ? "Menghapus…" : "Ya, Hapus"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </section>
+      )}
 
       <Link href="/cina/pesanan" className="block text-center text-sm font-semibold text-primary">
         &larr; Kembali ke daftar

@@ -125,6 +125,12 @@ export async function updateCinaOrder(
   });
 }
 
+/** Hapus pesanan Cina permanen. Nomor pesanan (CN-YYMM-###) tidak dipakai ulang. */
+export async function deleteCinaOrder(id: string): Promise<void> {
+  const database = mustDb();
+  await deleteDoc(doc(database, ORDERS, id));
+}
+
 /** Apakah email terdaftar di tim Cina (doc id = email huruf kecil). */
 export async function getCinaAccess(email: string): Promise<boolean> {
   const database = mustDb();
